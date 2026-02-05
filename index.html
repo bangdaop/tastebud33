@@ -213,11 +213,21 @@ function buildFormFromConfig(config) {
       const sel = el('select'); sel.name = field.key;
       const placeholder = el('option', { value: '', disabled: true, selected: true }, 'Select');
       sel.appendChild(placeholder);
-      if (field.options) {
-        field.options.split(/;|,/).map(s => s.trim()).filter(Boolean).forEach(opt => {
-          sel.appendChild(el('option', { value: opt }, opt));
-        });
+
+      // If this is the city field, sort options alphabetically before adding
+      if (String(field.key).toLowerCase().indexOf('city') !== -1 && field.options) {
+        const opts = field.options.split(/;|,/).map(s => s.trim()).filter(Boolean);
+        // Sort using localeCompare for natural alphabetical order
+        opts.sort((a,b) => a.localeCompare(b, undefined, { sensitivity: 'base' }));
+        opts.forEach(opt => sel.appendChild(el('option', { value: opt }, opt)));
+      } else {
+        if (field.options) {
+          field.options.split(/;|,/).map(s => s.trim()).filter(Boolean).forEach(opt => {
+            sel.appendChild(el('option', { value: opt }, opt));
+          });
+        }
       }
+
       if (field.key.toLowerCase().includes('city')) {
         const stateLine = el('div', { class: 'hint' }, '');
         sel.addEventListener('change', () => {
