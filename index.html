@@ -6,25 +6,12 @@
 <title>Taste Buds Choices</title>
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
 <style>
-  :root{
-    --bg1:#f6f8fa; --bg2:#eef2f5; --card:#ffffff; --accent:#ff7a00; --accent-2:#0d3b66;
-    --muted:#6b7280; --radius:12px; --shadow:0 14px 40px rgba(13,59,102,0.08); --gap:14px;
-  }
+  :root{--bg1:#f6f8fa;--bg2:#eef2f5;--card:#ffffff;--accent:#ff7a00;--accent-2:#0d3b66;--muted:#6b7280;--radius:12px;--shadow:0 14px 40px rgba(13,59,102,0.08);--gap:14px}
   html,body{height:100%;margin:0;font-family:"Poppins",system-ui,-apple-system,Segoe UI,Roboto,"Helvetica Neue",Arial;color:#111827;background:linear-gradient(180deg,var(--bg1),var(--bg2));-webkit-font-smoothing:antialiased}
   .app{max-width:980px;margin:20px auto;border-radius:16px;overflow:hidden;box-shadow:var(--shadow);background:linear-gradient(180deg,#fff,#fbfbff);border:1px solid rgba(13,59,102,0.04)}
-  header{position:relative;padding:22px 20px 28px;text-align:center;color:#fff;background-color: rgba(13,59,102,0.06);overflow:visible}
-  header::before{
-    content:"";
-    position:absolute;inset:0;z-index:0;
-    background-image:
-      linear-gradient(rgba(13,59,102,0.18), rgba(13,59,102,0.12)),
-      url('https://drive.google.com/uc?export=view&id=1rGPIGyEijiSivuAFZ5O_1fqRi6a_Jtus');
-    background-size:cover;background-position:center;
-    opacity:0.8;filter:saturate(0.98) contrast(0.98);pointer-events:none;
-    -webkit-mask-image: radial-gradient(ellipse at center, rgba(0,0,0,1) 62%, rgba(0,0,0,0) 100%);
-    mask-image: radial-gradient(ellipse at center, rgba(0,0,0,1) 62%, rgba(0,0,0,0) 100%);
-    -webkit-mask-size: 120% 120%; mask-size: 120% 120%;
-  }
+  header{position:relative;padding:22px 20px 28px;text-align:center;color:#fff;background-color: rgba(13,59,102,0.06);overflow:visible;min-height:120px}
+  header .bg-img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;z-index:0;opacity:0.98}
+  header .overlay{position:absolute;inset:0;background:linear-gradient(180deg,rgba(13,59,102,0.18),rgba(13,59,102,0.12));z-index:1}
   header .content{position:relative;z-index:2}
   h1{margin:0;font-size:22px;color:#fff;font-weight:700;text-shadow:0 6px 18px rgba(0,0,0,0.28)}
   .tagline{margin-top:8px;color:rgba(255,255,255,0.95);font-size:13px;line-height:1.3}
@@ -36,18 +23,15 @@
   label{font-weight:600;color:#0f172a;font-size:13px}
   .control-bg{background:linear-gradient(180deg, rgba(238,242,245,0.9), rgba(246,248,250,0.95));border-radius:10px;padding:6px}
   select,input,textarea{font-size:15px;padding:12px;border-radius:10px;border:1px solid rgba(13,59,102,0.06);background:transparent;color:#0f172a;width:100%;box-sizing:border-box}
-  select:focus,input:focus,textarea:focus{box-shadow:0 8px 22px rgba(13,59,102,0.06);border-color:rgba(13,59,102,0.12)}
   .hint{font-size:12px;color:var(--muted);margin-top:6px}
   .age-panel{margin-top:8px;padding:10px;border-radius:10px;background:linear-gradient(180deg,#fff,#fcfcff);border:1px solid rgba(13,59,102,0.03)}
   .age-tagline{font-weight:700;color:var(--accent-2);font-size:14px}
-  .summary{margin-top:12px;display:flex;flex-direction:column;gap:8px}
   .summary-row{display:flex;justify-content:space-between;align-items:center;padding:8px;border-radius:8px;background:linear-gradient(180deg,#fff,#fbfbff);border:1px solid rgba(13,59,102,0.03);font-size:13px}
   .controls{display:flex;gap:12px;justify-content:flex-end;margin-top:14px}
-  .btn-primary{background:linear-gradient(180deg,var(--accent),#d95b00);color:white;border:none;padding:12px 18px;border-radius:12px;font-weight:700;cursor:pointer;box-shadow:0 8px 24px rgba(255,122,0,0.12)}
+  .btn-primary{background:linear-gradient(180deg,var(--accent),#d95b00);color:white;border:none;padding:12px 18px;border-radius:12px;font-weight:700;cursor:pointer}
   .btn-secondary{background:transparent;border:1px solid #e6eef6;padding:10px 14px;border-radius:10px;cursor:pointer}
   .small-muted{font-size:13px;color:var(--muted)}
-  .sidebar{width:320px;display:flex;flex-direction:column;gap:12px}
-  @media (max-width:820px){main{flex-direction:column;padding:12px}.form-grid{grid-template-columns:1fr}.sidebar{display:none}.controls{display:none}.app{margin:8px}header{padding:18px}}
+  @media (max-width:820px){main{flex-direction:column;padding:12px}.form-grid{grid-template-columns:1fr}.controls{display:none}}
   /* Progress bar */
   #progressWrap{position:relative;height:6px;background:transparent;border-radius:6px;overflow:hidden;margin:8px 0 6px}
   #progressBar{height:100%;width:0%;background:linear-gradient(90deg,#cfe9ff,#9fd6ff);box-shadow:0 6px 18px rgba(31,120,255,0.08);transition:width 300ms ease}
@@ -57,6 +41,9 @@
 <body>
   <div class="app" role="application" aria-labelledby="appTitle">
     <header>
+      <!-- Reliable image element for header background -->
+      <img class="bg-img" id="headerBg" alt="header background" src="https://drive.google.com/uc?export=view&id=1rGPIGyEijiSivuAFZ5O_1fqRi6a_Jtus" />
+      <div class="overlay"></div>
       <div class="content">
         <h1 id="appTitle">Taste Buds Choices</h1>
         <div class="tagline">Pick your combo — we’ll drop it near you. Lock your picks and we’ll deliver vibes.</div>
@@ -66,13 +53,11 @@
     <main>
       <div class="left">
         <div id="formArea" class="card" aria-live="polite">
-          <!-- Progress -->
           <div id="progressWrap" aria-hidden="false">
             <div id="progressBar" role="progressbar" aria-valuemin="0" aria-valuemax="100"></div>
           </div>
           <div id="progressLabel" aria-live="polite">Loading form…</div>
 
-          <!-- Form wrapper -->
           <div id="formWrapper" style="margin-top:12px;"></div>
         </div>
 
@@ -84,7 +69,7 @@
         <div id="message" style="margin-top:12px"></div>
       </div>
 
-      <aside class="sidebar">
+      <aside style="width:320px">
         <div class="card">
           <div style="font-weight:700;margin-bottom:6px">Your quick summary</div>
           <div class="small-muted" id="sessionIdDisplay" style="margin-bottom:8px"></div>
@@ -96,207 +81,197 @@
   </div>
 
 <script>
-/* WEBAPP URL (updated to your new deployment) */
+/* WEBAPP URL (your deployed Apps Script) */
 const WEBAPP_URL = "https://script.google.com/macros/s/AKfycbwXlYjodsqdwXD1lpUObHRUxO-4g99cRvMU77rJ3YMi7ySHMHmiLM-hNceq5RvbCTUw/exec";
 
 /* session */
 let sessionId = localStorage.getItem("tb_session_id");
 if (!sessionId) { sessionId = 's_' + Math.random().toString(36).slice(2,12); localStorage.setItem("tb_session_id", sessionId); }
-document.getElementById('sessionIdDisplay').textContent = sessionId;
+document.addEventListener('DOMContentLoaded', ()=>{ const d = document.getElementById('sessionIdDisplay'); if (d) d.textContent = sessionId; });
 
 /* Progress helpers */
-function startProgress() {
-  const bar = document.getElementById('progressBar'), label = document.getElementById('progressLabel');
-  if (!bar) return;
-  bar.style.width = '6%'; if (label) label.textContent = 'Starting…';
-  window._progressInterval && clearInterval(window._progressInterval);
-  window._progressInterval = setInterval(() => {
-    const cur = parseFloat(bar.style.width) || 0;
-    const step = cur < 40 ? (Math.random()*6 + 4) : cur < 80 ? (Math.random()*3 + 1) : (Math.random()*1 + 0.2);
-    const next = Math.min(92, cur + step);
-    bar.style.width = next + '%';
-    if (label) label.textContent = 'Loading form… ' + Math.round(next) + '%';
-  }, 450);
-}
-function setProgress(p, text) {
-  const bar = document.getElementById('progressBar'), label = document.getElementById('progressLabel');
-  if (!bar) return; bar.style.width = Math.max(0, Math.min(100, p)) + '%'; if (label && text) label.textContent = text;
-}
-function finishProgress(successText) {
-  const bar = document.getElementById('progressBar'), label = document.getElementById('progressLabel');
-  if (!bar) return; clearInterval(window._progressInterval); bar.style.width = '100%'; if (label) label.textContent = successText || 'Loaded';
-  setTimeout(()=>{ const wrap = document.getElementById('progressWrap'); if (wrap) wrap.style.opacity='0'; if (label) label.style.opacity='0'; }, 600);
-}
-function failProgress(errText) { clearInterval(window._progressInterval); const label = document.getElementById('progressLabel'); if (label) label.textContent = errText || 'Failed to load'; const bar = document.getElementById('progressBar'); if (bar) { bar.style.background='linear-gradient(90deg,#ffd6d6,#ffb3b3)'; bar.style.width='100%'; } }
+function startProgress(){ const bar=document.getElementById('progressBar'), label=document.getElementById('progressLabel'); if(!bar) return; bar.style.width='6%'; if(label) label.textContent='Starting…'; window._progressInterval&&clearInterval(window._progressInterval); window._progressInterval=setInterval(()=>{ const cur=parseFloat(bar.style.width)||0; const step=cur<40?(Math.random()*6+4):cur<80?(Math.random()*3+1):(Math.random()*1+0.2); const next=Math.min(92,cur+step); bar.style.width=next+'%'; if(label) label.textContent='Loading form… '+Math.round(next)+'%'; },450); }
+function setProgress(p,text){ const bar=document.getElementById('progressBar'), label=document.getElementById('progressLabel'); if(!bar) return; bar.style.width=Math.max(0,Math.min(100,p))+'%'; if(label&&text) label.textContent=text; }
+function finishProgress(successText){ const bar=document.getElementById('progressBar'), label=document.getElementById('progressLabel'); if(!bar) return; clearInterval(window._progressInterval); bar.style.width='100%'; if(label) label.textContent=successText||'Loaded'; setTimeout(()=>{ const wrap=document.getElementById('progressWrap'); if(wrap) wrap.style.opacity='0'; if(label) label.style.opacity='0'; },600); }
+function failProgress(errText){ clearInterval(window._progressInterval); const label=document.getElementById('progressLabel'); if(label) label.textContent=errText||'Failed to load'; const bar=document.getElementById('progressBar'); if(bar){ bar.style.background='linear-gradient(90deg,#ffd6d6,#ffb3b3)'; bar.style.width='100%'; } }
 
 /* helpers */
-function el(tag, attrs = {}, ...children) {
-  const node = document.createElement(tag);
-  for (const k in attrs) {
-    if (k === 'class') node.className = attrs[k];
-    else if (k === 'html') node.innerHTML = attrs[k];
-    else node.setAttribute(k, attrs[k]);
-  }
-  children.forEach(c => { if (c !== null && c !== undefined) node.appendChild(typeof c === 'string' ? document.createTextNode(c) : c); });
-  return node;
-}
-function qs(sel, root = document) { return root.querySelector(sel); }
-function qsa(sel, root = document) { return Array.from(root.querySelectorAll(sel)); }
-function showMessage(text, type = 'info') { const msg = qs('#message'); msg.innerHTML = ''; const div = el('div', { class: type === 'error' ? 'error' : 'small-muted' }, text); msg.appendChild(div); }
-function clearMessage(){ qs('#message').innerHTML = ''; }
+function el(tag, attrs={}, ...children){ const node=document.createElement(tag); for(const k in attrs){ if(k==='class') node.className=attrs[k]; else if(k==='html') node.innerHTML=attrs[k]; else node.setAttribute(k, attrs[k]); } children.forEach(c=>{ if(c!==null&&c!==undefined) node.appendChild(typeof c==='string'?document.createTextNode(c):c); }); return node; }
+function qs(sel,root=document){ return root.querySelector(sel); }
+function qsa(sel,root=document){ return Array.from(root.querySelectorAll(sel)); }
+function showMessage(text,type='info'){ const msg=qs('#message'); if(!msg) return; msg.innerHTML=''; const div=el('div',{class:type==='error'?'error':'small-muted'},text); msg.appendChild(div); }
+function clearMessage(){ const msg=qs('#message'); if(msg) msg.innerHTML=''; }
 
 /* network */
-async function fetchWithTimeout(url, opts = {}, timeout = 9000) {
-  const controller = new AbortController(); const id = setTimeout(()=>controller.abort(), timeout);
-  try { const res = await fetch(url, { signal: controller.signal, ...opts }); clearTimeout(id); return res; } catch (err) { clearTimeout(id); throw err; }
-}
-async function postJson(url, body, timeout = 9000, retries = 2) {
-  const opts = { method: 'POST', body: JSON.stringify(body) };
-  for (let i=0;i<=retries;i++) {
-    try { const r = await fetchWithTimeout(url, opts, timeout); if (!r.ok) throw new Error('Network response not ok: ' + r.status); return await r.json().catch(()=>({status:'ok'})); }
-    catch (err) { if (i===retries) throw err; await new Promise(res=>setTimeout(res, 300*(i+1))); }
-  }
-}
+async function fetchWithTimeout(url,opts={},timeout=9000){ const controller=new AbortController(); const id=setTimeout(()=>controller.abort(),timeout); try{ const res=await fetch(url,{signal:controller.signal,...opts}); clearTimeout(id); return res; }catch(err){ clearTimeout(id); throw err; } }
+async function postJson(url,body,timeout=9000,retries=2){ const opts={method:'POST',body:JSON.stringify(body)}; for(let i=0;i<=retries;i++){ try{ const r=await fetchWithTimeout(url,opts,timeout); if(!r.ok) throw new Error('Network response not ok: '+r.status); return await r.json().catch(()=>({status:'ok'})); }catch(err){ if(i===retries) throw err; await new Promise(res=>setTimeout(res,300*(i+1))); } } }
 
 /* normalization */
-function normalizeKey(s) {
-  if (!s && s !== 0) return '';
-  let t = String(s).replace(/[\u200B-\u200F\uFEFF]/g,'').replace(/[\u2012\u2013\u2014\u2015]/g,'-').replace(/\s+/g,' ').trim();
-  return t.toLowerCase();
-}
-function stripEmoji(s) { if (!s) return s; return s.replace(/[\u{1F300}-\u{1F6FF}\u{1F900}-\u{1F9FF}\u{2600}-\u{26FF}\u{2700}-\u{27BF}]/gu,'').trim(); }
+function normalizeKey(s){ if(!s && s!==0) return ''; let t=String(s).replace(/[\u200B-\u200F\uFEFF]/g,'').replace(/[\u2012\u2013\u2014\u2015]/g,'-').replace(/\s+/g,' ').trim(); return t.toLowerCase(); }
+function stripEmoji(s){ if(!s) return s; return s.replace(/[\u{1F300}-\u{1F6FF}\u{1F900}-\u{1F9FF}\u{2600}-\u{26FF}\u{2700}-\u{27BF}]/gu,'').trim(); }
 
 /* global maps */
 window.AGE_TAGS_MAP = {};
 window.cityToState = {};
 window.cityToRegion = {};
+window.cityToStateNorm = {};
+window.cityToRegionNorm = {};
 
 let configFields = [];
 const answers = {};
 
 /* map ageTags from server JSON */
-function mapAgeTagsFromJson(ageTagsArray) {
+function mapAgeTagsFromJson(ageTagsArray){
   window.AGE_TAGS_MAP = {};
-  (ageTagsArray || []).forEach(r => {
-    const raw = (r.key || '').toString().trim();
-    if (!raw) return;
-    const display = (r.displayLabel || r.display || raw).toString();
+  (ageTagsArray||[]).forEach(r=>{
+    const raw=(r.key||'').toString().trim();
+    if(!raw) return;
+    const display=(r.displayLabel||r.display||raw).toString();
     window.AGE_TAGS_MAP[raw] = { displayLabel: display };
     const norm = normalizeKey(raw);
-    if (norm && !window.AGE_TAGS_MAP[norm]) window.AGE_TAGS_MAP[norm] = window.AGE_TAGS_MAP[raw];
+    if(norm && !window.AGE_TAGS_MAP[norm]) window.AGE_TAGS_MAP[norm] = window.AGE_TAGS_MAP[raw];
     const stripped = normalizeKey(stripEmoji(raw));
-    if (stripped && !window.AGE_TAGS_MAP[stripped]) window.AGE_TAGS_MAP[stripped] = window.AGE_TAGS_MAP[raw];
+    if(stripped && !window.AGE_TAGS_MAP[stripped]) window.AGE_TAGS_MAP[stripped] = window.AGE_TAGS_MAP[raw];
+  });
+}
+
+/* build normalized city maps */
+function buildNormalizedCityMaps(cityToState, cityToRegion){
+  window.cityToState = cityToState || {};
+  window.cityToRegion = cityToRegion || {};
+  window.cityToStateNorm = {};
+  window.cityToRegionNorm = {};
+  Object.keys(window.cityToState).forEach(city=>{
+    const norm = normalizeKey(city);
+    if(norm) window.cityToStateNorm[norm] = window.cityToState[city];
+  });
+  Object.keys(window.cityToRegion).forEach(city=>{
+    const norm = normalizeKey(city);
+    if(norm) window.cityToRegionNorm[norm] = window.cityToRegion[city];
   });
 }
 
 /* build form */
-function buildFormFromConfig(config) {
-  configFields = config.map(c => ({
-    label: (c.label||'').toString(),
-    type: (c.type||'').toString().toLowerCase(),
-    key: (c.key||'').toString(),
-    options: (c.options||'').toString(),
-    category: (c.category||'').toString(),
-    price: (c.price||'').toString()
-  })).filter(f => f.key && f.label);
+function buildFormFromConfig(config){
+  configFields = config.map(c=>({
+    label:(c.label||'').toString(),
+    type:(c.type||'').toString().toLowerCase(),
+    key:(c.key||'').toString(),
+    options:(c.options||'').toString(),
+    category:(c.category||'').toString(),
+    price:(c.price||'').toString()
+  })).filter(f=>f.key && f.label);
 
-  const wrapper = qs('#formWrapper'); wrapper.innerHTML = '';
-  const grid = el('div', { class: 'form-grid' });
+  const wrapper = qs('#formWrapper'); wrapper.innerHTML='';
+  const grid = el('div',{class:'form-grid'});
 
-  configFields.forEach(field => {
-    const fld = el('div', { class: 'field' });
-    fld.appendChild(el('label', {}, field.label));
-    const controlBg = el('div', { class: 'control-bg' });
+  configFields.forEach(field=>{
+    const fld = el('div',{class:'field'});
+    fld.appendChild(el('label',{}, field.label));
+    const controlBg = el('div',{class:'control-bg'});
 
-    if (field.type === 'select') {
-      const sel = el('select', { name: field.key });
-      sel.appendChild(el('option', { value:'', disabled:true, selected:true }, 'Select'));
+    if(field.type === 'select'){
+      const sel = el('select',{name: field.key});
+      sel.appendChild(el('option',{value:'',disabled:true,selected:true},'Select'));
       const rawOpts = field.options ? field.options.split(/;|,/).map(s=>s.trim()).filter(Boolean) : [];
 
-      if (String(field.key).toLowerCase().includes('age') && rawOpts.length) {
-        rawOpts.forEach(opt => {
+      // Age select (detect by key containing 'age')
+      if(String(field.key).toLowerCase().includes('age') && rawOpts.length){
+        rawOpts.forEach(opt=>{
           const n = normalizeKey(opt);
           const stripped = normalizeKey(stripEmoji(opt));
           const info = window.AGE_TAGS_MAP[opt] || window.AGE_TAGS_MAP[n] || window.AGE_TAGS_MAP[stripped] || null;
           const displayText = (info && info.displayLabel) ? info.displayLabel : opt;
-          const optionEl = el('option', { value: opt, 'data-original': opt, 'data-display': displayText }, opt);
+          const optionEl = el('option',{value: opt, 'data-original': opt, 'data-display': displayText}, opt);
           sel.appendChild(optionEl);
         });
-        sel.addEventListener('mousedown', () => {
-          qsa(`select[name="${field.key}"] option`).forEach(o => { const orig = o.getAttribute('data-original'); if (orig) o.textContent = orig; });
-        });
-        sel.addEventListener('change', () => {
+        sel.addEventListener('mousedown', ()=>{ qsa(`select[name="${field.key}"] option`).forEach(o=>{ const orig=o.getAttribute('data-original'); if(orig) o.textContent = orig; }); });
+        sel.addEventListener('change', ()=>{
           const val = sel.value; const opt = sel.querySelector(`option[value="${CSS.escape(val)}"]`);
-          if (!opt) return;
+          if(!opt) return;
           const n = normalizeKey(val); const stripped = normalizeKey(stripEmoji(val));
           const info = window.AGE_TAGS_MAP[val] || window.AGE_TAGS_MAP[n] || window.AGE_TAGS_MAP[stripped] || null;
           const display = (info && info.displayLabel) ? info.displayLabel : (opt.getAttribute('data-display') || val);
           opt.textContent = display;
-          qsa(`select[name="${field.key}"] option`).forEach(o => { if (o !== opt) { const orig = o.getAttribute('data-original'); if (orig) o.textContent = orig; } });
+          qsa(`select[name="${field.key}"] option`).forEach(o=>{ if(o!==opt){ const orig=o.getAttribute('data-original'); if(orig) o.textContent = orig; } });
           answers[field.key] = val;
           postAutosaveDebounced(field.key, val);
           updateSummaryUI();
         });
       }
-      else if (String(field.key).toLowerCase().includes('city') && rawOpts.length) {
-        rawOpts.sort((a,b)=>a.localeCompare(b, undefined, { sensitivity:'base' }));
-        rawOpts.forEach(opt => sel.appendChild(el('option', { value: opt }, opt)));
-        sel.addEventListener('change', () => {
+      // City select (detect by key containing 'city')
+      else if(String(field.key).toLowerCase().includes('city') && rawOpts.length){
+        // sort and add normalized attributes
+        rawOpts.sort((a,b)=>a.localeCompare(b, undefined, {sensitivity:'base'}));
+        rawOpts.forEach(opt=>{
+          const norm = normalizeKey(opt);
+          const optionEl = el('option',{value: opt, 'data-original': opt, 'data-norm': norm}, opt);
+          sel.appendChild(optionEl);
+        });
+        sel.addEventListener('change', ()=>{
           const city = sel.value;
-          const state = (window.cityToState && window.cityToState[city]) || '';
-          const region = (window.cityToRegion && window.cityToRegion[city]) || '';
+          // try direct lookup
+          let state = (window.cityToState && window.cityToState[city]) || '';
+          let region = (window.cityToRegion && window.cityToRegion[city]) || '';
+          // try normalized lookup
+          if(!state){
+            const norm = normalizeKey(city);
+            state = window.cityToStateNorm[norm] || '';
+            region = window.cityToRegionNorm[norm] || '';
+          }
           answers[field.key] = city; answers.state = state; answers.region = region;
           postAutosaveDebounced(field.key, city, { state, region });
           updateSummaryUI();
         });
-      } else {
-        rawOpts.forEach(opt => sel.appendChild(el('option', { value: opt }, opt)));
-        sel.addEventListener('change', () => { answers[field.key] = sel.value; postAutosaveDebounced(field.key, sel.value); updateSummaryUI(); });
+      }
+      else {
+        rawOpts.forEach(opt => sel.appendChild(el('option',{value: opt}, opt)));
+        sel.addEventListener('change', ()=>{ answers[field.key] = sel.value; postAutosaveDebounced(field.key, sel.value); updateSummaryUI(); });
       }
 
       controlBg.appendChild(sel);
     }
-    else if (field.type === 'radio') {
+    else if(field.type === 'radio'){
       const opts = field.options ? field.options.split(/;|,/).map(s=>s.trim()).filter(Boolean) : [];
       const group = el('div');
-      opts.forEach((opt, idx) => {
+      opts.forEach((opt,idx)=>{
         const id = `r_${field.key}_${idx}`;
-        const labelEl = el('label', {});
-        const radio = el('input', { type:'radio', name: field.key, id, value: opt });
-        radio.addEventListener('change', () => { answers[field.key] = opt; postAutosaveDebounced(field.key, opt); updateSummaryUI(); });
-        labelEl.appendChild(radio); labelEl.appendChild(document.createTextNode(' ' + opt));
+        const labelEl = el('label',{});
+        const radio = el('input',{type:'radio',name:field.key,id, value: opt});
+        radio.addEventListener('change', ()=>{ answers[field.key] = opt; postAutosaveDebounced(field.key,opt); updateSummaryUI(); });
+        labelEl.appendChild(radio); labelEl.appendChild(document.createTextNode(' '+opt));
         group.appendChild(labelEl);
       });
       controlBg.appendChild(group);
     }
-    else if (field.type === 'checkbox') {
+    else if(field.type === 'checkbox'){
       const opts = field.options ? field.options.split(/;|,/).map(s=>s.trim()).filter(Boolean) : [];
       const group = el('div');
-      opts.forEach((opt, idx) => {
+      opts.forEach((opt,idx)=>{
         const id = `c_${field.key}_${idx}`;
-        const labelEl = el('label', {});
-        const cb = el('input', { type:'checkbox', id, value: opt });
-        cb.addEventListener('change', () => {
-          const arr = qsa(`input[type="checkbox"][value]`).filter(i => i.checked && i.closest('.field') === fld).map(i => i.value);
-          answers[field.key] = arr; postAutosaveDebounced(field.key, arr); updateSummaryUI();
+        const labelEl = el('label',{});
+        const cb = el('input',{type:'checkbox',id,value:opt});
+        cb.addEventListener('change', ()=>{
+          const arr = qsa(`input[type="checkbox"][value]`).filter(i=>i.checked && i.closest('.field')===fld).map(i=>i.value);
+          answers[field.key] = arr; postAutosaveDebounced(field.key,arr); updateSummaryUI();
         });
-        labelEl.appendChild(cb); labelEl.appendChild(document.createTextNode(' ' + opt));
+        labelEl.appendChild(cb); labelEl.appendChild(document.createTextNode(' '+opt));
         group.appendChild(labelEl);
       });
       controlBg.appendChild(group);
     }
-    else if (field.type === 'textarea') {
-      const ta = el('textarea', { rows:4, name: field.key });
-      ta.addEventListener('change', () => { answers[field.key] = ta.value; postAutosaveDebounced(field.key, ta.value); updateSummaryUI(); });
+    else if(field.type === 'textarea'){
+      const ta = el('textarea',{rows:4,name:field.key});
+      ta.addEventListener('change', ()=>{ answers[field.key] = ta.value; postAutosaveDebounced(field.key,ta.value); updateSummaryUI(); });
       controlBg.appendChild(ta);
     }
     else {
-      const inp = el('input', { type:'text', name: field.key, autocomplete:'off' });
-      inp.addEventListener('change', () => { answers[field.key] = inp.value; postAutosaveDebounced(field.key, inp.value); updateSummaryUI(); });
+      const inp = el('input',{type:'text',name:field.key,autocomplete:'off'});
+      inp.addEventListener('change', ()=>{ answers[field.key] = inp.value; postAutosaveDebounced(field.key,inp.value); updateSummaryUI(); });
       controlBg.appendChild(inp);
     }
 
-    if (field.category || field.price) controlBg.appendChild(el('div', { class:'hint' }, [field.category, field.price ? 'price: ' + field.price : ''].filter(Boolean).join(' • ')));
+    if(field.category || field.price) controlBg.appendChild(el('div',{class:'hint'}, [field.category, field.price ? 'price: '+field.price : ''].filter(Boolean).join(' • ')));
     fld.appendChild(controlBg); grid.appendChild(fld);
   });
 
@@ -307,111 +282,116 @@ function buildFormFromConfig(config) {
 
 /* autosave debounce */
 let autosaveTimer = null;
-function postAutosaveDebounced(fieldName, fieldValue, extra = {}) {
-  if (autosaveTimer) clearTimeout(autosaveTimer);
-  autosaveTimer = setTimeout(() => {
+function postAutosaveDebounced(fieldName, fieldValue, extra = {}){
+  if(autosaveTimer) clearTimeout(autosaveTimer);
+  autosaveTimer = setTimeout(()=>{
     const payload = { sessionId, fieldName, fieldValue, ...extra };
+    // send autosave to backend (backend writes to Autosaves sheet)
     postJson(WEBAPP_URL, payload).catch(()=>{});
-  }, 600);
+  },600);
 }
 
 /* attach age tagline panel */
-function attachAgeTaglineBehavior() {
-  const ageSelect = Array.from(document.querySelectorAll('select')).find(s => s.previousSibling && s.previousSibling.textContent && s.previousSibling.textContent.toLowerCase().includes('and i\'m')) ||
+function attachAgeTaglineBehavior(){
+  const ageSelect = Array.from(document.querySelectorAll('select')).find(s => s.previousSibling && s.previousSibling.textContent && s.previousSibling.textContent.toLowerCase().includes("and i'm")) ||
                     document.querySelector('select[name="And I\'m"]');
-  if (!ageSelect) return;
+  if(!ageSelect) return;
   let panel = ageSelect.parentNode.querySelector('.age-panel');
-  if (!panel) { panel = el('div', { class:'age-panel' }); ageSelect.parentNode.appendChild(panel); }
+  if(!panel){ panel = el('div',{class:'age-panel'}); ageSelect.parentNode.appendChild(panel); }
   panel.innerHTML = '';
-  const tagNode = el('div', { class:'age-tagline' }, '');
+  const tagNode = el('div',{class:'age-tagline'},'');
   panel.appendChild(tagNode);
 
-  ageSelect.addEventListener('change', () => {
+  ageSelect.addEventListener('change', ()=>{
     const val = ageSelect.value;
     const n = normalizeKey(val);
     const stripped = normalizeKey(stripEmoji(val));
     const info = window.AGE_TAGS_MAP[val] || window.AGE_TAGS_MAP[n] || window.AGE_TAGS_MAP[stripped] || null;
-    if (info) tagNode.textContent = info.displayLabel || val;
+    if(info) tagNode.textContent = info.displayLabel || val;
     else {
       const opt = ageSelect.querySelector(`option[value="${CSS.escape(val)}"]`);
       tagNode.textContent = (opt && opt.getAttribute('data-display')) ? opt.getAttribute('data-display') : val;
     }
   });
 
-  if (ageSelect.value) ageSelect.dispatchEvent(new Event('change'));
+  if(ageSelect.value) ageSelect.dispatchEvent(new Event('change'));
 }
 
 /* summary UI */
-function updateSummaryUI() {
-  const list = qs('#summaryList'); list.innerHTML = '';
+function updateSummaryUI(){
+  const list = qs('#summaryList'); if(!list) return; list.innerHTML='';
   const keys = Object.keys(answers);
-  if (keys.length === 0) { list.appendChild(el('div', { class:'small-muted' }, 'No selections yet')); return; }
-  keys.slice(0,8).forEach(k => {
+  if(keys.length===0){ list.appendChild(el('div',{class:'small-muted'},'No selections yet')); return; }
+  keys.slice(0,8).forEach(k=>{
     const v = answers[k];
-    const row = el('div', { class:'summary-row' }, el('div', {}, k), el('div', {}, (Array.isArray(v) ? v.join(', ') : (v === '' || v === null ? '—' : String(v)))));
+    const row = el('div',{class:'summary-row'}, el('div',{}, k), el('div',{}, (Array.isArray(v) ? v.join(', ') : (v === '' || v === null ? '—' : String(v)))));
     list.appendChild(row);
   });
 }
 
 /* submit */
-async function handleSubmit() {
-  const submitBtn = qs('#submitBtn') || qs('#submitBtnMobile');
-  if (submitBtn) { submitBtn.disabled = true; submitBtn.textContent = 'Submitting...'; }
-  try {
-    configFields.forEach(f => {
-      if (!f.key) return;
+async function handleSubmit(){
+  const submitBtn = qs('#submitBtn');
+  if(submitBtn){ submitBtn.disabled = true; submitBtn.textContent = 'Submitting...'; }
+  try{
+    // collect current values
+    configFields.forEach(f=>{
+      if(!f.key) return;
       const sel = qs(`select[name="${f.key}"]`);
-      if (sel) answers[f.key] = sel.value;
+      if(sel) answers[f.key] = sel.value;
       const inp = qs(`input[name="${f.key}"], textarea[name="${f.key}"]`);
-      if (inp) answers[f.key] = inp.value;
+      if(inp) answers[f.key] = inp.value;
     });
+
     const payload = { sessionId, submitted: true, answers };
     await postJson(WEBAPP_URL, payload, 10000, 2);
-    qs('.left').innerHTML = ''; qs('.left').appendChild(el('div', { class:'card' }, el('div', { style:'text-align:center;padding:28px' }, el('h2', {}, 'Thanks! 🎉'), el('div', { class:'small-muted' }, 'We saved your picks.'))));
-  } catch (err) {
+    qs('.left').innerHTML = ''; qs('.left').appendChild(el('div',{class:'card'}, el('div',{style:'text-align:center;padding:28px'}, el('h2',{},'Thanks! 🎉'), el('div',{class:'small-muted'},'We saved your picks.'))));
+  }catch(err){
     console.error('Submit failed', err);
-    showMessage('Submission failed. Check connection and try again.', 'error');
-    if (submitBtn) { submitBtn.disabled = false; submitBtn.textContent = 'Finish'; }
+    showMessage('Submission failed. Check connection and try again.','error');
+    if(submitBtn){ submitBtn.disabled = false; submitBtn.textContent = 'Finish'; }
   }
 }
 
 /* load config and build */
-async function loadConfigAndBuild() {
+async function loadConfigAndBuild(){
   startProgress();
-  try {
+  try{
     const res = await fetchWithTimeout(WEBAPP_URL + '?_t=' + Date.now(), {}, 9000);
-    setProgress(40, 'Fetching configuration…');
+    setProgress(40,'Fetching configuration…');
     const json = await res.json();
-    setProgress(70, 'Building form…');
+    setProgress(70,'Building form…');
 
-    if (Array.isArray(json.ageTags)) mapAgeTagsFromJson(json.ageTags);
-    if (json.cityMappings) { window.cityToState = json.cityMappings.cityToState || {}; window.cityToRegion = json.cityMappings.cityToRegion || {}; }
-    if (json && json.status === 'ok' && Array.isArray(json.config)) {
+    if(Array.isArray(json.ageTags)) mapAgeTagsFromJson(json.ageTags);
+    if(json.cityMappings){
+      buildNormalizedCityMaps(json.cityMappings.cityToState || {}, json.cityMappings.cityToRegion || {});
+    }
+    if(json && json.status === 'ok' && Array.isArray(json.config)){
       buildFormFromConfig(json.config);
       finishProgress('Form ready');
       clearMessage();
-    } else throw new Error('Invalid config response');
-  } catch (err) {
+    } else {
+      throw new Error('Invalid config response');
+    }
+  }catch(err){
     console.error('Failed to load config', err);
     failProgress('Error loading form');
-    const container = qs('#formWrapper'); if (container) container.innerHTML = '<div class="small-muted">Unable to load form configuration. Check Config and AgeTags sheets and Apps Script deployment.</div>';
-    showMessage('Error loading form. Confirm the web app URL and that the script is deployed with correct access.', 'error');
+    const container = qs('#formWrapper'); if(container) container.innerHTML = '<div class="small-muted">Unable to load form configuration. Check Config and AgeTags sheets and Apps Script deployment.</div>';
+    showMessage('Error loading form. Confirm the web app URL and that the script is deployed with correct access.','error');
   }
 }
 
 /* reset */
-function resetFormLocal() {
-  for (const k in answers) delete answers[k];
-  qsa('input,textarea,select').forEach(i => { if (i.tagName === 'SELECT') i.selectedIndex = 0; else if (i.type === 'radio' || i.type === 'checkbox') i.checked = false; else i.value = ''; });
-  updateSummaryUI(); showMessage('Form reset locally.', 'info'); setTimeout(clearMessage, 2000);
+function resetFormLocal(){
+  for(const k in answers) delete answers[k];
+  qsa('input,textarea,select').forEach(i=>{ if(i.tagName==='SELECT') i.selectedIndex=0; else if(i.type==='radio' || i.type==='checkbox') i.checked=false; else i.value=''; });
+  updateSummaryUI(); showMessage('Form reset locally.','info'); setTimeout(clearMessage,2000);
 }
 
 /* wire */
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', ()=>{
   qs('#submitBtn')?.addEventListener('click', handleSubmit);
   qs('#resetBtn')?.addEventListener('click', resetFormLocal);
-  qs('#submitBtnMobile')?.addEventListener('click', handleSubmit);
-  qs('#resetBtnMobile')?.addEventListener('click', resetFormLocal);
   loadConfigAndBuild();
 });
 </script>
