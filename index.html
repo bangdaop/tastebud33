@@ -53,7 +53,7 @@
   </div>
 
 <script>
-const WEBAPP_URL = "https://script.google.com/macros/s/AKfycbywZvzhUFXH0EqljIfI-AlwmKwcxeGPzMYUH4eHLSQ1-iFYUV93CPkTFvqwaANl3EoD/exec";
+const WEBAPP_URL = "YOUR_WEBAPP_URL_HERE"; // replace with your deployed Apps Script URL
 
 // Generate persistent sessionId
 let sessionId = localStorage.getItem("tb_session_id");
@@ -140,4 +140,14 @@ function postAutosave(fieldName,fieldValue,extra={}){
   });
 }
 
-document.getElementById("submitBtn").onclick
+// Build form on load
+window.onload = buildForm;
+
+// Handle final submit
+document.getElementById("submitBtn").onclick = () => {
+  fetch(WEBAPP_URL, {
+    method: "POST",
+    body: JSON.stringify({
+      sessionId,
+      submitted: true,
+      answers
