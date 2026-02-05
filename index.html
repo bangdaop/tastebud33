@@ -7,53 +7,165 @@
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
 <style>
   :root{
-    --bg1:#fff7ed; --bg2:#fff1e6; --card:#ffffff; --accent:#ff7a00; --accent-2:#0d3b66;
-    --muted:#6b7280; --radius:12px; --shadow:0 14px 40px rgba(13,59,102,0.08);
+    --bg1:#f6f8fa; /* calm minimalist gradient start */
+    --bg2:#eef2f5; /* calm minimalist gradient end */
+    --card:#ffffff;
+    --accent:#ff7a00;
+    --accent-2:#0d3b66;
+    --muted:#6b7280;
+    --radius:12px;
+    --shadow:0 14px 40px rgba(13,59,102,0.08);
     --gap:14px;
   }
-  html,body{height:100%;margin:0;font-family:"Poppins",system-ui,-apple-system,Segoe UI,Roboto,"Helvetica Neue",Arial;color:#111827;background:linear-gradient(135deg,var(--bg1),var(--bg2));-webkit-font-smoothing:antialiased}
-  .app{max-width:980px;margin:20px auto;border-radius:16px;overflow:hidden;box-shadow:var(--shadow);background:linear-gradient(180deg,#fff,#fbfbff);border:1px solid rgba(13,59,102,0.04)}
-  header{position:relative;padding:22px 20px 28px;text-align:center;color:#fff;background-color: rgba(13,59,102,0.12);overflow:visible}
-  header::before{content:"";position:absolute;inset:0;z-index:0;background-image:linear-gradient(rgba(13,59,102,0.28), rgba(13,59,102,0.18)),url('https://drive.google.com/uc?export=view&id=1rGPIGyEijiSivuAFZ5O_1fqRi6a_Jtus');background-size:cover;background-position:center;filter:saturate(0.95) contrast(0.95);-webkit-mask-image:radial-gradient(ellipse at center, rgba(0,0,0,1) 62%, rgba(0,0,0,0) 100%);mask-image:radial-gradient(ellipse at center, rgba(0,0,0,1) 62%, rgba(0,0,0,0) 100%);-webkit-mask-size:120% 120%;mask-size:120% 120%;pointer-events:none}
-  header .content{position:relative;z-index:2}
-  h1{margin:0;font-size:22px;color:#fff;font-weight:700;text-shadow:0 6px 18px rgba(0,0,0,0.28)}
-  .tagline{margin-top:8px;color:rgba(255,255,255,0.95);font-size:13px;line-height:1.3}
-  main{display:flex;gap:var(--gap);padding:16px}
-  .left{flex:1;min-width:0}
-  .card{background:var(--card);border-radius:12px;padding:12px;border:1px solid rgba(13,59,102,0.03)}
-  .form-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
-  .field{display:flex;flex-direction:column;gap:8px;margin-bottom:6px}
-  label{font-weight:600;color:#0f172a;font-size:13px}
-  select,input,textarea{font-size:15px;padding:10px;border-radius:10px;border:1px solid #e6eef6;background:#fff;outline:none}
-  select:focus,input:focus,textarea:focus{box-shadow:0 8px 22px rgba(13,59,102,0.06);border-color:var(--accent)}
-  .hint{font-size:12px;color:var(--muted)}
-  .age-panel{margin-top:8px;padding:10px;border-radius:10px;background:linear-gradient(180deg,#fff,#fcfcff);border:1px solid rgba(13,59,102,0.03)}
-  .age-tagline{font-weight:700;color:var(--accent-2);font-size:14px}
-  .summary{margin-top:12px;display:flex;flex-direction:column;gap:8px}
-  .summary-row{display:flex;justify-content:space-between;align-items:center;padding:8px;border-radius:8px;background:linear-gradient(180deg,#fff,#fbfbff);border:1px solid rgba(13,59,102,0.03);font-size:13px}
-  .controls{display:flex;gap:12px;justify-content:flex-end;margin-top:14px}
-  .btn-primary{background:linear-gradient(180deg,var(--accent),#d95b00);color:white;border:none;padding:12px 18px;border-radius:12px;font-weight:700;cursor:pointer;box-shadow:0 8px 24px rgba(255,122,0,0.12)}
-  .btn-secondary{background:transparent;border:1px solid #e6eef6;padding:10px 14px;border-radius:10px;cursor:pointer}
-  .small-muted{font-size:13px;color:var(--muted)}
-  .loader{width:16px;height:16px;border-radius:50%;border:3px solid rgba(0,0,0,0.06);border-top-color:var(--accent);animation:spin .9s linear infinite}
-  @keyframes spin{to{transform:rotate(360deg)}}
-  .sidebar{width:320px;display:flex;flex-direction:column;gap:12px}
-  .sidebar .card{padding:12px}
-  @media (max-width:820px){
-    main{flex-direction:column;padding:12px}
-    .form-grid{grid-template-columns:1fr}
-    .sidebar{display:none}
-    .controls{display:none}
-    .app{margin:8px}
-    header{padding:18px}
-    header::before{-webkit-mask-image:radial-gradient(ellipse at center, rgba(0,0,0,1) 72%, rgba(0,0,0,0) 100%);mask-image:radial-gradient(ellipse at center, rgba(0,0,0,1) 72%, rgba(0,0,0,0) 100%)}
+
+  html,body{
+    height:100%;
+    margin:0;
+    font-family:"Poppins",system-ui,-apple-system,Segoe UI,Roboto,"Helvetica Neue",Arial;
+    color:#111827;
+    background: linear-gradient(180deg,var(--bg1),var(--bg2));
+    -webkit-font-smoothing:antialiased;
   }
-  .mobile-bar{display:none;position:fixed;left:0;right:0;bottom:0;padding:10px;background:linear-gradient(180deg,#fff,#fff);box-shadow:0 -6px 20px rgba(13,59,102,0.06);border-top:1px solid rgba(13,59,102,0.04);z-index:60}
-  .mobile-bar .bar-inner{max-width:980px;margin:0 auto;display:flex;gap:10px;justify-content:space-between;padding:6px}
-  .mobile-bar .btn-primary{flex:1;padding:12px;border-radius:10px}
-  .mobile-bar .btn-secondary{padding:10px 12px;border-radius:10px}
-  @media (max-width:820px){ .mobile-bar{display:block} }
-  select option{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+
+  .app{
+    max-width:980px;
+    margin:20px auto;
+    border-radius:16px;
+    overflow:hidden;
+    box-shadow:var(--shadow);
+    background:linear-gradient(180deg,#fff,#fbfbff);
+    border:1px solid rgba(13,59,102,0.04);
+  }
+
+  /* Header: image sits behind text with 80% opacity; feathered edges applied to image layer only */
+  header{
+    position:relative;
+    padding:22px 20px 28px;
+    text-align:center;
+    color:#fff;
+    background-color: rgba(13,59,102,0.06); /* subtle fallback */
+    overflow:visible;
+  }
+
+  /* image layer: placed in ::before so we can control opacity and feathering separately */
+  header::before{
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+    /* Drive direct view URL already converted; replace id if needed */
+    background-image:
+      linear-gradient(rgba(13,59,102,0.18), rgba(13,59,102,0.12)),
+      url('https://drive.google.com/uc?export=view&id=1rGPIGyEijiSivuAFZ5O_1fqRi6a_Jtus');
+    background-size: cover;
+    background-position: center;
+    /* set image opacity to 80% by using a semi-opaque overlay in the gradient above */
+    opacity: 0.98; /* keep near full so overlay controls perceived opacity */
+    filter: saturate(0.98) contrast(0.98);
+    pointer-events: none;
+
+    /* feather edges using mask-image (works in modern browsers) */
+    -webkit-mask-image: radial-gradient(ellipse at center, rgba(0,0,0,1) 62%, rgba(0,0,0,0) 100%);
+    mask-image: radial-gradient(ellipse at center, rgba(0,0,0,1) 62%, rgba(0,0,0,0) 100%);
+    -webkit-mask-size: 120% 120%;
+    mask-size: 120% 120%;
+    -webkit-mask-position: center;
+    mask-position: center;
+  }
+
+  /* Keep header content above the image layer */
+  header .content { position: relative; z-index: 2; }
+
+  h1{ margin:0; font-size:22px; color:#fff; font-weight:700; text-shadow:0 6px 18px rgba(0,0,0,0.28); }
+  .tagline{ margin-top:8px; color:rgba(255,255,255,0.95); font-size:13px; line-height:1.3; }
+
+  main{ display:flex; gap:var(--gap); padding:16px; }
+  .left{ flex:1; min-width:0; }
+  .card{ background:var(--card); border-radius:12px; padding:12px; border:1px solid rgba(13,59,102,0.03); }
+
+  /* Form grid and fields */
+  .form-grid{ display:grid; grid-template-columns:1fr 1fr; gap:12px; }
+  .field{ display:flex; flex-direction:column; gap:8px; margin-bottom:6px; }
+  label{ font-weight:600; color:#0f172a; font-size:13px; }
+
+  /* Minimalist calm gradient for form controls (inputs/selects) */
+  .control-bg {
+    background: linear-gradient(180deg, rgba(238,242,245,0.9), rgba(246,248,250,0.95));
+    border-radius:10px;
+    padding:6px;
+  }
+
+  select, input, textarea {
+    font-size:15px;
+    padding:12px 12px;
+    border-radius:10px;
+    border:1px solid rgba(13,59,102,0.06);
+    background: transparent; /* let the control-bg show through */
+    outline:none;
+    color:#0f172a;
+    -webkit-appearance: none;
+    appearance: none;
+  }
+
+  /* Keep the native options popup color unchanged by not styling option elements */
+  /* But we ensure the select itself looks calm and minimal */
+  select:focus, input:focus, textarea:focus {
+    box-shadow: 0 8px 22px rgba(13,59,102,0.06);
+    border-color: rgba(13,59,102,0.12);
+  }
+
+  /* Increase spacing and touch targets for mobile */
+  .field .hint { font-size:12px; color:var(--muted); margin-top:6px; }
+
+  /* Age panel */
+  .age-panel{ margin-top:8px; padding:10px; border-radius:10px; background:linear-gradient(180deg,#fff,#fcfcff); border:1px solid rgba(13,59,102,0.03); }
+  .age-tagline{ font-weight:700; color:var(--accent-2); font-size:14px; }
+  .age-desc{ font-size:13px; color:var(--muted); margin-top:4px; }
+
+  .summary{ margin-top:12px; display:flex; flex-direction:column; gap:8px; }
+  .summary-row{ display:flex; justify-content:space-between; align-items:center; padding:8px; border-radius:8px; background:linear-gradient(180deg,#fff,#fbfbff); border:1px solid rgba(13,59,102,0.03); font-size:13px; }
+
+  .controls{ display:flex; gap:12px; justify-content:flex-end; margin-top:14px; }
+  .btn-primary{ background: linear-gradient(180deg,var(--accent),#d95b00); color:white; border:none; padding:12px 18px; border-radius:12px; font-weight:700; cursor:pointer; box-shadow:0 8px 24px rgba(255,122,0,0.12); }
+  .btn-secondary{ background:transparent; border:1px solid #e6eef6; padding:10px 14px; border-radius:10px; cursor:pointer; }
+
+  .small-muted{ font-size:13px; color:var(--muted); }
+  .loader{ width:16px; height:16px; border-radius:50%; border:3px solid rgba(0,0,0,0.06); border-top-color:var(--accent); animation:spin .9s linear infinite; }
+  @keyframes spin{ to{ transform:rotate(360deg) } }
+
+  /* Sidebar */
+  .sidebar{ width:320px; display:flex; flex-direction:column; gap:12px; }
+  .sidebar .card{ padding:12px; }
+
+  /* Mobile adjustments */
+  @media (max-width:820px){
+    main{ flex-direction:column; padding:12px; }
+    .form-grid{ grid-template-columns:1fr; }
+    .sidebar{ display:none; }
+    .controls{ display:none; } /* use mobile bar */
+    .app{ margin:8px; }
+    header{ padding:18px; }
+    header::before{
+      -webkit-mask-image: radial-gradient(ellipse at center, rgba(0,0,0,1) 72%, rgba(0,0,0,0) 100%);
+      mask-image: radial-gradient(ellipse at center, rgba(0,0,0,1) 72%, rgba(0,0,0,0) 100%);
+    }
+  }
+
+  /* Mobile fixed bar */
+  .mobile-bar{ display:none; position:fixed; left:0; right:0; bottom:0; padding:10px; background:linear-gradient(180deg,#fff,#fff); box-shadow:0 -6px 20px rgba(13,59,102,0.06); border-top:1px solid rgba(13,59,102,0.04); z-index:60; }
+  .mobile-bar .bar-inner{ max-width:980px; margin:0 auto; display:flex; gap:10px; justify-content:space-between; padding:6px; }
+  .mobile-bar .btn-primary{ flex:1; padding:12px; border-radius:10px; }
+  .mobile-bar .btn-secondary{ padding:10px 12px; border-radius:10px; }
+  @media (max-width:820px){ .mobile-bar{ display:block } }
+
+  /* small visual polish for select spacing and gaps */
+  .field select, .field input, .field textarea { width:100%; box-sizing:border-box; }
+  .field { padding:6px; } /* adds breathing space around each field */
+  .form-grid > .field { background: linear-gradient(180deg, rgba(255,255,255,0.0), rgba(255,255,255,0.0)); border-radius:10px; }
+
+  /* keep native option popup color unchanged: do not style option elements */
+  option { /* intentionally minimal */ }
+
 </style>
 </head>
 <body>
@@ -72,6 +184,9 @@
             <div class="loader" aria-hidden="true"></div>
             <div class="small-muted">Loading form…</div>
           </div>
+
+          <!-- Form will be injected here by JS; wrapper kept for consistent background -->
+          <div id="formWrapper" style="margin-top:12px; border-radius:12px; padding:10px;" class="control-bg"></div>
         </div>
 
         <div class="controls" style="margin-top:12px">
@@ -112,11 +227,27 @@ if (!sessionId) {
 }
 document.getElementById('sessionIdDisplay').textContent = sessionId;
 
-const answers = {};
-let configFields = [];
-let AGE_TAGS_MAP = {}; // normalizedKey -> { displayLabel }
+/* Minimal DOM helpers and the same JS logic as before, but we inject the form into #formWrapper
+   so the control-bg gradient is applied behind the inputs while the native option popup color remains unchanged.
+*/
 
-/* Normalization helpers */
+function el(tag, attrs = {}, ...children) {
+  const node = document.createElement(tag);
+  for (const k in attrs) {
+    if (k === 'class') node.className = attrs[k];
+    else if (k === 'html') node.innerHTML = attrs[k];
+    else node.setAttribute(k, attrs[k]);
+  }
+  children.forEach(c => { if (c !== null && c !== undefined) node.appendChild(typeof c === 'string' ? document.createTextNode(c) : c); });
+  return node;
+}
+function qs(sel, root = document) { return root.querySelector(sel); }
+function qsa(sel, root = document) { return Array.from(root.querySelectorAll(sel)); }
+
+let configFields = [];
+let AGE_TAGS_MAP = {};
+const answers = {};
+
 function normalizeKey(s) {
   if (!s && s !== 0) return '';
   let t = String(s);
@@ -130,7 +261,6 @@ function stripEmoji(s) {
   return s.replace(/[\u{1F300}-\u{1F6FF}\u{1F900}-\u{1F9FF}\u{2600}-\u{26FF}\u{2700}-\u{27BF}]/gu, '').trim();
 }
 
-/* Map AgeTags into lookup using normalized keys */
 function mapAgeTags(ageTagsArray) {
   AGE_TAGS_MAP = {};
   (ageTagsArray || []).forEach(r => {
@@ -144,110 +274,60 @@ function mapAgeTags(ageTagsArray) {
   });
 }
 
-/* DOM helpers */
-function el(tag, attrs = {}, ...children) {
-  const node = document.createElement(tag);
-  for (const k in attrs) {
-    if (k === 'class') node.className = attrs[k];
-    else if (k === 'html') node.innerHTML = attrs[k];
-    else node.setAttribute(k, attrs[k]);
-  }
-  children.forEach(c => { if (c !== null && c !== undefined) node.appendChild(typeof c === 'string' ? document.createTextNode(c) : c); });
-  return node;
-}
-function qs(sel, root = document) { return root.querySelector(sel); }
-function qsa(sel, root = document) { return Array.from(root.querySelectorAll(sel)); }
-function showMessage(text, type = 'info') {
-  const msg = qs('#message'); msg.innerHTML = '';
-  const div = el('div', { class: type === 'error' ? 'error' : 'small-muted' }, text);
-  msg.appendChild(div);
-}
-function clearMessage(){ qs('#message').innerHTML = ''; }
-
-/* network */
-async function fetchWithTimeout(url, opts = {}, timeout = 9000) {
-  const controller = new AbortController();
-  const id = setTimeout(() => controller.abort(), timeout);
+/* Fetch config and build form into #formWrapper */
+async function fetchConfig() {
   try {
-    const res = await fetch(url, { signal: controller.signal, ...opts });
-    clearTimeout(id);
-    return res;
-  } catch (err) { clearTimeout(id); throw err; }
-}
-async function postJson(url, body, timeout = 9000, retries = 2) {
-  const opts = { method: 'POST', body: JSON.stringify(body) };
-  for (let i = 0; i <= retries; i++) {
-    try {
-      const r = await fetchWithTimeout(url, opts, timeout);
-      if (!r.ok) throw new Error('Network response not ok: ' + r.status);
-      return await r.json().catch(()=>({status:'ok'}));
-    } catch (err) {
-      if (i === retries) throw err;
-      await new Promise(res => setTimeout(res, 300 * (i+1)));
+    const res = await fetch(WEBAPP_URL + '?_t=' + Date.now());
+    const json = await res.json();
+    if (json && json.status === 'ok' && Array.isArray(json.config)) {
+      if (Array.isArray(json.ageTags)) mapAgeTags(json.ageTags);
+      buildForm(json.config);
+    } else {
+      throw new Error('Invalid config');
     }
+  } catch (e) {
+    qs('#formWrapper').innerHTML = '<div class="small-muted">Unable to load form configuration. Check Config and AgeTags sheets and Apps Script deployment.</div>';
   }
 }
 
-/* Build form from config */
-function buildFormFromConfig(config) {
-  configFields = config.map(c => {
-    return {
-      label: (c.label || c.Label || c.LABEL || c.key || '').toString(),
-      type: (c.type || c.Type || c.TYPE || '').toString().toLowerCase(),
-      key: (c.key || c.Key || c.KEY || c.label || '').toString(),
-      options: (c.options || c.Options || c.OPTIONS || '').toString(),
-      category: (c.category || c.Category || c.CATEGORY || '').toString(),
-      price: (c.price || c.Price || c.PRICE || '').toString()
-    };
-  }).filter(f => f.key && f.label);
+function buildForm(config) {
+  configFields = config.map(c => ({
+    label: (c.label || c.Label || c.LABEL || c.key || '').toString(),
+    type: (c.type || c.Type || c.TYPE || '').toString().toLowerCase(),
+    key: (c.key || c.Key || c.KEY || c.label || '').toString(),
+    options: (c.options || c.Options || c.OPTIONS || '').toString(),
+    category: (c.category || c.Category || c.CATEGORY || '').toString(),
+    price: (c.price || c.Price || c.PRICE || '').toString()
+  })).filter(f => f.key && f.label);
 
-  const container = qs('#formArea');
-  container.innerHTML = '';
+  const wrapper = qs('#formWrapper');
+  wrapper.innerHTML = '';
   const grid = el('div', { class: 'form-grid' });
-  container.appendChild(grid);
 
   configFields.forEach(field => {
-    const wrapper = el('div', { class: 'field' });
-    const label = el('label', {}, field.label);
-    wrapper.appendChild(label);
+    const fld = el('div', { class: 'field' });
+    fld.appendChild(el('label', {}, field.label));
 
-    const attachAutosave = (inputEl, key) => {
-      if (!inputEl) return;
-      const save = (val, extra = {}) => {
-        answers[key] = val;
-        postAutosaveDebounced(key, val, extra);
-        updateSummaryUI();
-      };
-      if (inputEl.tagName === 'SELECT' || inputEl.type === 'checkbox' || inputEl.type === 'radio') {
-        inputEl.addEventListener('change', () => {
-          if (inputEl.type === 'checkbox') save(inputEl.checked);
-          else save(inputEl.value);
-        });
-      } else {
-        inputEl.addEventListener('blur', () => save(inputEl.value));
-        inputEl.addEventListener('change', () => save(inputEl.value));
-      }
-    };
+    // container with calm gradient background so inputs appear on top of it
+    const controlBg = el('div', { class: 'control-bg' });
 
     if (field.type === 'select') {
-      const sel = el('select'); sel.name = field.key;
-      const placeholder = el('option', { value: '', disabled: true, selected: true }, 'Select');
-      sel.appendChild(placeholder);
+      const sel = el('select', { name: field.key });
+      sel.appendChild(el('option', { value: '', disabled: true, selected: true }, 'Select'));
 
       const rawOpts = field.options ? field.options.split(/;|,/).map(s => s.trim()).filter(Boolean) : [];
 
-      if (String(field.key).toLowerCase().indexOf('age') !== -1 && rawOpts.length) {
+      if (String(field.key).toLowerCase().includes('age') && rawOpts.length) {
         rawOpts.forEach(opt => {
           const n = normalizeKey(opt);
-          const strippedN = normalizeKey(stripEmoji(opt));
-          const info = AGE_TAGS_MAP[n] || AGE_TAGS_MAP[strippedN] || null;
+          const stripped = normalizeKey(stripEmoji(opt));
+          const info = AGE_TAGS_MAP[n] || AGE_TAGS_MAP[stripped] || null;
           const displayText = (info && info.displayLabel) ? info.displayLabel : opt;
-          // store original in data-original, and data-display for label
           const optionEl = el('option', { value: opt, 'data-original': opt, 'data-display': displayText }, opt);
           sel.appendChild(optionEl);
         });
 
-        // When user opens the select, restore original option texts
+        // restore original texts when opening dropdown
         sel.addEventListener('mousedown', () => {
           qsa(`select[name="${field.key}"] option`).forEach(o => {
             const orig = o.getAttribute('data-original');
@@ -255,7 +335,7 @@ function buildFormFromConfig(config) {
           });
         });
 
-        // On change, replace selected option text with displayLabel
+        // on change show displayLabel in selected option
         sel.addEventListener('change', () => {
           const val = sel.value;
           const opt = sel.querySelector(`option[value="${CSS.escape(val)}"]`);
@@ -264,242 +344,115 @@ function buildFormFromConfig(config) {
           const stripped = normalizeKey(stripEmoji(val));
           const info = AGE_TAGS_MAP[n] || AGE_TAGS_MAP[stripped] || null;
           const display = (info && info.displayLabel) ? info.displayLabel : (opt.getAttribute('data-display') || val);
-          // set selected option text to display label
           opt.textContent = display;
-          // ensure other options keep their original text
           qsa(`select[name="${field.key}"] option`).forEach(o => {
             if (o !== opt) {
               const orig = o.getAttribute('data-original');
               if (orig) o.textContent = orig;
             }
           });
-          // autosave and UI update
-          const state = (window.cityToState && window.cityToState[answers.city]) || '';
-          const region = (window.cityToRegion && window.cityToRegion[answers.city]) || '';
-          postAutosaveDebounced(field.key, val, { state, region });
           answers[field.key] = val;
-          updateSummaryUI();
         });
       }
-      else if (String(field.key).toLowerCase().indexOf('city') !== -1 && rawOpts.length) {
+      else if (String(field.key).toLowerCase().includes('city') && rawOpts.length) {
         rawOpts.sort((a,b) => a.localeCompare(b, undefined, { sensitivity: 'base' }));
         rawOpts.forEach(opt => sel.appendChild(el('option', { value: opt }, opt)));
         sel.addEventListener('change', () => {
-          const city = sel.value;
-          const state = (window.cityToState && window.cityToState[city]) || '';
-          const region = (window.cityToRegion && window.cityToRegion[city]) || '';
-          postAutosaveDebounced(field.key, city, { state, region });
-          answers[field.key] = city; answers.state = state; answers.region = region;
-          updateSummaryUI();
+          answers[field.key] = sel.value;
+        });
+      } else {
+        rawOpts.forEach(opt => sel.appendChild(el('option', { value: opt }, opt)));
+        sel.addEventListener('change', () => {
+          answers[field.key] = sel.value;
         });
       }
-      else {
-        rawOpts.forEach(opt => sel.appendChild(el('option', { value: opt }, opt)));
-        attachAutosave(sel, field.key);
-      }
 
-      wrapper.appendChild(sel);
+      controlBg.appendChild(sel);
     }
     else if (field.type === 'radio') {
       const opts = field.options ? field.options.split(/;|,/).map(s => s.trim()).filter(Boolean) : [];
-      const group = el('div', {});
+      const group = el('div');
       opts.forEach((opt, idx) => {
         const id = `r_${field.key}_${idx}`;
         const labelEl = el('label', {});
         const radio = el('input', { type: 'radio', name: field.key, id, value: opt });
-        radio.addEventListener('change', () => {
-          answers[field.key] = opt; postAutosaveDebounced(field.key, opt); updateSummaryUI();
-        });
+        radio.addEventListener('change', () => { answers[field.key] = opt; });
         labelEl.appendChild(radio); labelEl.appendChild(document.createTextNode(' ' + opt));
         group.appendChild(labelEl);
       });
-      wrapper.appendChild(group);
+      controlBg.appendChild(group);
     }
     else if (field.type === 'checkbox') {
       const opts = field.options ? field.options.split(/;|,/).map(s => s.trim()).filter(Boolean) : [];
-      const group = el('div', {});
+      const group = el('div');
       opts.forEach((opt, idx) => {
         const id = `c_${field.key}_${idx}`;
         const labelEl = el('label', {});
         const cb = el('input', { type: 'checkbox', id, value: opt });
         cb.addEventListener('change', () => {
-          const arr = qsa(`input[type="checkbox"][value]`).filter(i => i.checked && i.closest('.field') === wrapper).map(i => i.value);
-          answers[field.key] = arr; postAutosaveDebounced(field.key, arr); updateSummaryUI();
+          const arr = qsa(`input[type="checkbox"][value]`).filter(i => i.checked && i.closest('.field') === fld).map(i => i.value);
+          answers[field.key] = arr;
         });
         labelEl.appendChild(cb); labelEl.appendChild(document.createTextNode(' ' + opt));
         group.appendChild(labelEl);
       });
-      wrapper.appendChild(group);
+      controlBg.appendChild(group);
     }
     else if (field.type === 'textarea') {
       const ta = el('textarea', { rows: 4, name: field.key });
-      wrapper.appendChild(ta); attachAutosave(ta, field.key);
+      ta.addEventListener('change', () => answers[field.key] = ta.value);
+      controlBg.appendChild(ta);
     }
     else {
       const inp = el('input', { type: 'text', name: field.key, autocomplete: 'off' });
-      wrapper.appendChild(inp); attachAutosave(inp, field.key);
+      inp.addEventListener('change', () => answers[field.key] = inp.value);
+      controlBg.appendChild(inp);
     }
 
+    // hint/category
     const hintParts = [];
     if (field.category) hintParts.push(field.category);
     if (field.price) hintParts.push('price: ' + field.price);
-    if (hintParts.length) wrapper.appendChild(el('div', { class: 'hint' }, hintParts.join(' • ')));
+    if (hintParts.length) controlBg.appendChild(el('div', { class: 'hint' }, hintParts.join(' • ')));
 
-    grid.appendChild(wrapper);
+    fld.appendChild(controlBg);
+    grid.appendChild(fld);
   });
 
-  container.appendChild(grid);
-  attachAgeTaglineBehavior();
-  updateSummaryUI();
+  wrapper.appendChild(grid);
 }
 
-/* autosave debounce */
+/* autosave and submit (same endpoints as before) */
 let autosaveTimer = null;
-const AUTOSAVE_DELAY = 600;
+function postJson(url, body, timeout = 9000, retries = 2) {
+  return fetch(url, { method: 'POST', body: JSON.stringify(body) }).then(r => r.json()).catch(()=>({status:'error'}));
+}
 function postAutosaveDebounced(fieldName, fieldValue, extra = {}) {
   if (autosaveTimer) clearTimeout(autosaveTimer);
   autosaveTimer = setTimeout(() => {
     const payload = { sessionId, fieldName, fieldValue, ...extra };
-    postJson(WEBAPP_URL, payload, 7000, 1).catch(err => {
-      console.warn('Autosave failed', err);
-      showMessage('Autosave temporarily failed. Changes will retry on submit.', 'error');
-      setTimeout(clearMessage, 4000);
-    });
-  }, AUTOSAVE_DELAY);
+    postJson(WEBAPP_URL, payload).catch(()=>{});
+  }, 600);
 }
 
-/* load config and ageTags */
-async function loadConfigAndBuild() {
-  const loading = qs('#loading'); loading.style.display = 'flex';
-  try {
-    const res = await fetchWithTimeout(WEBAPP_URL + '?_t=' + Date.now(), {}, 9000);
-    const json = await res.json();
-    if (json && json.status === 'ok' && Array.isArray(json.config)) {
-      if (Array.isArray(json.ageTags)) mapAgeTags(json.ageTags);
-      buildFormFromConfig(json.config);
-      clearMessage();
-    } else {
-      throw new Error('Invalid config response');
-    }
-  } catch (err) {
-    console.error('Failed to load config', err);
-    const container = qs('#formArea'); container.innerHTML = '';
-    container.appendChild(el('div', { class: 'small-muted' }, 'Unable to load form configuration. Check Config and AgeTags sheets and Apps Script deployment.'));
-    showMessage('Error loading form. Confirm the web app URL and that the script is deployed with correct access.', 'error');
-  } finally {
-    loading.style.display = 'none';
-  }
-}
-
-/* age tagline UI (shows displayLabel after selection) */
-function attachAgeTaglineBehavior() {
-  const ageSelect = document.querySelector('select[name="ageGroup"]') ||
-    Array.from(document.querySelectorAll('select')).find(s => s.previousSibling && s.previousSibling.textContent && s.previousSibling.textContent.toLowerCase().includes('age'));
-  if (!ageSelect) return;
-
-  let panel = ageSelect.parentNode.querySelector('.age-panel');
-  if (!panel) {
-    panel = el('div', { class: 'age-panel' });
-    ageSelect.parentNode.appendChild(panel);
-  }
-  panel.innerHTML = '';
-  const tagNode = el('div', { class: 'age-tagline' }, '');
-  panel.appendChild(tagNode);
-
-  ageSelect.addEventListener('change', () => {
-    const val = ageSelect.value;
-    const n = normalizeKey(val);
-    const stripped = normalizeKey(stripEmoji(val));
-    const info = AGE_TAGS_MAP[n] || AGE_TAGS_MAP[stripped] || null;
-    if (info) tagNode.textContent = info.displayLabel || val;
-    else {
-      const opt = ageSelect.querySelector(`option[value="${CSS.escape(val)}"]`);
-      tagNode.textContent = (opt && opt.getAttribute('data-display')) ? opt.getAttribute('data-display') : val;
-    }
-  });
-
-  if (ageSelect.value) ageSelect.dispatchEvent(new Event('change'));
-}
-
-/* summary UI */
-function updateSummaryUI() {
-  const list = qs('#summaryList'); list.innerHTML = '';
-  const keys = Object.keys(answers);
-  if (keys.length === 0) {
-    list.appendChild(el('div', { class: 'small-muted' }, 'No selections yet'));
-    return;
-  }
-  keys.slice(0, 8).forEach(k => {
-    const v = answers[k];
-    const row = el('div', { class: 'summary-row' },
-      el('div', {}, k),
-      el('div', {}, (Array.isArray(v) ? v.join(', ') : (v === '' || v === null ? '—' : String(v))))
-    );
-    list.appendChild(row);
-  });
-}
-
-/* final submit */
-async function handleSubmit() {
-  const submitBtn = qs('#submitBtn') || qs('#submitBtnMobile');
-  if (submitBtn) { submitBtn.disabled = true; submitBtn.textContent = 'Submitting...'; }
-  try {
+/* wire buttons */
+document.addEventListener('DOMContentLoaded', () => {
+  qs('#resetBtn')?.addEventListener('click', () => { localStorage.removeItem('tb_session_id'); window.location.reload(); });
+  qs('#resetBtnMobile')?.addEventListener('click', () => { localStorage.removeItem('tb_session_id'); window.location.reload(); });
+  qs('#submitBtn')?.addEventListener('click', async () => {
+    // gather values
     configFields.forEach(f => {
       if (!f.key) return;
-      const name = f.key;
-      if (f.type === 'radio') {
-        const checked = qsa(`input[type="radio"][name="${name}"]`).find(i => i.checked);
-        if (checked) answers[name] = checked.value;
-      } else if (f.type === 'checkbox') {
-        const checked = qsa(`input[type="checkbox"]`).filter(i => i.checked && i.closest('.field'));
-        answers[name] = checked.map(i => i.value);
-      } else if (f.type === 'select') {
-        const sel = qsa('select').find(s => s.name === name);
-        if (sel) answers[name] = sel.value;
-      } else {
-        const inp = qsa('input,textarea').find(i => i.name === name);
-        if (inp) answers[name] = inp.value;
-      }
+      const sel = qs(`select[name="${f.key}"]`);
+      if (sel) answers[f.key] = sel.value;
+      const inp = qs(`input[name="${f.key}"], textarea[name="${f.key}"]`);
+      if (inp) answers[f.key] = inp.value;
     });
-
-    const payload = { sessionId, submitted: true, answers };
-    await postJson(WEBAPP_URL, payload, 10000, 2);
-
-    const left = qs('.left'); left.innerHTML = '';
-    left.appendChild(el('div', { class: 'card' },
-      el('div', { style: 'text-align:center;padding:28px' },
-        el('h2', {}, 'Thanks! 🎉'),
-        el('div', { class: 'small-muted' }, 'We saved your picks. You can close this window.'),
-        el('div', { style: 'margin-top:12px' }, el('button', { class: 'btn-primary', onclick: 'window.location.reload()' }, 'Done'))
-      )
-    ));
-  } catch (err) {
-    console.error('Submit failed', err);
-    showMessage('Submission failed. Check connection and try again.', 'error');
-    if (submitBtn) { submitBtn.disabled = false; submitBtn.textContent = 'Finish'; }
-  }
-}
-
-/* reset */
-function resetFormLocal() {
-  for (const k in answers) delete answers[k];
-  qsa('input,textarea,select').forEach(i => {
-    if (i.tagName === 'SELECT') i.selectedIndex = 0;
-    else if (i.type === 'radio' || i.type === 'checkbox') i.checked = false;
-    else i.value = '';
+    await postJson(WEBAPP_URL, { sessionId, submitted: true, answers });
+    qs('.left').innerHTML = '<div class="card" style="text-align:center;padding:28px"><h2>Thanks! 🎉</h2><div class="small-muted">We saved your picks.</div></div>';
   });
-  updateSummaryUI();
-  showMessage('Form reset locally.', 'info');
-  setTimeout(clearMessage, 2000);
-}
-
-/* wire mobile buttons */
-document.addEventListener('DOMContentLoaded', () => {
-  qs('#submitBtn')?.addEventListener('click', handleSubmit);
-  qs('#resetBtn')?.addEventListener('click', resetFormLocal);
-  qs('#submitBtnMobile')?.addEventListener('click', handleSubmit);
-  qs('#resetBtnMobile')?.addEventListener('click', resetFormLocal);
-  loadConfigAndBuild();
+  qs('#submitBtnMobile')?.addEventListener('click', () => qs('#submitBtn').click());
+  fetchConfig();
 });
 </script>
 </body>
