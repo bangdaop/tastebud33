@@ -36,6 +36,8 @@
   select:disabled,option[disabled]{color:#9ca3af}
   .hint{font-size:13px;color:var(--muted)}
   .state-line{font-weight:600;color:#374151;font-size:13px}
+  .age-tagline{font-size:13px;color:#0d3b66;font-weight:600;margin-top:6px}
+  .age-desc{font-size:13px;color:var(--muted);margin-top:4px}
   .controls{display:flex;gap:12px;align-items:center;justify-content:flex-end;margin-top:18px}
   button.primary{background:var(--accent);color:white;border:none;padding:12px 18px;border-radius:12px;font-weight:700;cursor:pointer;box-shadow:0 8px 20px rgba(247,127,0.12)}
   button.ghost{background:transparent;border:1px solid #e6e9ee;padding:10px 14px;border-radius:10px;cursor:pointer}
@@ -84,6 +86,7 @@ if (!sessionId) {
 }
 const answers = {};
 let configFields = [];
+let AGE_TAGS_MAP = {}; // key -> {displayLabel, tagline, description, responseTone}
 
 /* City mappings (extend as needed) */
 const cityToState = {
@@ -147,6 +150,22 @@ async function postJson(url, body, timeout = 8000, retries = 2) {
       await new Promise(res => setTimeout(res, 400 * (i+1)));
     }
   }
+}
+
+/* Map AgeTags array into lookup */
+function mapAgeTags(ageTagsArray) {
+  AGE_TAGS_MAP = {};
+  (ageTagsArray || []).forEach(r => {
+    // Accept multiple possible header names
+    const key = (r.key || r.Key || r.displayLabel || r.displaylabel || r.displayLabel || '').toString().trim();
+    if (!key) return;
+    AGE_TAGS_MAP[key] = {
+      displayLabel: r.displayLabel || r.displaylabel || r.display || r.key || key,
+      tagline: r.tagline || r.Tagline || r.description || '',
+      description: r.description || r.Description || '',
+      responseTone: r.responseTone || r.response_tone || ''
+    };
+  });
 }
 
 /* Build form from config */
@@ -299,7 +318,7 @@ function postAutosaveDebounced(fieldName, fieldValue, extra = {}) {
   }, AUTOSAVE_DELAY);
 }
 
-/* Load config (doGet) */
+/* Load config (doGet) and ageTags, then build form and attach age tagline behavior */
 async function loadConfigAndBuild() {
   const loading = qs('#loading');
   loading.style.display = 'flex';
@@ -307,7 +326,16 @@ async function loadConfigAndBuild() {
     const res = await fetchWithTimeout(WEBAPP_URL, {}, 9000);
     const json = await res.json();
     if (json && json.status === 'ok' && Array.isArray(json.config)) {
+      // map ageTags if present
+      if (Array.isArray(json.ageTags)) {
+        mapAgeTags(json.ageTags);
+      } else {
+        // also accept ageTags under different key names
+        if (json.ageTagsArray) mapAgeTags(json.ageTagsArray);
+      }
       buildFormFromConfig(json.config);
+      // attach age tagline behavior after form is built
+      attachAgeTaglineBehavior();
       clearMessage();
     } else {
       throw new Error('Invalid config response');
@@ -316,10 +344,50 @@ async function loadConfigAndBuild() {
     console.error('Failed to load config', err);
     const container = qs('#formArea');
     container.innerHTML = '';
-    container.appendChild(el('div', { class: 'error' }, 'Unable to load form configuration. Check the Config sheet and Apps Script deployment.'));
+    container.appendChild(el('div', { class: 'error' }, 'Unable to load form configuration. Check the Config and AgeTags sheets and Apps Script deployment.'));
     showMessage('Error loading form. Make sure the Apps Script is deployed and the WEBAPP_URL is correct.', 'error');
   } finally {
     loading.style.display = 'none';
+  }
+}
+
+/* Attach age select change behavior to show tagline + description */
+function attachAgeTaglineBehavior() {
+  // find the age select by name or label
+  const ageSelect = document.querySelector('select[name="ageGroup"]') ||
+    Array.from(document.querySelectorAll('select')).find(s => s.previousSibling && s.previousSibling.textContent && s.previousSibling.textContent.toLowerCase().includes('age'));
+  if (!ageSelect) return;
+
+  // create display nodes (insert after select)
+  let tagNode = el('div', { class: 'age-tagline' }, '');
+  let descNode = el('div', { class: 'age-desc' }, '');
+  // ensure we don't duplicate nodes if re-attaching
+  const parent = ageSelect.parentNode;
+  // remove existing if present
+  const existingTag = parent.querySelector('.age-tagline');
+  if (existingTag) existingTag.remove();
+  const existingDesc = parent.querySelector('.age-desc');
+  if (existingDesc) existingDesc.remove();
+
+  parent.appendChild(tagNode);
+  parent.appendChild(descNode);
+
+  ageSelect.addEventListener('change', () => {
+    const val = ageSelect.value;
+    const info = AGE_TAGS_MAP[val] || AGE_TAGS_MAP[val.trim()] || null;
+    if (info) {
+      tagNode.textContent = info.tagline || info.displayLabel || '';
+      descNode.textContent = info.description || info.responseTone || '';
+    } else {
+      tagNode.textContent = '';
+      descNode.textContent = '';
+    }
+  });
+
+  // if there's a preselected value, trigger once
+  if (ageSelect.value) {
+    const ev = new Event('change');
+    ageSelect.dispatchEvent(ev);
   }
 }
 
