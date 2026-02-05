@@ -13,18 +13,42 @@
   }
   html,body{height:100%;margin:0;font-family:"Poppins",system-ui,-apple-system,Segoe UI,Roboto,"Helvetica Neue",Arial;color:#111827;background:linear-gradient(135deg,var(--bg1),var(--bg2));-webkit-font-smoothing:antialiased}
   .app{max-width:980px;margin:20px auto;border-radius:16px;overflow:hidden;box-shadow:var(--shadow);background:linear-gradient(180deg,#fff,#fbfbff);border:1px solid rgba(13,59,102,0.04)}
+  /* Header with feathered background image */
   header{
     padding:22px 20px 28px;
     text-align:center;
-    color: #fff;
+    color:#fff;
     position:relative;
-    /* Replace IMAGE_URL_HERE with your image URL */
-    background-image: linear-gradient(rgba(13,59,102,0.28), rgba(13,59,102,0.18)), url('IMAGE_URL_HERE');
+    background-color: rgba(13,59,102,0.18);
+    /* Drive direct view URL (converted from share link) */
+    background-image:
+      linear-gradient(rgba(13,59,102,0.28), rgba(13,59,102,0.18)),
+      url('https://drive.google.com/uc?export=view&id=1rGPIGyEijiSivuAFZ5O_1fqRi6a_Jtus');
     background-size: cover;
     background-position: center;
   }
+  /* Feather the edges using mask and overlay for broad browser support */
+  header::before{
+    content: "";
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    /* subtle dark overlay to keep text readable */
+    background: linear-gradient(180deg, rgba(0,0,0,0.18), rgba(0,0,0,0.06));
+    border-radius: 0;
+  }
+  /* soft feathering using mask-image (webkit + standard) */
+  header {
+    -webkit-mask-image: radial-gradient(ellipse at center, rgba(0,0,0,1) 60%, rgba(0,0,0,0) 100%);
+    mask-image: radial-gradient(ellipse at center, rgba(0,0,0,1) 60%, rgba(0,0,0,0) 100%);
+    -webkit-mask-size: 120% 120%;
+    mask-size: 120% 120%;
+    -webkit-mask-position: center;
+    mask-position: center;
+  }
+
   h1{margin:0;font-size:22px;color:#fff;font-weight:700;text-shadow:0 6px 18px rgba(0,0,0,0.18)}
-  .tagline{margin-top:8px;color:rgba(255,255,255,0.92);font-size:13px;line-height:1.3}
+  .tagline{margin-top:8px;color:rgba(255,255,255,0.95);font-size:13px;line-height:1.3}
   main{display:flex;gap:var(--gap);padding:16px}
   .left{flex:1;min-width:0}
   .card{background:var(--card);border-radius:12px;padding:12px;border:1px solid rgba(13,59,102,0.03)}
@@ -45,28 +69,26 @@
   .small-muted{font-size:13px;color:var(--muted)}
   .loader{width:16px;height:16px;border-radius:50%;border:3px solid rgba(0,0,0,0.06);border-top-color:var(--accent);animation:spin .9s linear infinite}
   @keyframes spin{to{transform:rotate(360deg)}}
-
-  /* Sidebar (desktop) */
   .sidebar{width:320px;display:flex;flex-direction:column;gap:12px}
   .sidebar .card{padding:12px}
-
-  /* Mobile adjustments */
   @media (max-width:820px){
     main{flex-direction:column;padding:12px}
     .form-grid{grid-template-columns:1fr}
     .sidebar{display:none}
-    .controls{display:none} /* hide desktop controls on mobile; use fixed bar */
+    .controls{display:none}
     .app{margin:8px}
     header{padding:18px}
+    /* reduce mask intensity on small screens for better readability */
+    header {
+      -webkit-mask-image: radial-gradient(ellipse at center, rgba(0,0,0,1) 72%, rgba(0,0,0,0) 100%);
+      mask-image: radial-gradient(ellipse at center, rgba(0,0,0,1) 72%, rgba(0,0,0,0) 100%);
+    }
   }
-
-  /* Fixed bottom bar for mobile */
   .mobile-bar{display:none;position:fixed;left:0;right:0;bottom:0;padding:10px;background:linear-gradient(180deg,#fff,#fff);box-shadow:0 -6px 20px rgba(13,59,102,0.06);border-top:1px solid rgba(13,59,102,0.04);z-index:60}
   .mobile-bar .bar-inner{max-width:980px;margin:0 auto;display:flex;gap:10px;justify-content:space-between;padding:6px}
   .mobile-bar .btn-primary{flex:1;padding:12px;border-radius:10px}
   .mobile-bar .btn-secondary{padding:10px 12px;border-radius:10px}
   @media (max-width:820px){ .mobile-bar{display:block} }
-
   select option{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 </style>
 </head>
@@ -86,7 +108,6 @@
           </div>
         </div>
 
-        <!-- Desktop controls (hidden on mobile) -->
         <div class="controls" style="margin-top:12px">
           <button id="resetBtn" class="btn-secondary" type="button" title="Reset form">Reset</button>
           <button id="submitBtn" class="btn-primary" type="button" title="Finish">Finish</button>
@@ -106,7 +127,6 @@
     </main>
   </div>
 
-  <!-- Mobile fixed bar -->
   <div class="mobile-bar" role="toolbar" aria-hidden="false">
     <div class="bar-inner">
       <button id="resetBtnMobile" class="btn-secondary" type="button">Reset</button>
@@ -182,13 +202,16 @@ function mapAgeTags(ageTagsArray) {
     const display = (r.displayLabel || r.displaylabel || r.display || '').toString().trim();
     if (!key) return;
     AGE_TAGS_MAP[key] = { displayLabel: display || key };
+    const stripped = stripEmoji(key);
+    if (stripped && stripped !== key) AGE_TAGS_MAP[stripped] = AGE_TAGS_MAP[key];
   });
 }
+function stripEmoji(s) {
+  if (!s) return s;
+  return s.replace(/[\u{1F300}-\u{1F6FF}\u{1F900}-\u{1F9FF}\u{2600}-\u{26FF}\u{2700}-\u{27BF}]/gu, '').trim();
+}
 
-/* Build form from config
-   For age fields: show displayLabel from AgeTags when available.
-   Handles options separated by ; or ,.
-*/
+/* Build form from config */
 function buildFormFromConfig(config) {
   configFields = config.map(c => {
     return {
@@ -234,35 +257,25 @@ function buildFormFromConfig(config) {
       const placeholder = el('option', { value: '', disabled: true, selected: true }, 'Select');
       sel.appendChild(placeholder);
 
-      // Prepare options array
       const rawOpts = field.options ? field.options.split(/;|,/).map(s => s.trim()).filter(Boolean) : [];
 
-      // If this is the age field, show displayLabel from AgeTags when available.
       if (String(field.key).toLowerCase().indexOf('age') !== -1 && rawOpts.length) {
-        // preserve original order but map display label
         rawOpts.forEach(opt => {
-          // try exact match first
           let display = (AGE_TAGS_MAP[opt] && AGE_TAGS_MAP[opt].displayLabel) || '';
-          // if not found, try stripping emoji and whitespace and match again
           if (!display) {
-            const stripped = opt.replace(/[\u{1F300}-\u{1F6FF}\u{1F900}-\u{1F9FF}\u{2600}-\u{26FF}\u{2700}-\u{27BF}]/gu, '').trim();
+            const stripped = stripEmoji(opt);
             display = (AGE_TAGS_MAP[stripped] && AGE_TAGS_MAP[stripped].displayLabel) || '';
           }
-          // fallback to original option text
           const labelText = display || opt;
-          sel.appendChild(el('option', { value: opt }, labelText));
+          sel.appendChild(el('option', { value: opt, 'data-display': labelText }, labelText));
         });
-      }
-      // For city field: sort alphabetically
-      else if (String(field.key).toLowerCase().indexOf('city') !== -1 && rawOpts.length) {
+      } else if (String(field.key).toLowerCase().indexOf('city') !== -1 && rawOpts.length) {
         rawOpts.sort((a,b) => a.localeCompare(b, undefined, { sensitivity: 'base' }));
         rawOpts.forEach(opt => sel.appendChild(el('option', { value: opt }, opt)));
-      }
-      else {
+      } else {
         rawOpts.forEach(opt => sel.appendChild(el('option', { value: opt }, opt)));
       }
 
-      // City special behavior: show state/region after selection
       if (field.key.toLowerCase().includes('city')) {
         const stateLine = el('div', { class: 'hint' }, '');
         sel.addEventListener('change', () => {
@@ -323,7 +336,6 @@ function buildFormFromConfig(config) {
       wrapper.appendChild(inp); attachAutosave(inp, field.key);
     }
 
-    // show category/price only if present (keeps UI minimal)
     const hintParts = [];
     if (field.category) hintParts.push(field.category);
     if (field.price) hintParts.push('price: ' + field.price);
@@ -359,7 +371,6 @@ async function loadConfigAndBuild() {
     const res = await fetchWithTimeout(WEBAPP_URL + '?_t=' + Date.now(), {}, 9000);
     const json = await res.json();
     if (json && json.status === 'ok' && Array.isArray(json.config)) {
-      // map AgeTags (supports minimal columns)
       if (Array.isArray(json.ageTags)) mapAgeTags(json.ageTags);
       buildFormFromConfig(json.config);
       clearMessage();
@@ -394,17 +405,21 @@ function attachAgeTaglineBehavior() {
 
   ageSelect.addEventListener('change', () => {
     const val = ageSelect.value;
-    // Try exact match first, then stripped emoji match
     let info = AGE_TAGS_MAP[val] || null;
     if (!info) {
-      const stripped = val.replace(/[\u{1F300}-\u{1F6FF}\u{1F900}-\u{1F9FF}\u{2600}-\u{26FF}\u{2700}-\u{27BF}]/gu, '').trim();
+      const stripped = stripEmoji(val);
       info = AGE_TAGS_MAP[stripped] || null;
     }
     if (info) {
       tagNode.textContent = info.displayLabel || val;
-      descNode.textContent = ''; // user removed tagline/description columns; keep UI minimal
+      descNode.textContent = '';
     } else {
-      tagNode.textContent = val || '';
+      const opt = ageSelect.querySelector(`option[value="${CSS.escape(val)}"]`);
+      if (opt && opt.getAttribute('data-display')) {
+        tagNode.textContent = opt.getAttribute('data-display');
+      } else {
+        tagNode.textContent = val || '';
+      }
       descNode.textContent = '';
     }
   });
