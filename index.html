@@ -34,7 +34,6 @@
       transition:all .2s ease;
     }
     select:focus,input:focus,textarea:focus { border-color:#f77f00; box-shadow:0 0 8px rgba(247,127,0,0.3); }
-    .state-display { margin-top:6px; font-weight:600; color:#555; }
     button {
       background:#f77f00; color:#fff; border:none; padding:12px 20px;
       border-radius:12px; font-weight:600; cursor:pointer; transition:.2s;
@@ -62,86 +61,74 @@ if (!sessionId) {
   localStorage.setItem("tb_session_id", sessionId);
 }
 
-// City mapping
-const cityToState = {"Delhi":"Delhi","Mumbai":"Maharashtra","Bengaluru":"Karnataka","Mangaluru":"Karnataka","Chennai":"Tamil Nadu","Hyderabad":"Telangana","Kolkata":"West Bengal","Ahmedabad":"Gujarat","Jaipur":"Rajasthan","Lucknow":"Uttar Pradesh","Pune":"Maharashtra","Surat":"Gujarat","Patna":"Bihar","Indore":"Madhya Pradesh","Guwahati":"Assam"};
-const cityToRegion = {"Delhi":"North","Mumbai":"West","Bengaluru":"South","Mangaluru":"South","Chennai":"South","Hyderabad":"South","Kolkata":"East","Ahmedabad":"West","Jaipur":"North","Lucknow":"North","Pune":"West","Surat":"West","Patna":"East","Indore":"Central","Guwahati":"Northeast"};
-const cities = Object.keys(cityToState).sort();
-
 // Store answers
 const answers = {};
 
-function buildForm(){
+function buildForm(config){
   const container=document.getElementById("formContainer");
+  container.innerHTML="";
 
-  // Age group
-  addSelect(container,"ageGroup","Select your age group",["Below 18","18–23","24–28","29–35","35–45","46+"]);
+  config.forEach(field=>{
+    const wrapper=document.createElement("div"); wrapper.className="field-row";
+    const label=document.createElement("label"); label.textContent=field.label; wrapper.appendChild(label);
 
-  // Gender
-  addRadio(container,"gender","Select your gender",["Male","Female","Other","Prefer not to say"]);
+    if(field.type==="select"){
+      const sel=document.createElement("select");
+      const placeholder=document.createElement("option"); placeholder.value=""; placeholder.textContent="Select"; placeholder.selected=true;
+      sel.appendChild(placeholder);
+      if(field.options){
+        field.options.split(/;|,/).forEach(o=>{
+          const opt=document.createElement("option"); opt.value=o.trim(); opt.textContent=o.trim(); sel.appendChild(opt);
+        });
+      }
+      sel.onchange=()=>{ if(sel.querySelector('option[value=""]')) sel.removeChild(sel.querySelector('option[value=""]')); answers[field.key]=sel.value; postAutosave(field.key,sel.value); };
+      wrapper.appendChild(sel);
+    }
+    else if(field.type==="radio"){
+      if(field.options){
+        field.options.split(/;|,/).forEach(o=>{
+          const row=document.createElement("label");
+          const r=document.createElement("input"); r.type="radio"; r.name=field.key; r.value=o.trim();
+          r.onchange=()=>{answers[field.key]=o.trim(); postAutosave(field.key,o.trim());};
+          row.appendChild(r); row.appendChild(document.createTextNode(" "+o.trim()));
+          wrapper.appendChild(row);
+        });
+      }
+    }
+    else if(field.type==="text"){
+      const inp=document.createElement("input"); inp.type="text";
+      inp.onblur=()=>{answers[field.key]=inp.value; postAutosave(field.key,inp.value);};
+      wrapper.appendChild(inp);
+    }
+    else if(field.type==="textarea"){
+      const ta=document.createElement("textarea");
+      ta.onblur=()=>{answers[field.key]=ta.value; postAutosave(field.key,ta.value);};
+      wrapper.appendChild(ta);
+    }
 
-  // City
-  const wrapper=document.createElement("div"); wrapper.className="field-row";
-  const label=document.createElement("label"); label.textContent="Select your city"; wrapper.appendChild(label);
-  const sel=document.createElement("select");
-  const placeholder=document.createElement("option"); placeholder.value=""; placeholder.textContent="Select your city"; placeholder.selected=true;
-  sel.appendChild(placeholder);
-  cities.forEach(c=>{const opt=document.createElement("option"); opt.value=c; opt.textContent=c; sel.appendChild(opt);});
-  const stateDisplay=document.createElement("div"); stateDisplay.className="state-display";
-  sel.onchange=()=>{
-    const chosenCity=sel.value;
-    const state=cityToState[chosenCity]||""; const region=cityToRegion[chosenCity]||"";
-    stateDisplay.textContent= state ? "State: "+state+" | Region: "+region : "";
-    if(sel.querySelector('option[value=""]')) sel.removeChild(sel.querySelector('option[value=""]'));
-    answers.city=chosenCity; answers.state=state; answers.region=region;
-    postAutosave("city",chosenCity,{state,region});
-  };
-  wrapper.appendChild(sel); wrapper.appendChild(stateDisplay); container.appendChild(wrapper);
-
-  // Occupation
-  addText(container,"occupation","Your occupation");
-}
-
-function addSelect(container,key,labelText,options){
-  const wrapper=document.createElement("div"); wrapper.className="field-row";
-  const label=document.createElement("label"); label.textContent=labelText; wrapper.appendChild(label);
-  const sel=document.createElement("select");
-  const placeholder=document.createElement("option"); placeholder.value=""; placeholder.textContent="Select"; placeholder.selected=true;
-  sel.appendChild(placeholder);
-  options.forEach(o=>{const opt=document.createElement("option"); opt.value=o; opt.textContent=o; sel.appendChild(opt);});
-  sel.onchange=()=>{ if(sel.querySelector('option[value=""]')) sel.removeChild(sel.querySelector('option[value=""]')); answers[key]=sel.value; postAutosave(key,sel.value); };
-  wrapper.appendChild(sel); container.appendChild(wrapper);
-}
-
-function addRadio(container,key,labelText,options){
-  const wrapper=document.createElement("div"); wrapper.className="field-row";
-  const label=document.createElement("label"); label.textContent=labelText; wrapper.appendChild(label);
-  options.forEach(o=>{
-    const row=document.createElement("label");
-    const r=document.createElement("input"); r.type="radio"; r.name=key; r.value=o;
-    r.onchange=()=>{answers[key]=o; postAutosave(key,o);};
-    row.appendChild(r); row.appendChild(document.createTextNode(" "+o));
-    wrapper.appendChild(row);
+    container.appendChild(wrapper);
   });
-  container.appendChild(wrapper);
 }
 
-function addText(container,key,labelText){
-  const wrapper=document.createElement("div"); wrapper.className="field-row";
-  const label=document.createElement("label"); label.textContent=labelText; wrapper.appendChild(label);
-  const inp=document.createElement("input"); inp.type="text";
-  inp.onblur=()=>{answers[key]=inp.value; postAutosave(key,inp.value);};
-  wrapper.appendChild(inp); container.appendChild(wrapper);
-}
-
-function postAutosave(fieldName,fieldValue,extra={}){
+function postAutosave(fieldName,fieldValue){
   fetch(WEBAPP_URL,{
     method:"POST",
-    body:JSON.stringify({sessionId,fieldName,fieldValue,...extra})
+    body:JSON.stringify({sessionId,fieldName,fieldValue})
   });
 }
 
-// Build form on load
-window.onload = buildForm;
+// Load config dynamically
+function loadConfig(){
+  fetch(WEBAPP_URL)
+    .then(r=>r.json())
+    .then(data=>{
+      if(data.status==="ok"){
+        buildForm(data.config);
+      } else {
+        document.getElementById("formContainer").textContent="Error loading form config.";
+      }
+    });
+}
 
 // Handle final submit
 document.getElementById("submitBtn").onclick = () => {
@@ -151,3 +138,15 @@ document.getElementById("submitBtn").onclick = () => {
       sessionId,
       submitted: true,
       answers
+    })
+  }).then(() => {
+    document.getElementById("submitMsg").textContent =
+      "Thanks for completing Taste Buds Choices! 🎉";
+  });
+};
+
+// Build form on load
+window.onload = loadConfig;
+</script>
+</body>
+</html>
