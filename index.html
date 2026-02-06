@@ -449,7 +449,7 @@
         function resetFormLocal() { for (const k in answers) delete answers[k]; qsa('input,textarea,select').forEach(i => { if (i.tagName === 'SELECT') i.selectedIndex = 0; else if (i.type === 'radio' || i.type === 'checkbox') i.checked = false; else i.value = '' }); updateSummaryUI(); showMessage('Form reset locally.'); setTimeout(clearMessage, 2000) }
         async function handleSubmit() { const submitBtn = qs('#submitBtn'); if (submitBtn) { submitBtn.disabled = true; submitBtn.textContent = 'Submitting...' } try { configFields.forEach(f => { if (!f.key) return; const sel = qs(`select[name="${f.key}"]`); if (sel) answers[f.key] = sel.value; const inp = qs(`input[name="${f.key}"], textarea[name="${f.key}"]`); if (inp) answers[f.key] = inp.value }); await postJson(WEBAPP_URL, { sessionId, submitted: true, answers }, 10000, 2); qs('.left').innerHTML = ''; qs('.left').appendChild(el('div', { class: 'card' }, el('div', { style: 'text-align:center;padding:28px' }, el('h2', {}, 'Thanks! 🎉'), el('div', { class: 'small-muted' }, 'We saved your picks.')))) } catch (err) { showMessage('Submission failed.'); if (submitBtn) { submitBtn.disabled = false; submitBtn.textContent = 'Finish' } } }
         document.addEventListener('DOMContentLoaded', () => { qs('#submitBtn')?.addEventListener('click', handleSubmit); qs('#resetBtn')?.addEventListener('click', resetFormLocal); loadConfigAndBuild() })
-        }
+        
     </script>
 </body>
 
