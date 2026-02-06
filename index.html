@@ -366,7 +366,6 @@
         document.addEventListener('DOMContentLoaded', () => {
             const d = document.getElementById('sessionIdDisplay');
             if (d) d.textContent = '';
-        });
 
         function el(tag, attrs = {}, ...children) { const node = document.createElement(tag); for (const k in attrs) { if (k === 'class') node.className = attrs[k]; else if (k === 'html') node.innerHTML = attrs[k]; else node.setAttribute(k, attrs[k]); } children.forEach(c => { if (c !== null && c !== undefined) node.appendChild(typeof c === 'string' ? document.createTextNode(c) : c); }); return node }
         function qs(s, r = document) { return r.querySelector(s) }
