@@ -324,11 +324,25 @@ function buildFormFromConfig(config) {
       ta.addEventListener('change', () => { answers[field.key] = ta.value; postAutosaveDebounced(field.key, ta.value); updateSummaryUI(); });
       controlBg.appendChild(ta);
     }
-    else {
-      const inp = el('input', { type:'text', name: field.key, autocomplete:'off' });
-      inp.addEventListener('change', () => { answers[field.key] = inp.value; postAutosaveDebounced(field.key, inp.value); updateSummaryUI(); });
-      controlBg.appendChild(inp);
-    }
+    else if (field.type === 'number') {
+  const inp = el('input', { type:'number', name: field.key, autocomplete:'off', step:'any' });
+  inp.addEventListener('change', () => {
+    answers[field.key] = inp.value;
+    postAutosaveDebounced(field.key, inp.value);
+    updateSummaryUI();
+  });
+  controlBg.appendChild(inp);
+}
+else {
+  const inp = el('input', { type:'text', name: field.key, autocomplete:'off' });
+  inp.addEventListener('change', () => {
+    answers[field.key] = inp.value;
+    postAutosaveDebounced(field.key, inp.value);
+    updateSummaryUI();
+  });
+  controlBg.appendChild(inp);
+}
+
 
     if (field.category || field.price) controlBg.appendChild(el('div', { class:'hint' }, [field.category, field.price ? 'price: ' + field.price : ''].filter(Boolean).join(' • ')));
     fld.appendChild(controlBg); grid.appendChild(fld);
