@@ -384,12 +384,25 @@
             window.AGE_TAGS_MAP = {}; window.cityToState = {}; let configFields = []; const answers = {};
             function mapAgeTagsFromJson(a) { window.AGE_TAGS_MAP = {}; (a || []).forEach(r => { const raw = (r.key || '').toString().trim(); if (!raw) return; const display = (r.displayLabel || r.display || raw).toString(); window.AGE_TAGS_MAP[raw] = { displayLabel: display }; const norm = normalizeKey(raw); if (norm && !window.AGE_TAGS_MAP[norm]) window.AGE_TAGS_MAP[norm] = window.AGE_TAGS_MAP[raw]; const stripped = normalizeKey(stripEmoji(raw)); if (stripped && !window.AGE_TAGS_MAP[stripped]) window.AGE_TAGS_MAP[stripped] = window.AGE_TAGS_MAP[raw] }) }
             function updateSurveyProgress() {
-                if (!configFields.length) return; let done = 0; configFields.forEach(f => { const v = answers[f.key]; if (Array.isArray(v) ? v.length : (v !== '' && v != null)) done++ }); const pct = Math.round(done / configFields.length * 100); const submitBtn = qs('#submitBtn');
+                if (!configFields.length) return;
+
+                let done = 0;
+
+                configFields.forEach(f => {
+                    const v = answers[f.key];
+                    if (Array.isArray(v) ? v.length : (v !== '' && v != null)) done++;
+                });
+
+                const pct = Math.round(done / configFields.length * 100);
+
+                const submitBtn = qs('#submitBtn');
                 if (submitBtn) {
                     submitBtn.disabled = done !== configFields.length;
                     submitBtn.style.opacity = done === configFields.length ? '1' : '0.5';
                 }
-                qs('#surveyWrap').style.display = 'block'; qs('#surveyBarInner').style.width = pct + '%'; qs('#surveyText').textContent = `${done} / ${configFields.length} completed`
+
+                qs('#surveyWrap').style.display = 'block';
+                qs('#surveyBarInner').style.width = pct + '%';
             }
             function updateSummaryUI() {
                 const list = qs('#summaryList'); list.innerHTML = ''; const keys = configFields.map(f => f.key).filter(k => answers[k] !== undefined && k.toLowerCase() !== 'intro');
