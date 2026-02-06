@@ -2,7 +2,7 @@
 <html>
 <head>
 <meta charset="utf-8">
-<title>Taste Buds</title>
+<title>Test</title>
 </head>
 <body>
 
@@ -17,13 +17,8 @@ if(!sessionId){
  localStorage.setItem("tb_session_id",sessionId);
 }
 
-function el(tag){
- return document.createElement(tag);
-}
-
 async function load(){
  const r=await fetch(WEBAPP_URL);
- const j=await r.json();
  document.getElementById("formWrapper").innerText="CONNECTED OK";
 }
 
