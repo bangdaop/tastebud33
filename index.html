@@ -354,72 +354,71 @@
             </aside>
         </main>
     </div>
-    <script>
-        const WEBAPP_URL = "https://script.google.com/macros/s/AKfycbwXlYjodsqdwXD1lpUObHRUxO-4g99cRvMU77rJ3YMi7ySHMHmiLM-hNceq5RvbCTUw/exec";
-        let sessionId = localStorage.getItem("tb_session_id");
+   <script>
+const WEBAPP_URL="https://script.google.com/macros/s/AKfycbwXlYjodsqdwXD1lpUObHRUxO-4g99cRvMU77rJ3YMi7ySHMHmiLM-hNceq5RvbCTUw/exec";
 
-        if (!sessionId) {
-            sessionId = 's_' + Math.random().toString(36).slice(2, 12);
-            localStorage.setItem("tb_session_id", sessionId);
-        }
+let sessionId=localStorage.getItem("tb_session_id");
+if(!sessionId){
+ sessionId='s_'+Math.random().toString(36).slice(2,12);
+ localStorage.setItem("tb_session_id",sessionId);
+}
 
-        document.addEventListener('DOMContentLoaded', () => {
-            const d = document.getElementById('sessionIdDisplay');
-            if (d) d.textContent = '';
-        });
+const answers={};
+let configFields=[];
 
-        function el(tag, attrs = {}, ...children) { const node = document.createElement(tag); for (const k in attrs) { if (k === 'class') node.className = attrs[k]; else if (k === 'html') node.innerHTML = attrs[k]; else node.setAttribute(k, attrs[k]); } children.forEach(c => { if (c !== null && c !== undefined) node.appendChild(typeof c === 'string' ? document.createTextNode(c) : c); }); return node }
-        function qs(s, r = document) { return r.querySelector(s) }
-        function qsa(s, r = document) { return Array.from(r.querySelectorAll(s)) }
-        function showMessage(t) { qs('#message').innerHTML = ''; qs('#message').appendChild(el('div', { class: 'small-muted' }, t)) }
-        function clearMessage() { qs('#message').innerHTML = '' }
-        async function fetchWithTimeout(url, opts = {}, timeout = 9000) { const c = new AbortController(); const id = setTimeout(() => c.abort(), timeout); try { const r = await fetch(url, { signal: c.signal, ...opts }); clearTimeout(id); return r } catch (e) { clearTimeout(id); throw e } }
-        async function postJson(url, body, timeout = 9000, retries = 2) { const opts = { method: 'POST', body: JSON.stringify(body) }; for (let i = 0; i <= retries; i++) { try { const r = await fetchWithTimeout(url, opts, timeout); if (!r.ok) throw new Error('Network ' + r.status); return await r.json().catch(() => ({ status: 'ok' })) } catch (e) { if (i === retries) throw e; await new Promise(res => setTimeout(res, 300 * (i + 1))) } } }
-        function normalizeKey(s) { if (!s && s !== 0) return ''; let t = String(s).replace(/[\u200B-\u200F\uFEFF]/g, '').replace(/[\u2012-\u2015]/g, '-').replace(/\s+/g, ' ').trim(); return t.toLowerCase() }
-        function stripEmoji(s) { if (!s) return s; return s.replace(/[\u{1F300}-\u{1F6FF}\u{1F900}-\u{1F9FF}\u{2600}-\u{26FF}\u{2700}-\u{27BF}]/gu, '').trim() }
-        window.AGE_TAGS_MAP = {}; window.cityToState = {}; let configFields = []; const answers = {};
-        function mapAgeTagsFromJson(a) { window.AGE_TAGS_MAP = {}; (a || []).forEach(r => { const raw = (r.key || '').toString().trim(); if (!raw) return; const display = (r.displayLabel || r.display || raw).toString(); window.AGE_TAGS_MAP[raw] = { displayLabel: display }; const norm = normalizeKey(raw); if (norm && !window.AGE_TAGS_MAP[norm]) window.AGE_TAGS_MAP[norm] = window.AGE_TAGS_MAP[raw]; const stripped = normalizeKey(stripEmoji(raw)); if (stripped && !window.AGE_TAGS_MAP[stripped]) window.AGE_TAGS_MAP[stripped] = window.AGE_TAGS_MAP[raw] }) }
-        function updateSurveyProgress() {
-            if (!configFields.length) return; let done = 0; configFields.forEach(f => { const v = answers[f.key]; if (Array.isArray(v) ? v.length : (v !== '' && v != null)) done++ }); const pct = Math.round(done / configFields.length * 100); const submitBtn = qs('#submitBtn');
-            if (submitBtn) {
-                submitBtn.disabled = done !== configFields.length;
-                submitBtn.style.opacity = done === configFields.length ? '1' : '0.5';
-            }
-            qs('#surveyWrap').style.display = 'block'; qs('#surveyBarInner').style.width = pct + '%'; qs('#surveyText').textContent = `${done} / ${configFields.length} completed`
-        }
-        function updateSummaryUI() {
-            const list = qs('#summaryList'); list.innerHTML = ''; const keys = configFields.map(f => f.key).filter(k => answers[k] !== undefined && k.toLowerCase() !== 'intro');
-            if (keys.length === 0) { list.appendChild(el('div', { class: 'small-muted' }, 'No selections yet')); updateSurveyProgress(); return; } keys.slice(0, 8).forEach(k => { const v = answers[k]; list.appendChild(el('div', { class: 'summary-row' }, el('div', {}, k), el('div', {}, Array.isArray(v) ? v.join(', ') : (v === '' || v === null ? '—' : String(v))))) }); updateSurveyProgress()
-        }
-        function buildFormFromConfig(config) {
-            configFields = config.map(c => ({ label: (c.label || '').toString(), type: (c.type || '').toString().toLowerCase(), key: (c.key || '').toString(), options: (c.options || '').toString(), category: (c.category || '').toString(), price: (c.price || '').toString() })).filter(f => f.key && f.label); const wrapper = qs('#formWrapper'); wrapper.innerHTML = ''; const grid = el('div', { class: 'form-grid' }); configFields.forEach(field => {
-                const fld = el('div', { class: 'field' }); fld.appendChild(el('label', {}, field.label)); const controlBg = el('div', { class: 'control-bg' }); if (field.type === 'select') { const sel = el('select', { name: field.key }); sel.appendChild(el('option', { value: '', disabled: true, selected: true }, 'Select')); const rawOpts = field.options ? field.options.split(/;|,/).map(s => s.trim()).filter(Boolean) : []; if (String(field.key).toLowerCase().includes('city') && rawOpts.length) { rawOpts.sort((a, b) => a.localeCompare(b)); rawOpts.forEach(opt => sel.appendChild(el('option', { value: opt }, opt))); const stateInput = el('input', { readonly: true, placeholder: 'State' }); sel.addEventListener('change', () => { const city = sel.value; const state = (window.cityToState && window.cityToState[city]) || ''; answers[field.key] = city; answers.state = state; stateInput.value = state; postAutosaveDebounced(field.key, city, { state }); updateSummaryUI() }); controlBg.appendChild(sel); controlBg.appendChild(stateInput) } else { rawOpts.forEach(opt => sel.appendChild(el('option', { value: opt }, opt))); sel.addEventListener('change', () => { answers[field.key] = sel.value; postAutosaveDebounced(field.key, sel.value); updateSummaryUI() }); controlBg.appendChild(sel) } } else if (field.type === 'radio') { const opts = field.options ? field.options.split(/;|,/).map(s => s.trim()).filter(Boolean) : []; const group = el('div'); opts.forEach((opt, idx) => { const id = `r_${field.key}_${idx}`; const labelEl = el('label', {}); const radio = el('input', { type: 'radio', name: field.key, id, value: opt }); radio.addEventListener('change', () => { answers[field.key] = opt; postAutosaveDebounced(field.key, opt); updateSummaryUI() }); labelEl.appendChild(radio); labelEl.appendChild(document.createTextNode(' ' + opt)); group.appendChild(labelEl) }); controlBg.appendChild(group) } else if (field.type === 'checkbox') { const opts = field.options ? field.options.split(/;|,/).map(s => s.trim()).filter(Boolean) : []; const group = el('div'); opts.forEach((opt, idx) => { const id = `c_${field.key}_${idx}`; const labelEl = el('label', {}); const cb = el('input', { type: 'checkbox', id, value: opt }); cb.addEventListener('change', () => { const arr = qsa(`input[type="checkbox"][value]`).filter(i => i.checked && i.closest('.field') === fld).map(i => i.value); answers[field.key] = arr; postAutosaveDebounced(field.key, arr); updateSummaryUI() }); labelEl.appendChild(cb); labelEl.appendChild(document.createTextNode(' ' + opt)); group.appendChild(labelEl) }); controlBg.appendChild(group) } else if (field.type === 'textarea') { const ta = el('textarea', { rows: 4, name: field.key }); ta.addEventListener('change', () => { answers[field.key] = ta.value; postAutosaveDebounced(field.key, ta.value); updateSummaryUI() }); controlBg.appendChild(ta) } else if (field.type === 'number') {
-                    const inp = el('input', {
-                        type: 'text',
-                        name: field.key,
-                        inputmode: 'numeric',
-                        pattern: '[0-9]*',
-                        autocomplete: 'off'
-                    });
+function el(t,a={},...c){
+ const n=document.createElement(t);
+ for(const k in a){k==="class"?n.className=a[k]:n.setAttribute(k,a[k]);}
+ c.forEach(x=>n.append(x));
+ return n;
+}
 
-                    inp.addEventListener('input', () => {
-                        inp.value = inp.value.replace(/[^0-9.]/g, '');   // HARD strip letters
-                        answers[field.key] = inp.value;
-                        postAutosaveDebounced(field.key, inp.value);
-                        updateSummaryUI();
-                    });
+function qs(s){return document.querySelector(s);}
+function qsa(s){return [...document.querySelectorAll(s)];}
 
-                    controlBg.appendChild(inp);
-                }
-                if (field.category || field.price) controlBg.appendChild(el('div', { class: 'hint' }, [field.category, field.price ? 'price: ' + field.price : ''].filter(Boolean).join(' • '))); fld.appendChild(controlBg); grid.appendChild(fld)
-            }); wrapper.appendChild(grid); updateSummaryUI()
-        }
-        let autosaveTimer = null; function postAutosaveDebounced(fieldName, fieldValue, extra = {}) { if (autosaveTimer) clearTimeout(autosaveTimer); autosaveTimer = setTimeout(() => { postJson(WEBAPP_URL, { sessionId, fieldName, fieldValue, ...extra }).catch(() => { }) }, 600) }
-        async function loadConfigAndBuild() { try { const res = await fetchWithTimeout(WEBAPP_URL + '?_t=' + Date.now(), {}, 9000); const json = await res.json(); if (Array.isArray(json.ageTags)) mapAgeTagsFromJson(json.ageTags); if (json.cityMappings) { window.cityToState = json.cityMappings.cityToState || {} } if (json && json.status === 'ok' && Array.isArray(json.config)) { buildFormFromConfig(json.config) } else throw new Error('Invalid config') } catch (err) { qs('#formWrapper').innerHTML = '<div class="small-muted">Unable to load form configuration.</div>'; showMessage('Error loading form') } }
-        function resetFormLocal() { for (const k in answers) delete answers[k]; qsa('input,textarea,select').forEach(i => { if (i.tagName === 'SELECT') i.selectedIndex = 0; else if (i.type === 'radio' || i.type === 'checkbox') i.checked = false; else i.value = '' }); updateSummaryUI(); showMessage('Form reset locally.'); setTimeout(clearMessage, 2000) }
-        async function handleSubmit() { const submitBtn = qs('#submitBtn'); if (submitBtn) { submitBtn.disabled = true; submitBtn.textContent = 'Submitting...' } try { configFields.forEach(f => { if (!f.key) return; const sel = qs(`select[name="${f.key}"]`); if (sel) answers[f.key] = sel.value; const inp = qs(`input[name="${f.key}"], textarea[name="${f.key}"]`); if (inp) answers[f.key] = inp.value }); await postJson(WEBAPP_URL, { sessionId, submitted: true, answers }, 10000, 2); qs('.left').innerHTML = ''; qs('.left').appendChild(el('div', { class: 'card' }, el('div', { style: 'text-align:center;padding:28px' }, el('h2', {}, 'Thanks! 🎉'), el('div', { class: 'small-muted' }, 'We saved your picks.')))) } catch (err) { showMessage('Submission failed.'); if (submitBtn) { submitBtn.disabled = false; submitBtn.textContent = 'Finish' } } }
-        document.addEventListener('DOMContentLoaded', () => { qs('#submitBtn')?.addEventListener('click', handleSubmit); qs('#resetBtn')?.addEventListener('click', resetFormLocal); loadConfigAndBuild() })
-    </script>
+function updateSurveyProgress(){
+ if(!configFields.length)return;
+ let done=0;
+ configFields.forEach(f=>{
+   const v=answers[f.key];
+   if(Array.isArray(v)?v.length:v)done++;
+ });
+ const pct=Math.round(done/configFields.length*100);
+ qs("#surveyWrap").style.display="block";
+ qs("#surveyBarInner").style.width=pct+"%";
+}
+
+function updateSummary(){
+ const s=qs("#summaryList");
+ s.innerHTML="";
+ Object.keys(answers).forEach(k=>{
+   s.append(el("div",{class:"summary-row"},el("div",{},k),el("div",{},answers[k])));
+ });
+ updateSurveyProgress();
+}
+
+function buildForm(cfg){
+ configFields=cfg;
+ const w=qs("#formWrapper");
+ w.innerHTML="";
+ const g=el("div",{class:"form-grid"});
+ cfg.forEach(f=>{
+   const fld=el("div",{class:"field"},el("label",{},f.label));
+   let i;
+   if(f.type==="number") i=el("input",{type:"number"});
+   else i=el("input",{type:"text"});
+   i.onchange=()=>{answers[f.key]=i.value;updateSummary();}
+   fld.append(el("div",{class:"control-bg"},i));
+   g.append(fld);
+ });
+ w.append(g);
+}
+
+fetch(WEBAPP_URL).then(r=>r.json()).then(j=>{
+ if(j.config)buildForm(j.config);
+});
+</script>
+
 </body>
 
 </html>
