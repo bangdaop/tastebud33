@@ -357,16 +357,16 @@
     <script>
         const WEBAPP_URL = "https://script.google.com/macros/s/AKfycbwXlYjodsqdwXD1lpUObHRUxO-4g99cRvMU77rJ3YMi7ySHMHmiLM-hNceq5RvbCTUw/exec";
         let sessionId = localStorage.getItem("tb_session_id");
+if (!sessionId) {
+  sessionId = 's_' + Math.random().toString(36).slice(2,12);
+  localStorage.setItem("tb_session_id", sessionId);
+}
 
-        if (!sessionId) {
-            sessionId = 's_' + Math.random().toString(36).slice(2, 12);
-            localStorage.setItem("tb_session_id", sessionId);
-        }
+document.addEventListener('DOMContentLoaded', () => {
+  const d = document.getElementById('sessionIdDisplay');
+  if (d) d.textContent = '';
+});
 
-        document.addEventListener('DOMContentLoaded', () => {
-            const d = document.getElementById('sessionIdDisplay');
-            if (d) d.textContent = '';
-        });
 
         function el(tag, attrs = {}, ...children) { const node = document.createElement(tag); for (const k in attrs) { if (k === 'class') node.className = attrs[k]; else if (k === 'html') node.innerHTML = attrs[k]; else node.setAttribute(k, attrs[k]); } children.forEach(c => { if (c !== null && c !== undefined) node.appendChild(typeof c === 'string' ? document.createTextNode(c) : c); }); return node }
         function qs(s, r = document) { return r.querySelector(s) }
