@@ -356,17 +356,17 @@
     </div>
     <script>
         const WEBAPP_URL = "https://script.google.com/macros/s/AKfycbwXlYjodsqdwXD1lpUObHRUxO-4g99cRvMU77rJ3YMi7ySHMHmiLM-hNceq5RvbCTUw/exec";
-        let sessionId = localStorage.getItem("tb_session_id");
-if (!sessionId) {
-  sessionId = 's_' + Math.random().toString(36).slice(2,12);
-  localStorage.setItem("tb_session_id", sessionId);
-}
+        Id = localStorage.getItem("tb_session_id");
 
-document.addEventListener('DOMContentLoaded', () => {
-  const d = document.getElementById('sessionIdDisplay');
-  if (d) d.textContent = '';
-});
+        if (!sessionId) {
+            sessionId = 's_' + Math.random().toString(36).slice(2, 12);
+            localStorage.setItem("tb_session_id", sessionId);
+        }
 
+        document.addEventListener('DOMContentLoaded', () => {
+            const d = document.getElementById('sessionIdDisplay');
+            if (d) d.textContent = '';
+        });
 
         function el(tag, attrs = {}, ...children) { const node = document.createElement(tag); for (const k in attrs) { if (k === 'class') node.className = attrs[k]; else if (k === 'html') node.innerHTML = attrs[k]; else node.setAttribute(k, attrs[k]); } children.forEach(c => { if (c !== null && c !== undefined) node.appendChild(typeof c === 'string' ? document.createTextNode(c) : c); }); return node }
         function qs(s, r = document) { return r.querySelector(s) }
@@ -411,10 +411,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
                     controlBg.appendChild(inp);
                 }
-                if (field.category || field.price) controlBg.appendChild(el('div', { class: 'hint' }, [field.category, field.price ? 'price: ' + field.price : ''].filter(Boolean).join(' • '))); fld.appendChild(controlBg); grid.appendChild(fld);
-});
-wrapper.appendChild(grid);
-updateSummaryUI();
+                if (field.category || field.price) controlBg.appendChild(el('div', { class: 'hint' }, [field.category, field.price ? 'price: ' + field.price : ''].filter(Boolean).join(' • '))); fld.appendChild(controlBg); grid.appendChild(fld)
+            }); wrapper.appendChild(grid); updateSummaryUI();
+        }
         let autosaveTimer = null; function postAutosaveDebounced(fieldName, fieldValue, extra = {}) { if (autosaveTimer) clearTimeout(autosaveTimer); autosaveTimer = setTimeout(() => { postJson(WEBAPP_URL, { sessionId, fieldName, fieldValue, ...extra }).catch(() => { }) }, 600) }
         async function loadConfigAndBuild() { try { const res = await fetchWithTimeout(WEBAPP_URL + '?_t=' + Date.now(), {}, 9000); const json = await res.json(); if (Array.isArray(json.ageTags)) mapAgeTagsFromJson(json.ageTags); if (json.cityMappings) { window.cityToState = json.cityMappings.cityToState || {} } if (json && json.status === 'ok' && Array.isArray(json.config)) { buildFormFromConfig(json.config) } else throw new Error('Invalid config') } catch (err) { qs('#formWrapper').innerHTML = '<div class="small-muted">Unable to load form configuration.</div>'; showMessage('Error loading form') } }
         function resetFormLocal() { for (const k in answers) delete answers[k]; qsa('input,textarea,select').forEach(i => { if (i.tagName === 'SELECT') i.selectedIndex = 0; else if (i.type === 'radio' || i.type === 'checkbox') i.checked = false; else i.value = '' }); updateSummaryUI(); showMessage('Form reset locally.'); setTimeout(clearMessage, 2000) }
