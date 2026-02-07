@@ -187,39 +187,64 @@
 
                 let input;
 
+                // SELECT
                 if (f.type === 'select') {
                     input = el('select', { name: f.key });
                     input.append(el('option', { value: '' }, 'Select'));
 
-                    if (f.options) {
-                        f.options.split(/;|,/).forEach(o => {
-                            input.append(el('option', { value: o.trim() }, o.trim()));
-                        });
-                    }
-
-                } else if (f.type === 'radio') {
-                    input = el('div');
-
-                    if (f.options) {
-                        f.options.split(/;|,/).forEach(o => {
-                            const r = el('input', { type: 'radio', name: f.key, value: o.trim() });
-                            r.onchange = () => answers[f.key] = o.trim();
-                            input.append(r, document.createTextNode(" " + o.trim()), el('br'));
-                        });
-                    }
-
-                } else {
-                    input = el('input', {
-                        type: f.type || 'text',
-                        name: f.key
+                    (f.options || '').split(/;|,/).forEach(o => {
+                        const v = o.trim();
+                        if (v) input.append(el('option', { value: v }, v));
                     });
+
+                    input.onchange = () => {
+                        answers[f.key] = input.value;
+                        updateSurveyProgress();
+                    };
+
+                    box.append(input);
                 }
 
-                input.onchange = () => {
-                    answers[f.key] = input.value;
-                };
+                // TEXT / NUMBER
+                else if (f.type === 'text' || f.type === 'number') {
+                    input = el('input', {
+                        type: f.type,
+                        name: f.key
+                    });
 
-                box.append(input);
+                    input.oninput = () => {
+                        answers[f.key] = input.value;
+                        updateSurveyProgress();
+                    };
+
+                    box.append(input);
+                }
+
+                // RADIO
+                else if (f.type === 'radio') {
+                    const wrap = el('div');
+
+                    (f.options || '').split(/;|,/).forEach(o => {
+                        const v = o.trim();
+                        if (!v) return;
+
+                        const r = el('input', {
+                            type: 'radio',
+                            name: f.key,
+                            value: v
+                        });
+
+                        r.onchange = () => {
+                            answers[f.key] = v;
+                            updateSurveyProgress();
+                        };
+
+                        wrap.append(el('label', {}, r, " " + v));
+                    });
+
+                    box.append(wrap);
+                }
+
                 w.append(box);
             });
         }
