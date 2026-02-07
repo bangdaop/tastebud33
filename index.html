@@ -2,8 +2,7 @@
 <html>
 
 <head>
-    <img class="bg-img"
-        src="https://github.com/bangdaop/33cimg/blob/ddf5f8b694c57261bfb3139ce1595492a9707899/photo_6062312442882100596_y.jpg">
+    <img class="bg-img" src="https://raw.githubusercontent.com/bangdaop/33cimg/main/photo_6062312442882100596_y.jpg">
     <div class="overlay"></div>
 
     <meta charset="utf-8">
@@ -11,7 +10,7 @@
     <title>Taste Buds Choices</title>
 
     <style>
-         h1 {
+        h1 {
             text-shadow:
                 0 0 8px #ff2828,
                 0 0 16px #ff2828,
@@ -176,8 +175,8 @@
                 qs('#formWrapper').innerText = 'Failed loading form';
             }
         }
-
         loadConfigAndBuild();
+
         function buildForm() {
             const w = qs('#formWrapper')
             w.innerHTML = ''
@@ -266,7 +265,9 @@
             })
             alert("Submitted")
         }
-        loadConfigAndBuild();
+        document.addEventListener('DOMContentLoaded', () => {
+            loadConfigAndBuild();
+        });
 
     </script>
 </body>
