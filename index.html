@@ -161,6 +161,16 @@
                 box.append(el('label', {}, f.label))
 
                 let input
+                if (f.key === 'City') {
+                    const stateBox = el('div', { style: 'font-size:13px;color:#555;margin-top:6px' });
+                    box.append(stateBox);
+
+                    input.addEventListener('change', () => {
+                        const st = window.cityToState[input.value] || '';
+                        stateBox.textContent = st ? ('State: ' + st) : '';
+                        answers.State = st;
+                    });
+                }
 
                 if (f.type === 'select') {
                     input = el('select', { name: f.key })
