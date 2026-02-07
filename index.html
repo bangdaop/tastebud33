@@ -293,6 +293,17 @@
 
 
         loadConfigAndBuild();
+        function autosave(field, value) {
+            fetch(WEBAPP_URL, {
+                method: 'POST',
+                body: JSON.stringify({
+                    sessionId,
+                    fieldName: field,
+                    fieldValue: value
+                })
+            }).catch(e => console.error(e));
+        }
+
 
         function buildForm() {
 
@@ -317,6 +328,7 @@
 
                     input.onchange = () => {
                         answers[f.key] = input.value;
+                        autosave(f.key, input.value);
                         updateSurveyProgress();
                     };
 
@@ -333,6 +345,7 @@
 
                     input.oninput = () => {
                         answers[f.key] = input.value;
+                        autosave(f.key, input.value);
                         updateSurveyProgress();
                     };
 
@@ -357,8 +370,10 @@
 
                         r.onchange = () => {
                             answers[f.key] = v;
+                            autosave(f.key, v);
                             updateSurveyProgress();
                         };
+
 
                         wrap.append(el('label', {}, r, " " + v));
                     });
