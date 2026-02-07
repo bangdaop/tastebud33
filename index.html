@@ -261,13 +261,14 @@
             })
         }
 
-        qs('#submitBtn').onclick = () => {
+       qs('#submitBtn').onclick = () => {
             fetch(WEBAPP_URL, {
                 method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ sessionId, submitted: true, answers })
-            })
-            alert("Submitted")
-        }
+            });
+            alert("Submitted");
+        };
         document.addEventListener('DOMContentLoaded', () => {
             loadConfigAndBuild();
         });
