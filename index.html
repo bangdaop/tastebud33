@@ -81,12 +81,12 @@
             sessionId = 's_' + Math.random().toString(36).slice(2, 12);
             localStorage.setItem("tb_session_id", sessionId);
         }
-        function setLoadingProgress(pct){
-  const bar = qs('#progressBar');
-  const label = qs('#progressLabel');
-  if(bar) bar.style.width = pct + '%';
-  if(label) label.textContent = pct + '% loading…';
-}
+        function setLoadingProgress(pct) {
+            const bar = qs('#progressBar');
+            const label = qs('#progressLabel');
+            if (bar) bar.style.width = pct + '%';
+            if (label) label.textContent = pct + '% loading…';
+        }
 
 
         const answers = {}
@@ -126,14 +126,31 @@
         }
 
         async function loadConfigAndBuild() {
-            const r = await fetch(WEBAPP_URL);
-            const j = await r.json();
+            try {
+                setLoadingProgress(20);
 
-            configFields = j.config || [];
+                const r = await fetch(WEBAPP_URL);
+                setLoadingProgress(60);
 
-            buildForm();
-            updateProgress();
+                const j = await r.json();
+                setLoadingProgress(85);
+
+                configFields = j.config || [];
+                buildForm();
+
+                setLoadingProgress(100);
+
+                // hide loader after render
+                setTimeout(() => {
+                    qs('#progressWrap').style.display = 'none';
+                    qs('#progressLabel').style.display = 'none';
+                }, 500);
+
+            } catch (e) {
+                qs('#formWrapper').innerText = 'Failed loading form';
+            }
         }
+
 
         function buildForm() {
             const w = qs('#formWrapper')
@@ -212,7 +229,7 @@
             })
             alert("Submitted")
         }
-            loadConfigAndBuild();
+        loadConfigAndBuild();
 
     </script>
 </body>
