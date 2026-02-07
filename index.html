@@ -199,11 +199,14 @@
 
 
                 if (f.type === 'select') {
-                    input = el('select', { name: f.key })
-                    input.append(el('option', { value: '' }, 'Select'))
-                    f.options.split(/;|,/).forEach(o => {
-                        input.append(el('option', { value: o.trim() }, o.trim()))
-                    })
+                    input = el('select', { name: f.key });
+                    input.append(el('option', { value: '' }, 'Select'));
+
+                    (f.options || '').split(/;|,/).forEach(o => {
+                        if (o.trim()) {
+                            input.append(el('option', { value: o.trim() }, o.trim()));
+                        }
+                    });
                 }
 
                 else if (f.type === 'radio') {
