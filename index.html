@@ -233,18 +233,19 @@
         loadConfigAndBuild();
 
         function buildForm() {
+
             const w = qs('#formWrapper');
             w.innerHTML = '';
 
             configFields.forEach(f => {
+
                 const box = el('div', { class: 'field' });
                 box.append(el('label', {}, f.label));
 
-                let input;
-
                 // SELECT
                 if (f.type === 'select') {
-                    input = el('select', { name: f.key });
+
+                    const input = el('select', { name: f.key });
                     input.append(el('option', { value: '' }, 'Select'));
 
                     (f.options || '').split(/;|,/).forEach(o => {
@@ -259,23 +260,14 @@
 
                     box.append(input);
                 }
-                input.addEventListener('change', () => {
-                    answers[f.key] = input.value;
-                    updateSurveyProgress();
-                });
-
 
                 // TEXT / NUMBER
                 else if (f.type === 'text' || f.type === 'number') {
-                    input = el('input', {
+
+                    const input = el('input', {
                         type: f.type,
                         name: f.key
                     });
-                    input.addEventListener('input', () => {
-                        answers[f.key] = input.value;
-                        updateSurveyProgress();
-                    });
-
 
                     input.oninput = () => {
                         answers[f.key] = input.value;
@@ -286,66 +278,99 @@
                 }
 
                 // RADIO
-                if (f.type === 'radio') {
+                else if (f.type === 'radio') {
 
-                    input = el('div');
+                    const wrap = el('div');
 
-                    f.options.split(/;|,/).forEach(o => {
+                    (f.options || '').split(/;|,/).forEach(o => {
+
+                        const v = o.trim();
+                        if (!v) return;
 
                         const r = el('input', {
                             type: 'radio',
                             name: f.key,
-                            value: o.trim()
+                            value: v
                         });
 
-                        r.addEventListener('change', () => {
-                            answers[f.key] = o.trim();
+                        r.onchange = () => {
+                            answers[f.key] = v;
                             updateSurveyProgress();
-                        });
+                        };
 
-                        input.append(
-                            el('label', {}, r, " " + o.trim())
-                        );
-
+                        wrap.append(el('label', {}, r, " " + v));
                     });
 
+                    box.append(wrap);
                 }
 
+                w.append(box);
+            });
 
-                function save(k, v) {
-                    answers[k] = v
-                    updateProgress()
-                    updateSummary()
-                    fetch(WEBAPP_URL, { method: 'POST', body: JSON.stringify({ sessionId, fieldName: k, fieldValue: v }) })
-                }
+        }
 
-                function updateProgress() {
-                    let done = Object.keys(answers).length
-                    let pct = Math.round(done / configFields.length * 100)
-                    qs('#surveyBarInner').style.width = pct + '%'
-                    qs('#submitBtn').disabled = done !== configFields.length
-                }
 
-                function updateSummary() {
-                    const s = qs('#summaryList')
-                    s.innerHTML = ''
-                    Object.entries(answers).forEach(([k, v]) => {
-                        s.append(el('div', { class: 'summary-row' }, k, v))
-                    })
-                }
+        // RADIO
+        if (f.type === 'radio') {
 
-                qs('#submitBtn').onclick = () => {
-                    fetch(WEBAPP_URL, {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ sessionId, submitted: true, answers })
-                    });
-                    alert("Submitted");
-                };
+            input = el('div');
 
-                document.addEventListener('DOMContentLoaded', () => {
-                    loadConfigAndBuild();
+            f.options.split(/;|,/).forEach(o => {
+
+                const r = el('input', {
+                    type: 'radio',
+                    name: f.key,
+                    value: o.trim()
                 });
+
+                r.addEventListener('change', () => {
+                    answers[f.key] = o.trim();
+                    updateSurveyProgress();
+                });
+
+                input.append(
+                    el('label', {}, r, " " + o.trim())
+                );
+
+            });
+
+        }
+
+
+        function save(k, v) {
+            answers[k] = v
+            updateProgress()
+            updateSummary()
+            fetch(WEBAPP_URL, { method: 'POST', body: JSON.stringify({ sessionId, fieldName: k, fieldValue: v }) })
+        }
+
+        function updateProgress() {
+            let done = Object.keys(answers).length
+            let pct = Math.round(done / configFields.length * 100)
+            qs('#surveyBarInner').style.width = pct + '%'
+            qs('#submitBtn').disabled = done !== configFields.length
+        }
+
+        function updateSummary() {
+            const s = qs('#summaryList')
+            s.innerHTML = ''
+            Object.entries(answers).forEach(([k, v]) => {
+                s.append(el('div', { class: 'summary-row' }, k, v))
+            })
+        }
+
+        qs('#submitBtn').onclick = () => {
+            fetch(WEBAPP_URL, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ sessionId, submitted: true, answers })
+            });
+            alert("Submitted");
+        };
+
+        document.addEventListener('DOMContentLoaded', () => {
+            loadConfigAndBuild();
+        });
 
     </script>
 </body>
