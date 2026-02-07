@@ -10,6 +10,24 @@
     <title>Taste Buds Choices</title>
 
     <style>
+        #loadWrap {
+            margin: 12px 0;
+        }
+
+        #loadBar {
+            height: 6px;
+            width: 0%;
+            background: #4da3ff;
+            border-radius: 6px;
+            transition: width .3s;
+        }
+
+        #loadText {
+            font-size: 12px;
+            text-align: center;
+            margin-top: 4px;
+        }
+
         h1 {
             text-shadow:
                 0 0 8px #ff2828,
@@ -83,6 +101,11 @@
     <div id="surveyBar">
         <div id="surveyBarInner"></div>
     </div>
+    <div id="loadWrap">
+        <div id="loadBar"></div>
+        <div id="loadText">Loading… 0%</div>
+    </div>
+
 
     <div id="formWrapper">
 
@@ -149,32 +172,41 @@
             c.forEach(x => n.append(x))
             return n
         }
+        function setLoad(p) {
+            qs('#loadBar').style.width = p + '%';
+            qs('#loadText').innerText = 'Loading… ' + p + '%';
+        }
 
         async function loadConfigAndBuild() {
             try {
-                setLoadingProgress(20);
+                function setLoad(p) {
+                    qs('#loadBar').style.width = p + '%';
+                    qs('#loadText').innerText = 'Loading… ' + p + '%';
+                }
+
+                setLoad(20);
 
                 const r = await fetch(WEBAPP_URL);
-                setLoadingProgress(60);
+                setLoad(60);
 
                 const j = await r.json();
-                setLoadingProgress(85);
-
                 configFields = j.config || [];
+
+                setLoad(85);
+
                 buildForm();
 
-                setLoadingProgress(100);
-
-                // hide loader after render
                 setTimeout(() => {
-                    qs('#progressWrap').style.display = 'none';
-                    qs('#progressLabel').style.display = 'none';
-                }, 500);
+                    qs('#loadWrap').style.display = 'none';
+                }, 400);
 
             } catch (e) {
+                console.error(e);
                 qs('#formWrapper').innerText = 'Failed loading form';
             }
         }
+
+
         loadConfigAndBuild();
 
         function buildForm() {
