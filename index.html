@@ -93,6 +93,52 @@
                 padding: 0;
             }
         }
+
+        /* ===== Loader ===== */
+
+        #loadWrap {
+            padding: 12px;
+        }
+
+        #loadBarWrap {
+            height: 6px;
+            background: #eee;
+            border-radius: 6px;
+            overflow: hidden;
+        }
+
+        #loadBar {
+            height: 100%;
+            width: 0%;
+            background: linear-gradient(90deg, #ff7a00, #ffb347);
+            transition: .3s;
+        }
+
+        #loadText {
+            font-size: 13px;
+            text-align: center;
+            margin-bottom: 6px;
+        }
+
+        /* ===== Survey progress ===== */
+
+        #surveyWrap {
+            margin: 12px 0;
+        }
+
+        #surveyBar {
+            height: 6px;
+            background: #ddd;
+            border-radius: 6px;
+            overflow: hidden;
+        }
+
+        #surveyBarInner {
+            height: 100%;
+            width: 0%;
+            background: linear-gradient(90deg, #0d3b66, #3fa9f5);
+            transition: .3s;
+        }
     </style>
 </head>
 
@@ -104,6 +150,18 @@
     <div id="loadWrap">
         <div id="loadBar"></div>
         <div id="loadText">Loading… 0%</div>
+    </div>
+    <div id="loadWrap">
+        <div id="loadText">Loading…</div>
+        <div id="loadBarWrap">
+            <div id="loadBar"></div>
+        </div>
+    </div>
+
+    <div id="surveyWrap">
+        <div id="surveyBar">
+            <div id="surveyBarInner"></div>
+        </div>
     </div>
 
 
@@ -163,6 +221,11 @@
 
         function qs(x) { return document.querySelector(x) }
 
+        function setLoad(p) {
+            qs('#loadBar').style.width = p + '%';
+            qs('#loadText').innerText = 'Loading… ' + p + '%';
+        }
+
         function updateSurveyProgress() {
 
             if (!configFields.length) return;
@@ -178,14 +241,15 @@
 
             qs('#surveyBarInner').style.width = pct + '%';
 
-            const submitBtn = qs('#submitBtn');
+            const submit = qs('#submitBtn');
 
-            if (submitBtn) {
-                submitBtn.disabled = done !== configFields.length;
-                submitBtn.style.opacity = done === configFields.length ? '1' : '0.4';
+            if (submit) {
+                submit.disabled = done !== configFields.length;
+                submit.style.opacity = done === configFields.length ? '1' : '0.4';
             }
 
         }
+
 
         function el(t, a = {}, ...c) {
             const n = document.createElement(t)
@@ -199,11 +263,8 @@
         }
 
         async function loadConfigAndBuild() {
+
             try {
-                function setLoad(p) {
-                    qs('#loadBar').style.width = p + '%';
-                    qs('#loadText').innerText = 'Loading… ' + p + '%';
-                }
 
                 setLoad(20);
 
@@ -218,7 +279,6 @@
                 buildForm();
                 updateSurveyProgress();
 
-
                 setTimeout(() => {
                     qs('#loadWrap').style.display = 'none';
                 }, 400);
@@ -227,7 +287,9 @@
                 console.error(e);
                 qs('#formWrapper').innerText = 'Failed loading form';
             }
+
         }
+
 
 
         loadConfigAndBuild();
