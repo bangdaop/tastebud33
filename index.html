@@ -118,14 +118,17 @@
             return n
         }
 
-        async function load() {
-            const r = await fetch(WEBAPP_URL)
-            const j = await r.json()
-            configFields = j.config
-            build()
+        async function loadConfig() {
+            const r = await fetch(WEBAPP_URL);
+            const j = await r.json();
+
+            configFields = j.config || [];
+
+            buildForm();
+            updateProgress();
         }
 
-        function build() {
+        function buildForm() {
             const w = qs('#formWrapper')
             w.innerHTML = ''
 
