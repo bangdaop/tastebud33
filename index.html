@@ -139,6 +139,27 @@
 
         const answers = {}
         let configFields = []
+        function updateSurveyProgress() {
+
+            if (!configFields.length) return;
+
+            let done = 0;
+
+            configFields.forEach(f => {
+                const v = answers[f.key];
+                if (Array.isArray(v) ? v.length : (v !== '' && v != null)) done++;
+            });
+
+            const pct = Math.round(done / configFields.length * 100);
+
+            qs('#surveyBarInner').style.width = pct + '%';
+
+            const submitBtn = qs('#submitBtn');
+            if (submitBtn) {
+                submitBtn.disabled = done !== configFields.length;
+                submitBtn.style.opacity = done === configFields.length ? '1' : '0.4';
+            }
+        }
 
         function qs(x) { return document.querySelector(x) }
 
@@ -195,6 +216,8 @@
                 setLoad(85);
 
                 buildForm();
+                updateSurveyProgress();
+
 
                 setTimeout(() => {
                     qs('#loadWrap').style.display = 'none';
@@ -236,6 +259,11 @@
 
                     box.append(input);
                 }
+                input.addEventListener('change', () => {
+                    answers[f.key] = input.value;
+                    updateSurveyProgress();
+                });
+
 
                 // TEXT / NUMBER
                 else if (f.type === 'text' || f.type === 'number') {
@@ -243,6 +271,11 @@
                         type: f.type,
                         name: f.key
                     });
+                    input.addEventListener('input', () => {
+                        answers[f.key] = input.value;
+                        updateSurveyProgress();
+                    });
+
 
                     input.oninput = () => {
                         answers[f.key] = input.value;
@@ -253,68 +286,66 @@
                 }
 
                 // RADIO
-                else if (f.type === 'radio') {
-                    const wrap = el('div');
+                if (f.type === 'radio') {
 
-                    (f.options || '').split(/;|,/).forEach(o => {
-                        const v = o.trim();
-                        if (!v) return;
+                    input = el('div');
+
+                    f.options.split(/;|,/).forEach(o => {
 
                         const r = el('input', {
                             type: 'radio',
                             name: f.key,
-                            value: v
+                            value: o.trim()
                         });
 
-                        r.onchange = () => {
-                            answers[f.key] = v;
+                        r.addEventListener('change', () => {
+                            answers[f.key] = o.trim();
                             updateSurveyProgress();
-                        };
+                        });
 
-                        wrap.append(el('label', {}, r, " " + v));
+                        input.append(
+                            el('label', {}, r, " " + o.trim())
+                        );
+
                     });
 
-                    box.append(wrap);
                 }
 
-                w.append(box);
-            });
-        }
 
-        function save(k, v) {
-            answers[k] = v
-            updateProgress()
-            updateSummary()
-            fetch(WEBAPP_URL, { method: 'POST', body: JSON.stringify({ sessionId, fieldName: k, fieldValue: v }) })
-        }
+                function save(k, v) {
+                    answers[k] = v
+                    updateProgress()
+                    updateSummary()
+                    fetch(WEBAPP_URL, { method: 'POST', body: JSON.stringify({ sessionId, fieldName: k, fieldValue: v }) })
+                }
 
-        function updateProgress() {
-            let done = Object.keys(answers).length
-            let pct = Math.round(done / configFields.length * 100)
-            qs('#surveyBarInner').style.width = pct + '%'
-            qs('#submitBtn').disabled = done !== configFields.length
-        }
+                function updateProgress() {
+                    let done = Object.keys(answers).length
+                    let pct = Math.round(done / configFields.length * 100)
+                    qs('#surveyBarInner').style.width = pct + '%'
+                    qs('#submitBtn').disabled = done !== configFields.length
+                }
 
-        function updateSummary() {
-            const s = qs('#summaryList')
-            s.innerHTML = ''
-            Object.entries(answers).forEach(([k, v]) => {
-                s.append(el('div', { class: 'summary-row' }, k, v))
-            })
-        }
+                function updateSummary() {
+                    const s = qs('#summaryList')
+                    s.innerHTML = ''
+                    Object.entries(answers).forEach(([k, v]) => {
+                        s.append(el('div', { class: 'summary-row' }, k, v))
+                    })
+                }
 
-        qs('#submitBtn').onclick = () => {
-            fetch(WEBAPP_URL, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ sessionId, submitted: true, answers })
-            });
-            alert("Submitted");
-        };
+                qs('#submitBtn').onclick = () => {
+                    fetch(WEBAPP_URL, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ sessionId, submitted: true, answers })
+                    });
+                    alert("Submitted");
+                };
 
-        document.addEventListener('DOMContentLoaded', () => {
-            loadConfigAndBuild();
-        });
+                document.addEventListener('DOMContentLoaded', () => {
+                    loadConfigAndBuild();
+                });
 
     </script>
 </body>
