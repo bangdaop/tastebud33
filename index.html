@@ -118,7 +118,7 @@
             return n
         }
 
-        async function loadConfig() {
+        async function loadConfigAndBuild() {
             const r = await fetch(WEBAPP_URL);
             const j = await r.json();
 
