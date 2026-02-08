@@ -2,107 +2,66 @@
 <html>
 
 <head>
-    <img class="bg-img" src="https://raw.githubusercontent.com/bangdaop/33cimg/main/photo_6062312442882100596_y.jpg">
-    <div class="overlay"></div>
-
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width,initial-scale=1">
     <title>Taste Buds Choices</title>
 
     <style>
-        #loadWrap {
-            margin: 12px 0;
-        }
-
-        #loadBar {
-            height: 6px;
-            width: 0%;
-            background: #4da3ff;
-            border-radius: 6px;
-            transition: width .3s;
-        }
-
-        #loadText {
-            font-size: 12px;
-            text-align: center;
-            margin-top: 4px;
-        }
-
-        h1 {
-            text-shadow:
-                0 0 8px #ff2828,
-                0 0 16px #ff2828,
-                0 0 30px #ff4444;
-        }
-
         body {
-            font-family: Arial;
             margin: 0;
-            background: #f6f8fa
+            font-family: Arial;
+            background: #f6f8fa;
         }
 
-        .field {
-            margin-bottom: 12px
+        .container {
+            max-width: 760px;
+            margin: auto;
+            padding: 12px;
+        }
+
+        .header img {
+            width: 100%;
+            border-radius: 12px;
+            margin-bottom: 10px;
+        }
+
+        .card {
+            background: white;
+            padding: 14px;
+            border-radius: 12px;
+            margin-bottom: 14px;
+            box-shadow: 0 4px 14px rgba(0, 0, 0, .06);
         }
 
         label {
-            font-weight: bold
+            font-weight: 600;
+            display: block;
+            margin-bottom: 6px;
         }
 
         input,
         select {
             width: 100%;
-            padding: 8px
-        }
-
-        #surveyBar {
-            height: 6px;
-            background: #ddd;
-            margin: 10px 0
-        }
-
-        #surveyBarInner {
-            height: 100%;
-            width: 0;
-            background: #4aa3ff
-        }
-
-        #submitBtn {
-            margin-top: 10px;
             padding: 10px;
-            width: 100%
+            border-radius: 8px;
+            border: 1px solid #ddd;
+            font-size: 15px;
         }
 
-        .summary-row {
-            display: flex;
-            justify-content: space-between;
-            font-size: 13px
+        .radio label {
+            display: block;
+            margin: 6px 0;
+            font-weight: 400;
         }
-
-        .left {
-            padding-left: 12px;
-            padding-right: 12px;
-        }
-
-        @media(max-width:600px) {
-            main {
-                padding: 8px;
-            }
-
-            .left {
-                padding: 0;
-            }
-        }
-
-        /* ===== Loader ===== */
 
         #loadWrap {
-            padding: 12px;
+            margin: 10px 0;
+            text-align: center;
         }
 
-        #loadBarWrap {
+        #loadTrack {
             height: 6px;
-            background: #eee;
+            background: #ddd;
             border-radius: 6px;
             overflow: hidden;
         }
@@ -114,23 +73,12 @@
             transition: .3s;
         }
 
-        #loadText {
-            font-size: 13px;
-            text-align: center;
-            margin-bottom: 6px;
-        }
-
-        /* ===== Survey progress ===== */
-
-        #surveyWrap {
-            margin: 12px 0;
-        }
-
         #surveyBar {
             height: 6px;
             background: #ddd;
             border-radius: 6px;
             overflow: hidden;
+            margin: 12px 0;
         }
 
         #surveyBarInner {
@@ -139,47 +87,64 @@
             background: linear-gradient(90deg, #0d3b66, #3fa9f5);
             transition: .3s;
         }
+
+        button {
+            width: 100%;
+            padding: 12px;
+            border-radius: 10px;
+            border: none;
+            background: #ff7a00;
+            color: white;
+            font-weight: 700;
+            margin-top: 10px;
+        }
+
+        button:disabled {
+            opacity: .4
+        }
+
+        #thanks {
+            text-align: center;
+            font-size: 20px;
+            padding: 40px;
+        }
+
+        @media(max-width:600px) {
+            .container {
+                padding: 8px
+            }
+        }
     </style>
 </head>
 
 <body>
 
-    <div id="surveyBar">
-        <div id="surveyBarInner"></div>
-    </div>
-    <div id="loadWrap">
-        <div id="loadBar"></div>
-        <div id="loadText">Loading… 0%</div>
-    </div>
-    <div id="loadWrap">
-        <div id="loadText">Loading…</div>
-        <div id="loadBarWrap">
-            <div id="loadBar"></div>
-        </div>
-    </div>
+    <div class="container">
 
-    <div id="surveyWrap">
+        <div class="header">
+            <img src="https://raw.githubusercontent.com/bangdaop/33cimg/main/photo_6062312442882100596_y.jpg">
+        </div>
+
+        <div id="loadWrap">
+            <div id="loadTrack">
+                <div id="loadBar"></div>
+            </div>
+            <div id="loadText">Loading…</div>
+        </div>
+
         <div id="surveyBar">
             <div id="surveyBarInner"></div>
         </div>
-    </div>
 
+        <div id="formWrapper"></div>
 
-    <div id="formWrapper">
+        <button id="submitBtn" disabled>Finish</button>
 
-        <div id="loadingMsg" style="text-align:center;padding:20px;font-weight:600">
-            Loading questions…
-        </div>
+        <div id="thanks" style="display:none">🙏 Thanks! Your response is saved.</div>
 
     </div>
-
-    <button id="submitBtn" disabled style="margin-top:12px">Finish</button>
-
-    <div id="summaryList"></div>
-
 
     <script>
-
         const WEBAPP_URL = "https://script.google.com/macros/s/AKfycbwxz9H-DUWMsQy2bD7nrf6NEGizKwN4E8PU3GWplO7Z9pk81wiRh90IGkBmVW9OJSEV/exec";
 
         let sessionId = localStorage.getItem("tb_session_id");
@@ -187,269 +152,124 @@
             sessionId = 's_' + Math.random().toString(36).slice(2, 12);
             localStorage.setItem("tb_session_id", sessionId);
         }
-        function setLoadingProgress(pct) {
-            const bar = qs('#progressBar');
-            const label = qs('#progressLabel');
-            if (bar) bar.style.width = pct + '%';
-            if (label) label.textContent = pct + '% loading…';
-        }
-
 
         const answers = {}
         let configFields = []
-        function updateSurveyProgress() {
-
-            if (!configFields.length) return;
-
-            let done = 0;
-
-            configFields.forEach(f => {
-                const v = answers[f.key];
-                if (Array.isArray(v) ? v.length : (v !== '' && v != null)) done++;
-            });
-
-            const pct = Math.round(done / configFields.length * 100);
-
-            qs('#surveyBarInner').style.width = pct + '%';
-
-            const submitBtn = qs('#submitBtn');
-            if (submitBtn) {
-                submitBtn.disabled = done !== configFields.length;
-                submitBtn.style.opacity = done === configFields.length ? '1' : '0.4';
-            }
-        }
 
         function qs(x) { return document.querySelector(x) }
-
-        function setLoad(p) {
-            qs('#loadBar').style.width = p + '%';
-            qs('#loadText').innerText = 'Loading… ' + p + '%';
-        }
-
-        function updateSurveyProgress() {
-
-            if (!configFields.length) return;
-
-            let done = 0;
-
-            configFields.forEach(f => {
-                const v = answers[f.key];
-                if (Array.isArray(v) ? v.length : (v !== '' && v != null)) done++;
-            });
-
-            const pct = Math.round(done / configFields.length * 100);
-
-            qs('#surveyBarInner').style.width = pct + '%';
-
-            const submit = qs('#submitBtn');
-
-            if (submit) {
-                submit.disabled = done !== configFields.length;
-                submit.style.opacity = done === configFields.length ? '1' : '0.4';
-            }
-
-        }
-
-
         function el(t, a = {}, ...c) {
             const n = document.createElement(t)
             for (const k in a) n.setAttribute(k, a[k])
             c.forEach(x => n.append(x))
             return n
         }
+
         function setLoad(p) {
-            qs('#loadBar').style.width = p + '%';
-            qs('#loadText').innerText = 'Loading… ' + p + '%';
+            qs('#loadBar').style.width = p + '%'
+            qs('#loadText').innerText = 'Loading ' + p + '%'
         }
 
-        async function loadConfigAndBuild() {
-
-            try {
-
-                setLoad(20);
-
-                const r = await fetch(WEBAPP_URL);
-                setLoad(60);
-
-                const j = await r.json();
-                configFields = j.config || [];
-
-                setLoad(85);
-
-                buildForm();
-                updateSurveyProgress();
-
-                setTimeout(() => {
-                    qs('#loadWrap').style.display = 'none';
-                }, 400);
-
-            } catch (e) {
-                console.error(e);
-                qs('#formWrapper').innerText = 'Failed loading form';
-            }
-
-        }
-
-
-
-        loadConfigAndBuild();
-        function autosave(field, value) {
-            fetch(WEBAPP_URL, {
-                method: 'POST',
-                body: JSON.stringify({
-                    sessionId,
-                    fieldName: field,
-                    fieldValue: value
-                })
-            }).catch(e => console.error(e));
-        }
-
-
-        function buildForm() {
-
-            const w = qs('#formWrapper');
-            w.innerHTML = '';
-
+        function updateSurveyProgress() {
+            let done = 0
             configFields.forEach(f => {
-
-                const box = el('div', { class: 'field' });
-                box.append(el('label', {}, f.label));
-
-                // SELECT
-                if (f.type === 'select') {
-
-                    const input = el('select', { name: f.key });
-                    input.append(el('option', { value: '' }, 'Select'));
-
-                    (f.options || '').split(/;|,/).forEach(o => {
-                        const v = o.trim();
-                        if (v) input.append(el('option', { value: v }, v));
-                    });
-
-                    input.onchange = () => {
-                        answers[f.key] = input.value;
-                        autosave(f.key, input.value);
-                        updateSurveyProgress();
-                    };
-
-                    box.append(input);
-                }
-
-                // TEXT / NUMBER
-                else if (f.type === 'text' || f.type === 'number') {
-
-                    const input = el('input', {
-                        type: f.type,
-                        name: f.key
-                    });
-
-                    input.oninput = () => {
-                        answers[f.key] = input.value;
-                        autosave(f.key, input.value);
-                        updateSurveyProgress();
-                    };
-
-                    box.append(input);
-                }
-
-                // RADIO
-                else if (f.type === 'radio') {
-
-                    const wrap = el('div');
-
-                    (f.options || '').split(/;|,/).forEach(o => {
-
-                        const v = o.trim();
-                        if (!v) return;
-
-                        const r = el('input', {
-                            type: 'radio',
-                            name: f.key,
-                            value: v
-                        });
-
-                        r.onchange = () => {
-                            answers[f.key] = v;
-                            autosave(f.key, v);
-                            updateSurveyProgress();
-                        };
-
-
-                        wrap.append(el('label', {}, r, " " + v));
-                    });
-
-                    box.append(wrap);
-                }
-
-                w.append(box);
-            });
-
-        }
-
-
-        // RADIO
-        if (f.type === 'radio') {
-
-            input = el('div');
-
-            f.options.split(/;|,/).forEach(o => {
-
-                const r = el('input', {
-                    type: 'radio',
-                    name: f.key,
-                    value: o.trim()
-                });
-
-                r.addEventListener('change', () => {
-                    answers[f.key] = o.trim();
-                    updateSurveyProgress();
-                });
-
-                input.append(
-                    el('label', {}, r, " " + o.trim())
-                );
-
-            });
-
-        }
-
-
-        function save(k, v) {
-            answers[k] = v
-            updateProgress()
-            updateSummary()
-            fetch(WEBAPP_URL, { method: 'POST', body: JSON.stringify({ sessionId, fieldName: k, fieldValue: v }) })
-        }
-
-        function updateProgress() {
-            let done = Object.keys(answers).length
-            let pct = Math.round(done / configFields.length * 100)
+                const v = answers[f.key]
+                if (v !== undefined && v !== '') done++
+            })
+            const pct = Math.round(done / configFields.length * 100)
             qs('#surveyBarInner').style.width = pct + '%'
             qs('#submitBtn').disabled = done !== configFields.length
         }
 
-        function updateSummary() {
-            const s = qs('#summaryList')
-            s.innerHTML = ''
-            Object.entries(answers).forEach(([k, v]) => {
-                s.append(el('div', { class: 'summary-row' }, k, v))
+        function autosave(k, v) {
+            fetch(WEBAPP_URL, {
+                method: 'POST',
+                body: JSON.stringify({ sessionId, fieldName: k, fieldValue: v })
+            }).catch(() => { })
+        }
+
+        async function loadConfigAndBuild() {
+            try {
+                setLoad(20)
+                const r = await fetch(WEBAPP_URL)
+                setLoad(60)
+                const j = await r.json()
+                configFields = j.config || []
+                setLoad(90)
+                buildForm()
+                updateSurveyProgress()
+                setTimeout(() => qs('#loadWrap').style.display = 'none', 400)
+            } catch (e) {
+                qs('#formWrapper').innerText = 'Failed loading form'
+            }
+        }
+
+        function buildForm() {
+            const w = qs('#formWrapper')
+            w.innerHTML = ''
+
+            configFields.forEach(f => {
+                const box = el('div', { class: 'card' })
+                box.append(el('label', {}, f.label))
+
+                if (f.type === 'select') {
+                    const input = el('select')
+                    input.append(el('option', { value: '' }, 'Select'))
+                        ; (f.options || '').split(/;|,/).forEach(o => {
+                            o = o.trim()
+                            if (o) input.append(el('option', { value: o }, o))
+                        })
+                    input.onchange = () => {
+                        answers[f.key] = input.value
+                        autosave(f.key, input.value)
+                        updateSurveyProgress()
+                    }
+                    box.append(input)
+                }
+
+                else if (f.type === 'text' || f.type === 'number') {
+                    const input = el('input', { type: f.type })
+                    input.oninput = () => {
+                        answers[f.key] = input.value
+                        autosave(f.key, input.value)
+                        updateSurveyProgress()
+                    }
+                    box.append(input)
+                }
+
+                else if (f.type === 'radio') {
+                    const wrap = el('div', { class: 'radio' })
+                        ; (f.options || '').split(/;|,/).forEach(o => {
+                            o = o.trim()
+                            if (!o) return
+                            const r = el('input', { type: 'radio', name: f.key, value: o })
+                            r.onchange = () => {
+                                answers[f.key] = o
+                                autosave(f.key, o)
+                                updateSurveyProgress()
+                            }
+                            wrap.append(el('label', {}, r, " " + o))
+                        })
+                    box.append(wrap)
+                }
+
+                w.append(box)
             })
         }
 
         qs('#submitBtn').onclick = () => {
             fetch(WEBAPP_URL, {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ sessionId, submitted: true, answers })
-            });
-            alert("Submitted");
-        };
+            })
+            qs('#formWrapper').style.display = 'none'
+            qs('#submitBtn').style.display = 'none'
+            qs('#surveyBar').style.display = 'none'
+            qs('#thanks').style.display = 'block'
+        }
 
-        document.addEventListener('DOMContentLoaded', () => {
-            loadConfigAndBuild();
-        });
-
+        loadConfigAndBuild()
     </script>
+
 </body>
 
 </html>
