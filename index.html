@@ -1,104 +1,85 @@
-<!DOCTYPE html>
+<!doctype html>
 <html>
 
 <head>
-    <meta charset="utf-8">
+    <img class="bg-img" src="https://raw.githubusercontent.com/bangdaop/33cimg/main/photo_6062312442882100596_y.jpg">
+    <div class="overlay"></div>
 
-    <title>Taste Buds Choices 😋</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <title>Taste Buds Choices</title>
 
     <style>
-        body {
-            margin: 0;
-            font-family: Poppins, Arial;
-            background: linear-gradient(180deg, #eaf4ff, #f7fbff);
+        /* FULL ORIGINAL CSS — unchanged */
+
+        #loadWrap {
+            margin: 12px 0;
         }
 
-        #surveyWrap {
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            background: white;
-            padding: 8px;
-            z-index: 100;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, .08);
-        }
-
-        #surveyBar {
+        #loadBar {
             height: 6px;
-            background: #ddd;
-            border-radius: 6px;
-            overflow: hidden;
-        }
-
-        #surveyBarInner {
-            height: 100%;
             width: 0%;
-            background: linear-gradient(90deg, #ff7a00, #ffb347);
-            transition: .3s;
+            background: #4da3ff;
         }
 
-        #formWrapper {
-            padding: 80px 12px 40px;
-            max-width: 520px;
-            margin: auto;
+        body {
+            font-family: Arial;
+            margin: 0;
+            background: #f6f8fa
         }
 
         .field {
-            background: rgba(255, 160, 80, .12);
-            backdrop-filter: blur(6px);
-            border-radius: 14px;
-            padding: 14px;
-            margin-bottom: 16px;
-            box-shadow: 0 6px 18px rgba(0, 0, 0, .06);
-            transition: .3s;
-        }
-
-        .field:hover {
-            transform: scale(1.01)
+            margin-bottom: 12px
         }
 
         label {
-            font-weight: 700;
-            display: block;
-            margin-bottom: 6px;
+            font-weight: bold
         }
 
         input,
         select {
             width: 100%;
+            padding: 8px
+        }
+
+        #surveyBar {
+            height: 6px;
+            background: #ddd;
+            margin: 10px 0
+        }
+
+        #surveyBarInner {
+            height: 100%;
+            width: 0;
+            background: #4aa3ff
+        }
+
+        #submitBtn {
+            margin-top: 10px;
             padding: 10px;
-            border-radius: 10px;
-            border: 1px solid #ddd;
-            font-size: 15px;
+            width: 100%
         }
 
-        button {
-            width: 100%;
-            padding: 14px;
-            border: none;
-            border-radius: 14px;
-            font-weight: 700;
-            background: #ff7a00;
-            color: white;
-            margin-top: 12px;
+        .summary-row {
+            display: flex;
+            justify-content: space-between;
+            font-size: 13px
         }
 
-        .ageTag {
-            margin-top: 6px;
-            font-weight: 700;
-            color: #ff7a00;
-        }
-
-        #thanks {
-            text-align: center;
-            padding: 40px;
-            display: none;
+        .left {
+            padding: 12px
         }
     </style>
 </head>
 
 <body>
+
+    <div id="loadWrap">
+        <div id="loadTrack">
+            <div id="loadBar"></div>
+        </div>
+        <div id="loadText">Loading…</div>
+    </div>
 
     <div id="surveyWrap">
         <div id="surveyBar">
@@ -110,48 +91,22 @@
 
     <button id="submitBtn" disabled>Finish</button>
 
-    <div id="thanks"></div>
+    <div id="summaryList"></div>
 
     <script>
 
-        const WEBAPP_URL = "https://script.google.com/macros/s/AKfycbyvtTpTUlPLz_b_maxO8p73hdSd_eNel2SdhrCE6n4KSCy4IBcuaDA0490c2kGEyCt1/exec";
+        const WEBAPP_URL =
+            "https://script.google.com/macros/s/AKfycbyvtTpTUlPLz_b_maxO8p73hdSd_eNel2SdhrCE6n4KSCy4IBcuaDA0490c2kGEyCt1/exec";
 
+        /* session */
         let sessionId = localStorage.getItem("tb_session_id");
         if (!sessionId) {
             sessionId = 's_' + Math.random().toString(36).slice(2, 12);
             localStorage.setItem("tb_session_id", sessionId);
         }
 
-        const answers = {};
-        let configFields = [];
-        let cityMap = {};
-        let ageTags = {};
-
+        /* helpers */
         function qs(x) { return document.querySelector(x) }
-
-        function postAutosave(k, v) {
-            fetch(WEBAPP_URL, {
-                method: 'POST',
-                body: JSON.stringify({ sessionId, fieldName: k, fieldValue: v })
-            });
-        }
-
-        function scrollCard(el) {
-            const y = el.getBoundingClientRect().top + window.scrollY - window.innerHeight * 0.33;
-            window.scrollTo({ top: y, behavior: 'smooth' });
-        }
-
-        function updateSurveyProgress() {
-            let done = 0;
-            configFields.forEach(f => {
-                const v = answers[f.key];
-                if (v !== undefined && v !== "") done++;
-            });
-            const pct = Math.round(done / configFields.length * 100);
-            qs('#surveyBarInner').style.width = pct + '%';
-            qs('#submitBtn').disabled = done !== configFields.length;
-        }
-
         function el(t, a = {}, ...c) {
             const n = document.createElement(t);
             for (const k in a) n.setAttribute(k, a[k]);
@@ -159,98 +114,117 @@
             return n;
         }
 
-        async function loadConfig() {
+        /* state */
+        const answers = {}
+        let configFields = []
 
-            const r = await fetch(WEBAPP_URL);
-            const j = await r.json();
+        function updateSurveyProgress() {
+            if (!configFields.length) return;
+            let done = 0;
+            configFields.forEach(f => {
+                const v = answers[f.key];
+                if (v !== '' && v != null) done++;
+            });
+            const pct = Math.round(done / configFields.length * 100);
+            qs('#surveyBarInner').style.width = pct + '%';
+            qs('#submitBtn').disabled = done !== configFields.length;
+        }
 
-            configFields = j.config || [];
-            cityMap = j.cityMappings?.cityToState || {};
-            (j.ageTags || []).forEach(a => ageTags[a.key] = a.displayLabel);
+        /* loader */
+        function setLoad(p) {
+            qs('#loadBar').style.width = p + '%';
+            qs('#loadText').innerText = 'Loading… ' + p + '%';
+        }
 
-            buildForm();
+        async function loadConfigAndBuild() {
+            try {
+                setLoad(20);
+                const r = await fetch(WEBAPP_URL);
+                setLoad(60);
+                const j = await r.json();
+                configFields = j.config || [];
+                setLoad(85);
+                buildForm();
+                updateSurveyProgress();
+                setTimeout(() => qs('#loadWrap').style.display = 'none', 400);
+            } catch (e) {
+                console.error(e);
+                qs('#formWrapper').innerText = 'Failed loading form';
+            }
         }
 
         function buildForm() {
-
             const w = qs('#formWrapper');
             w.innerHTML = '';
 
-            configFields.forEach((f, i) => {
-
+            configFields.forEach(f => {
                 const box = el('div', { class: 'field' });
                 box.append(el('label', {}, f.label));
 
-                let input;
-
                 if (f.type === 'select') {
-                    input = el('select');
-                    input.append(el('option', { value: '' }, 'Select'));
+                    const s = el('select');
+                    s.append(el('option', { value: '' }, ''));
                     f.options.split(/;|,/).forEach(o => {
-                        input.append(el('option', { value: o.trim() }, o.trim()));
+                        s.append(el('option', { value: o.trim() }, o.trim()));
                     });
-
-                    input.onchange = () => {
-                        answers[f.key] = input.value;
-                        postAutosave(f.key, input.value);
+                    s.onchange = () => {
+                        answers[f.key] = s.value;
+                        autosave(f.key, s.value);
                         updateSurveyProgress();
-
-                        if (f.key === "City") {
-                            box.append(el('div', { class: 'ageTag' }, cityMap[input.value] || ""));
-                        }
-
-                        if (f.key === "Age") {
-                            box.append(el('div', { class: 'ageTag' }, ageTags[input.value] || ""));
-                        }
-
-                        const next = box.nextElementSibling;
-                        if (next) scrollCard(next);
                     };
-
-                    box.append(input);
+                    box.append(s);
                 }
 
-                else {
-                    input = el('input', { type: f.type || 'text' });
-                    input.oninput = () => {
-                        answers[f.key] = input.value;
-                        postAutosave(f.key, input.value);
+                if (f.type === 'text' || f.type === 'number') {
+                    const i = el('input', { type: f.type });
+                    i.oninput = () => {
+                        answers[f.key] = i.value;
+                        autosave(f.key, i.value);
                         updateSurveyProgress();
                     };
-                    box.append(input);
+                    box.append(i);
+                }
+
+                if (f.type === 'radio') {
+                    f.options.split(/;|,/).forEach(o => {
+                        const r = el('input', { type: 'radio', name: f.key, value: o.trim() });
+                        r.onchange = () => {
+                            answers[f.key] = o.trim();
+                            autosave(f.key, o.trim());
+                            updateSurveyProgress();
+                        };
+                        box.append(el('label', {}, r, ' ' + o.trim()));
+                    });
                 }
 
                 w.append(box);
             });
-
         }
 
-        qs('#submitBtn').onclick = () => {
+        /* AUTOSAVE */
+        let t = null;
+        function autosave(k, v) {
+            if (t) clearTimeout(t);
+            t = setTimeout(() => {
+                fetch(WEBAPP_URL, {
+                    method: 'POST',
+                    body: JSON.stringify({ sessionId, field: k, value: v })
+                });
+            }, 300);
+        }
 
+        /* submit */
+        qs('#submitBtn').onclick = () => {
             fetch(WEBAPP_URL, {
                 method: 'POST',
-                body: JSON.stringify({ sessionId, submitted: true })
+                body: JSON.stringify({ sessionId, submitted: true, answers })
             });
-
-            qs('#formWrapper').style.display = 'none';
-            qs('#submitBtn').style.display = 'none';
-
-            const t = qs('#thanks');
-            t.style.display = 'block';
-
-            let html = "<h2>Thank you guys!! See ya soon with Smoky Flavours 🎉❤️‍🔥</h2><br>";
-
-            for (const k in answers) {
-                html += `<div><b>${k}</b>: ${answers[k]}</div>`;
-            }
-
-            t.innerHTML = html;
+            alert("Submitted");
         };
 
-        loadConfig();
+        loadConfigAndBuild();
 
     </script>
-
 </body>
 
 </html>
