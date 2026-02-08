@@ -1,100 +1,162 @@
-<!doctype html>
+<!DOCTYPE html>
 <html>
 
 <head>
-    <img class="bg-img" src="https://raw.githubusercontent.com/bangdaop/33cimg/main/photo_6062312442882100596_y.jpg">
-    <div class="overlay"></div>
-
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width,initial-scale=1">
-    <title>Taste Buds Choices</title>
+
+    <title>Taste Buds</title>
 
     <style>
-        /* FULL ORIGINAL CSS — unchanged */
-
-        #loadWrap {
-            margin: 12px 0;
-        }
-
-        #loadBar {
-            height: 6px;
-            width: 0%;
-            background: #4da3ff;
-        }
-
         body {
-            font-family: Arial;
             margin: 0;
+            font-family: system-ui;
             background: #f6f8fa
         }
 
+        .app {
+            max-width: 720px;
+            margin: auto;
+            padding: 12px
+        }
+
+        .header img {
+            width: 100%;
+            border-radius: 14px;
+            display: block
+        }
+
+        #loadWrap {
+            text-align: center;
+            margin: 12px 0
+        }
+
+        #loadTrack {
+            height: 6px;
+            background: #eee;
+            border-radius: 6px;
+            overflow: hidden
+        }
+
+        #loadBar {
+            height: 100%;
+            width: 0%;
+            background: linear-gradient(90deg, #ff7a00, #ffb347);
+            transition: .3s
+        }
+
+        #loadText {
+            font-size: 12px;
+            margin-top: 6px;
+            opacity: .7
+        }
+
         .field {
-            margin-bottom: 12px
+            background: white;
+            padding: 12px;
+            border-radius: 12px;
+            margin-bottom: 10px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, .05)
         }
 
         label {
-            font-weight: bold
+            font-weight: 600;
+            display: block;
+            margin-bottom: 6px
         }
 
         input,
         select {
             width: 100%;
-            padding: 8px
+            padding: 10px;
+            border-radius: 8px;
+            border: 1px solid #ddd
+        }
+
+        #surveyWrap {
+            margin: 12px 0
         }
 
         #surveyBar {
             height: 6px;
             background: #ddd;
-            margin: 10px 0
+            border-radius: 6px;
+            overflow: hidden
         }
 
         #surveyBarInner {
             height: 100%;
-            width: 0;
-            background: #4aa3ff
+            width: 0%;
+            background: linear-gradient(90deg, #0d3b66, #3fa9f5);
+            transition: .3s
+        }
+
+        .badge {
+            margin-top: 6px;
+            font-size: 13px;
+            color: #0d3b66;
+            font-weight: 600
         }
 
         #submitBtn {
-            margin-top: 10px;
-            padding: 10px;
-            width: 100%
+            margin-top: 12px;
+            width: 100%;
+            padding: 12px;
+            border: none;
+            border-radius: 10px;
+            background: #ff7a00;
+            color: white;
+            font-size: 16px
         }
 
         .summary-row {
             display: flex;
             justify-content: space-between;
-            font-size: 13px
+            font-size: 13px;
+            padding: 6px 0
         }
 
-        .left {
-            padding: 12px
+        @media(max-width:600px) {
+            .app {
+                padding: 8px
+            }
         }
     </style>
 </head>
 
 <body>
 
-    <div id="loadWrap">
-        <div id="loadTrack">
-            <div id="loadBar"></div>
+    <div class="app">
+
+        <div class="header">
+            <img
+                src="https://raw.githubusercontent.com/bangdaop/33cimg/9c0a0d694849c5fcc4fde282076fc70f0c46492f/33%20combo.PNG">
         </div>
-        <div id="loadText">Loading…</div>
-    </div>
 
-    <div id="surveyWrap">
-        <div id="surveyBar">
-            <div id="surveyBarInner"></div>
+        <div id="loadWrap">
+            <div id="loadTrack">
+                <div id="loadBar"></div>
+            </div>
+            <div id="loadText">Loading…</div>
         </div>
+
+        <div id="surveyWrap" style="display:none">
+            <div id="surveyBar">
+                <div id="surveyBarInner"></div>
+            </div>
+        </div>
+
+        <div id="formWrapper"></div>
+
+        <button id="submitBtn" disabled>Finish</button>
+
+        <div id="thankYou" style="display:none"></div>
+
     </div>
-
-    <div id="formWrapper"></div>
-
-    <button id="submitBtn" disabled>Finish</button>
-
-    <div id="summaryList"></div>
 
     <script>
 
+        /* 🔴 YOUR LATEST WEBAPP */
         const WEBAPP_URL =
             "https://script.google.com/macros/s/AKfycbyvtTpTUlPLz_b_maxO8p73hdSd_eNel2SdhrCE6n4KSCy4IBcuaDA0490c2kGEyCt1/exec";
 
@@ -105,124 +167,141 @@
             localStorage.setItem("tb_session_id", sessionId);
         }
 
-        /* helpers */
-        function qs(x) { return document.querySelector(x) }
-        function el(t, a = {}, ...c) {
-            const n = document.createElement(t);
-            for (const k in a) n.setAttribute(k, a[k]);
-            c.forEach(x => n.append(x));
-            return n;
-        }
-
-        /* state */
         const answers = {}
         let configFields = []
+        let cityMap = {}
+        let ageTags = {}
+        let autoTimer = null
 
-        function updateSurveyProgress() {
-            if (!configFields.length) return;
-            let done = 0;
-            configFields.forEach(f => {
-                const v = answers[f.key];
-                if (v !== '' && v != null) done++;
-            });
-            const pct = Math.round(done / configFields.length * 100);
-            qs('#surveyBarInner').style.width = pct + '%';
-            qs('#submitBtn').disabled = done !== configFields.length;
-        }
+        function qs(x) { return document.querySelector(x) }
+        function el(t, a = {}, ...c) { const n = document.createElement(t); for (const k in a) n.setAttribute(k, a[k]); c.forEach(x => n.append(x)); return n }
 
-        /* loader */
         function setLoad(p) {
-            qs('#loadBar').style.width = p + '%';
-            qs('#loadText').innerText = 'Loading… ' + p + '%';
+            qs('#loadBar').style.width = p + '%'
+            qs('#loadText').innerText = 'Loading… ' + p + '%'
         }
 
-        async function loadConfigAndBuild() {
-            try {
-                setLoad(20);
-                const r = await fetch(WEBAPP_URL);
-                setLoad(60);
-                const j = await r.json();
-                configFields = j.config || [];
-                setLoad(85);
-                buildForm();
-                updateSurveyProgress();
-                setTimeout(() => qs('#loadWrap').style.display = 'none', 400);
-            } catch (e) {
-                console.error(e);
-                qs('#formWrapper').innerText = 'Failed loading form';
-            }
+        /* debounce autosave */
+        function autosave(k, v) {
+            if (autoTimer) clearTimeout(autoTimer)
+            autoTimer = setTimeout(() => {
+                fetch(WEBAPP_URL, {
+                    method: 'POST',
+                    body: JSON.stringify({ sessionId, fieldName: k, fieldValue: v })
+                })
+            }, 300)
+        }
+
+        function updateProgress() {
+            let done = 0
+            configFields.forEach(f => {
+                const v = answers[f.key]
+                if (Array.isArray(v) ? v.length : (v !== '' && v != null)) done++
+            })
+            const pct = Math.round(done / configFields.length * 100)
+            qs('#surveyBarInner').style.width = pct + '%'
+            qs('#surveyWrap').style.display = 'block'
+            qs('#submitBtn').disabled = done !== configFields.length
+        }
+
+        async function loadConfig() {
+            setLoad(20)
+            const r = await fetch(WEBAPP_URL)
+            setLoad(60)
+            const j = await r.json()
+
+            configFields = j.config || []
+            cityMap = j.cityMappings?.cityToState || {}
+                ; (j.ageTags || []).forEach(a => ageTags[a.key] = a.displayLabel)
+
+            setLoad(90)
+            buildForm()
+            setTimeout(() => qs('#loadWrap').style.display = 'none', 300)
         }
 
         function buildForm() {
-            const w = qs('#formWrapper');
-            w.innerHTML = '';
+            const w = qs('#formWrapper')
+            w.innerHTML = ''
 
-            configFields.forEach(f => {
-                const box = el('div', { class: 'field' });
-                box.append(el('label', {}, f.label));
+            configFields.forEach((f, idx) => {
+                const box = el('div', { class: 'field' })
+                box.append(el('label', {}, f.label))
 
                 if (f.type === 'select') {
-                    const s = el('select');
-                    s.append(el('option', { value: '' }, ''));
+                    const s = el('select', { name: f.key })
+                    s.append(el('option', { value: '', hidden: true }, ''))
                     f.options.split(/;|,/).forEach(o => {
-                        s.append(el('option', { value: o.trim() }, o.trim()));
-                    });
+                        s.append(el('option', { value: o.trim() }, o.trim()))
+                    })
                     s.onchange = () => {
-                        answers[f.key] = s.value;
-                        autosave(f.key, s.value);
-                        updateSurveyProgress();
-                    };
-                    box.append(s);
+                        answers[f.key] = s.value
+                        autosave(f.key, s.value)
+
+                        if (f.key === 'City') {
+                            const st = cityMap[s.value] || ''
+                            answers.state = st
+                            box.append(el('div', { class: 'badge' }, st))
+                        }
+
+                        if (f.key === 'Age') {
+                            box.append(el('div', { class: 'badge' }, ageTags[s.value] || ''))
+                        }
+
+                        updateProgress()
+                        box.nextElementSibling?.scrollIntoView({ behavior: 'smooth', block: 'center' })
+                    }
+                    box.append(s)
                 }
 
-                if (f.type === 'text' || f.type === 'number') {
-                    const i = el('input', { type: f.type });
+                else if (f.type === 'number' || f.type === 'text') {
+                    const i = el('input', { type: f.type })
                     i.oninput = () => {
-                        answers[f.key] = i.value;
-                        autosave(f.key, i.value);
-                        updateSurveyProgress();
-                    };
-                    box.append(i);
+                        answers[f.key] = i.value
+                        autosave(f.key, i.value)
+                        updateProgress()
+                        box.nextElementSibling?.scrollIntoView({ behavior: 'smooth', block: 'center' })
+                    }
+                    box.append(i)
                 }
 
-                if (f.type === 'radio') {
+                else if (f.type === 'radio') {
                     f.options.split(/;|,/).forEach(o => {
-                        const r = el('input', { type: 'radio', name: f.key, value: o.trim() });
+                        const v = o.trim()
+                        const r = el('input', { type: 'radio', name: f.key, value: v })
                         r.onchange = () => {
-                            answers[f.key] = o.trim();
-                            autosave(f.key, o.trim());
-                            updateSurveyProgress();
-                        };
-                        box.append(el('label', {}, r, ' ' + o.trim()));
-                    });
+                            answers[f.key] = v
+                            autosave(f.key, v)
+                            updateProgress()
+                            box.nextElementSibling?.scrollIntoView({ behavior: 'smooth', block: 'center' })
+                        }
+                        box.append(el('label', {}, r, ' ' + v))
+                    })
                 }
 
-                w.append(box);
-            });
+                w.append(box)
+            })
         }
 
-        /* AUTOSAVE */
-        let t = null;
-        function autosave(k, v) {
-            if (t) clearTimeout(t);
-            t = setTimeout(() => {
-                fetch(WEBAPP_URL, {
-                    method: 'POST',
-                    body: JSON.stringify({ sessionId, field: k, value: v })
-                });
-            }, 300);
-        }
-
-        /* submit */
-        qs('#submitBtn').onclick = () => {
-            fetch(WEBAPP_URL, {
+        qs('#submitBtn').onclick = async () => {
+            await fetch(WEBAPP_URL, {
                 method: 'POST',
                 body: JSON.stringify({ sessionId, submitted: true, answers })
-            });
-            alert("Submitted");
-        };
+            })
 
-        loadConfigAndBuild();
+            qs('#formWrapper').style.display = 'none'
+            qs('#submitBtn').style.display = 'none'
+            qs('#surveyWrap').style.display = 'none'
+
+            let out = '<h3>Thank you guys!! See ya soon with Smoky Flavours 🎉❤️‍🔥</h3>'
+            Object.keys(answers).forEach(k => {
+                out += `<div class="summary-row"><b>${k}</b><span>${answers[k]}</span></div>`
+            })
+
+            qs('#thankYou').innerHTML = out
+            qs('#thankYou').style.display = 'block'
+        }
+
+        loadConfig()
 
     </script>
 </body>
