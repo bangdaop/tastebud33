@@ -10,44 +10,6 @@
     <title>Taste Buds Choices</title>
 
     <style>
-        body {
-            margin: 0;
-            font-family: Arial;
-            background: #f6f8fa;
-        }
-
-        h1 {
-            text-shadow: 0 0 8px #ff2828, 0 0 16px #ff2828, 0 0 30px #ff4444;
-        }
-
-        /* form */
-
-        .field {
-            margin-bottom: 12px
-        }
-
-        label {
-            font-weight: bold
-        }
-
-        input,
-        select {
-            width: 100%;
-            padding: 8px
-        }
-
-        .left {
-            padding: 12px
-        }
-
-        @media(max-width:600px) {
-            .left {
-                padding: 0
-            }
-        }
-
-        /* loader */
-
         #loadWrap {
             padding: 20px;
             text-align: center;
@@ -55,31 +17,23 @@
 
         #loadTrack {
             width: 100%;
-            height: 8px;
-            background: #ddd;
-            border-radius: 10px;
+            height: 6px;
+            background: #eee;
+            border-radius: 6px;
             overflow: hidden;
-            margin-bottom: 10px;
+            margin-bottom: 8px;
         }
 
         #loadBar {
             height: 100%;
             width: 0%;
             background: linear-gradient(90deg, #ff7a00, #ffb347);
-            transition: .3s;
+            transition: width .3s;
         }
 
         #loadText {
             font-size: 13px;
             opacity: .7;
-        }
-
-        /* submit */
-
-        #submitBtn {
-            margin-top: 10px;
-            padding: 12px;
-            width: 100%;
         }
     </style>
 
@@ -114,13 +68,16 @@
         </div>
         <div id="loadText">Loading…</div>
     </div>
+    <div id="loadWrap">
+        <div id="loadTrack">
+            <div id="loadBar"></div>
+        </div>
+        <div id="loadText">Loading…</div>
+    </div>
+
 
     <div id="formWrapper"></div>
 
-
-    <div id="loadingMsg" style="text-align:center;padding:20px;font-weight:600">
-        Loading questions…
-    </div>
 
     </div>
 
@@ -214,13 +171,11 @@
         }
 
         async function loadConfigAndBuild() {
-
             try {
-
-                setLoad(20);
+                setLoad(10);
 
                 const r = await fetch(WEBAPP_URL);
-                setLoad(60);
+                setLoad(50);
 
                 const j = await r.json();
                 configFields = j.config || [];
@@ -228,6 +183,15 @@
                 setLoad(85);
 
                 buildForm();
+                qs('#submitBtn').onclick = async () => {
+                    await fetch(WEBAPP_URL, {
+                        method: 'POST',
+                        body: JSON.stringify({ sessionId, submitted: true, answers })
+                    });
+
+                    qs('#formWrapper').innerHTML = '<h2 style="text-align:center">Thanks! 🎉</h2>';
+                };
+
                 updateSurveyProgress();
 
                 setTimeout(() => {
@@ -238,8 +202,8 @@
                 console.error(e);
                 qs('#formWrapper').innerText = 'Failed loading form';
             }
-
         }
+
 
 
 
