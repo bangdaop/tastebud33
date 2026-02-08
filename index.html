@@ -11,7 +11,7 @@
         body {
             margin: 0;
             font-family: system-ui;
-            background: #f6f8fa;
+            background: linear-gradient(180deg, #f3f6fb, #e9eef5);
         }
 
         .app {
@@ -26,6 +26,32 @@
             display: block;
         }
 
+        /* ===== Floating progress ===== */
+
+        #surveyWrap {
+            position: sticky;
+            top: 0;
+            z-index: 20;
+            background: #f3f6fb;
+            padding: 8px 0;
+        }
+
+        #surveyBar {
+            height: 6px;
+            background: #d9dee6;
+            border-radius: 6px;
+            overflow: hidden;
+        }
+
+        #surveyBarInner {
+            height: 100%;
+            width: 0%;
+            background: linear-gradient(90deg, #0d3b66, #3fa9f5);
+            transition: .35s ease;
+        }
+
+        /* ===== Loader ===== */
+
         #loadWrap {
             margin: 12px 0;
             text-align: center;
@@ -33,7 +59,7 @@
 
         #loadTrack {
             height: 6px;
-            background: #eee;
+            background: #ddd;
             border-radius: 6px;
             overflow: hidden;
         }
@@ -51,69 +77,83 @@
             opacity: .7;
         }
 
+        /* ===== Cards ===== */
+
         .field {
-            background: white;
-            padding: 12px;
-            border-radius: 12px;
-            margin-bottom: 10px;
-            box-shadow: 0 4px 10px rgba(0, 0, 0, .05);
+            background: #ffffff;
+            padding: 14px;
+            border-radius: 14px;
+            margin-bottom: 14px;
+            box-shadow: 0 8px 18px rgba(0, 0, 0, .06);
+            opacity: 0;
+            transform: translateY(12px);
+            animation: fadeUp .4s forwards;
+        }
+
+        @keyframes fadeUp {
+            to {
+                opacity: 1;
+                transform: none
+            }
         }
 
         label {
             font-weight: 600;
             display: block;
-            margin-bottom: 6px;
+            margin-bottom: 8px;
         }
 
         input,
         select {
             width: 100%;
-            padding: 10px;
-            border-radius: 8px;
-            border: 1px solid #ddd;
+            padding: 12px;
+            border-radius: 10px;
+            border: 1px solid #d7dce4;
+            background: #fafbfc;
+            font-size: 15px;
         }
 
-        #surveyWrap {
-            margin: 12px 0
-        }
-
-        #surveyBar {
-            height: 6px;
-            background: #ddd;
-            border-radius: 6px;
-            overflow: hidden;
-        }
-
-        #surveyBarInner {
-            height: 100%;
-            width: 0%;
-            background: linear-gradient(90deg, #0d3b66, #3fa9f5);
-            transition: .3s;
+        input:focus,
+        select:focus {
+            outline: none;
+            border-color: #3fa9f5;
+            box-shadow: 0 0 0 2px rgba(63, 169, 245, .15);
         }
 
         .badge {
-            margin-top: 6px;
+            margin-top: 8px;
             font-size: 13px;
             color: #0d3b66;
             font-weight: 600;
         }
 
+        /* ===== Button ===== */
+
         #submitBtn {
-            margin-top: 12px;
+            margin-top: 16px;
             width: 100%;
-            padding: 12px;
+            padding: 14px;
             border: none;
-            border-radius: 10px;
+            border-radius: 12px;
             background: #ff7a00;
             color: white;
             font-size: 16px;
+            opacity: .4;
+            transition: .3s;
         }
+
+        #submitBtn:not(:disabled) {
+            opacity: 1;
+        }
+
+        /* ===== Summary ===== */
 
         .summary-row {
             display: flex;
             justify-content: space-between;
             font-size: 13px;
             padding: 6px 0;
+            border-bottom: 1px dashed #ddd;
         }
 
         @media(max-width:600px) {
@@ -189,6 +229,12 @@
             })
         }
 
+        function scrollNext(card) {
+            setTimeout(() => {
+                card.nextElementSibling?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+            }, 250)
+        }
+
         function updateProgress() {
             let done = 0
             configFields.forEach(f => {
@@ -227,34 +273,39 @@
                 if (f.type === 'select') {
                     const s = el('select', { name: f.key })
                     s.append(el('option', { value: '', hidden: true }, ''))
+
                     f.options.split(/;|,/).forEach(o => {
                         s.append(el('option', { value: o.trim() }, o.trim()))
                     })
+
                     s.onchange = () => {
                         answers[f.key] = s.value
                         autosave(f.key, s.value)
 
                         if (f.key === 'City') {
-                            const st = cityMap[s.value] || ''
-                            answers.state = st
-                            box.append(el('div', { class: 'badge' }, st))
+                            box.querySelector('.badge')?.remove()
+                            box.append(el('div', { class: 'badge' }, cityMap[s.value] || ''))
                         }
 
                         if (f.key === 'Age') {
+                            box.querySelector('.badge')?.remove()
                             box.append(el('div', { class: 'badge' }, ageTags[s.value] || ''))
                         }
 
                         updateProgress()
+                        scrollNext(box)
                     }
+
                     box.append(s)
                 }
 
                 else if (f.type === 'number' || f.type === 'text') {
                     const i = el('input', { type: f.type })
-                    i.oninput = () => {
+                    i.onblur = () => {
                         answers[f.key] = i.value
                         autosave(f.key, i.value)
                         updateProgress()
+                        scrollNext(box)
                     }
                     box.append(i)
                 }
@@ -267,6 +318,7 @@
                             answers[f.key] = v
                             autosave(f.key, v)
                             updateProgress()
+                            scrollNext(box)
                         }
                         box.append(el('label', {}, r, ' ' + v))
                     })
