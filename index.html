@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="en">
+<html>
 
 <head>
     <img class="bg-img" src="https://raw.githubusercontent.com/bangdaop/33cimg/main/photo_6062312442882100596_y.jpg">
@@ -11,32 +11,135 @@
 
     <style>
         #loadWrap {
-            padding: 20px;
-            text-align: center;
+            margin: 12px 0;
         }
 
-        #loadTrack {
+        #loadBar {
+            height: 6px;
+            width: 0%;
+            background: #4da3ff;
+            border-radius: 6px;
+            transition: width .3s;
+        }
+
+        #loadText {
+            font-size: 12px;
+            text-align: center;
+            margin-top: 4px;
+        }
+
+        h1 {
+            text-shadow:
+                0 0 8px #ff2828,
+                0 0 16px #ff2828,
+                0 0 30px #ff4444;
+        }
+
+        body {
+            font-family: Arial;
+            margin: 0;
+            background: #f6f8fa
+        }
+
+        .field {
+            margin-bottom: 12px
+        }
+
+        label {
+            font-weight: bold
+        }
+
+        input,
+        select {
             width: 100%;
+            padding: 8px
+        }
+
+        #surveyBar {
+            height: 6px;
+            background: #ddd;
+            margin: 10px 0
+        }
+
+        #surveyBarInner {
+            height: 100%;
+            width: 0;
+            background: #4aa3ff
+        }
+
+        #submitBtn {
+            margin-top: 10px;
+            padding: 10px;
+            width: 100%
+        }
+
+        .summary-row {
+            display: flex;
+            justify-content: space-between;
+            font-size: 13px
+        }
+
+        .left {
+            padding-left: 12px;
+            padding-right: 12px;
+        }
+
+        @media(max-width:600px) {
+            main {
+                padding: 8px;
+            }
+
+            .left {
+                padding: 0;
+            }
+        }
+
+        /* ===== Loader ===== */
+
+        #loadWrap {
+            padding: 12px;
+        }
+
+        #loadBarWrap {
             height: 6px;
             background: #eee;
             border-radius: 6px;
             overflow: hidden;
-            margin-bottom: 8px;
         }
 
         #loadBar {
             height: 100%;
             width: 0%;
             background: linear-gradient(90deg, #ff7a00, #ffb347);
-            transition: width .3s;
+            transition: .3s;
         }
 
         #loadText {
             font-size: 13px;
-            opacity: .7;
+            text-align: center;
+            margin-bottom: 6px;
+        }
+
+        /* ===== Survey progress ===== */
+
+        #surveyWrap {
+            margin: 12px 0;
+        }
+
+        #surveyBar {
+            height: 6px;
+            background: #ddd;
+            border-radius: 6px;
+            overflow: hidden;
+        }
+
+        #surveyBarInner {
+            height: 100%;
+            width: 0%;
+            background: linear-gradient(90deg, #0d3b66, #3fa9f5);
+            transition: .3s;
         }
     </style>
-
 </head>
 
 <body>
@@ -62,22 +165,11 @@
     </div>
 
 
-    <div id="loadWrap">
-        <div id="loadTrack">
-            <div id="loadBar"></div>
+    <div id="formWrapper">
+
+        <div id="loadingMsg" style="text-align:center;padding:20px;font-weight:600">
+            Loading questions…
         </div>
-        <div id="loadText">Loading…</div>
-    </div>
-    <div id="loadWrap">
-        <div id="loadTrack">
-            <div id="loadBar"></div>
-        </div>
-        <div id="loadText">Loading…</div>
-    </div>
-
-
-    <div id="formWrapper"></div>
-
 
     </div>
 
@@ -171,11 +263,13 @@
         }
 
         async function loadConfigAndBuild() {
+
             try {
-                setLoad(10);
+
+                setLoad(20);
 
                 const r = await fetch(WEBAPP_URL);
-                setLoad(50);
+                setLoad(60);
 
                 const j = await r.json();
                 configFields = j.config || [];
@@ -183,15 +277,6 @@
                 setLoad(85);
 
                 buildForm();
-                qs('#submitBtn').onclick = async () => {
-                    await fetch(WEBAPP_URL, {
-                        method: 'POST',
-                        body: JSON.stringify({ sessionId, submitted: true, answers })
-                    });
-
-                    qs('#formWrapper').innerHTML = '<h2 style="text-align:center">Thanks! 🎉</h2>';
-                };
-
                 updateSurveyProgress();
 
                 setTimeout(() => {
@@ -202,8 +287,8 @@
                 console.error(e);
                 qs('#formWrapper').innerText = 'Failed loading form';
             }
-        }
 
+        }
 
 
 
@@ -351,23 +436,13 @@
             })
         }
 
-        qs('#submitBtn').onclick = async () => {
-
-            await fetch(WEBAPP_URL, {
+        qs('#submitBtn').onclick = () => {
+            fetch(WEBAPP_URL, {
                 method: 'POST',
-                body: JSON.stringify({
-                    sessionId,
-                    submitted: true,
-                    answers
-                })
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ sessionId, submitted: true, answers })
             });
-
-            document.body.innerHTML = `
-    <div style="text-align:center;padding:60px">
-      <h2>Thank you 🎉</h2>
-      <p>Your response has been saved.</p>
-    </div>
-  `;
+            alert("Submitted");
         };
 
         document.addEventListener('DOMContentLoaded', () => {
