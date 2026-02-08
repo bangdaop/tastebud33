@@ -1,47 +1,39 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
 
-    <title>🔥 Taste Buds Choices 🍟🥟🥤</title>
-
+    <title>Taste Buds</title>
 
     <style>
         body {
             margin: 0;
             font-family: system-ui;
-            background: #f5f7fa;
+            background: #f6f8fa;
         }
 
         .app {
-            max-width: 700px;
+            max-width: 720px;
             margin: auto;
             padding: 12px;
         }
 
-        .header {
-            position: relative;
-            border-radius: 16px;
-            overflow: hidden;
-            margin-bottom: 16px;
-        }
-
         .header img {
             width: 100%;
+            border-radius: 14px;
             display: block;
         }
 
-
-
         #loadWrap {
             margin: 12px 0;
+            text-align: center;
         }
 
         #loadTrack {
             height: 6px;
-            background: #ddd;
+            background: #eee;
             border-radius: 6px;
             overflow: hidden;
         }
@@ -54,13 +46,35 @@
         }
 
         #loadText {
-            text-align: center;
             font-size: 12px;
             margin-top: 6px;
+            opacity: .7;
+        }
+
+        .field {
+            background: white;
+            padding: 12px;
+            border-radius: 12px;
+            margin-bottom: 10px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, .05);
+        }
+
+        label {
+            font-weight: 600;
+            display: block;
+            margin-bottom: 6px;
+        }
+
+        input,
+        select {
+            width: 100%;
+            padding: 10px;
+            border-radius: 8px;
+            border: 1px solid #ddd;
         }
 
         #surveyWrap {
-            margin: 12px 0;
+            margin: 12px 0
         }
 
         #surveyBar {
@@ -77,64 +91,22 @@
             transition: .3s;
         }
 
-        .field {
-            background: white;
-            border-radius: 12px;
-            padding: 12px;
-            margin-bottom: 12px;
-            box-shadow: 0 2px 6px rgba(0, 0, 0, .05);
-            animation: fadeUp .3s ease;
-        }
-
-        @keyframes fadeUp {
-            from {
-                opacity: 0;
-                transform: translateY(10px)
-            }
-
-            to {
-                opacity: 1;
-                transform: none
-            }
-        }
-
-        label {
-            font-weight: 700;
-            display: block;
-            margin-bottom: 6px;
-        }
-
-        select,
-        input {
-            width: 100%;
-            padding: 10px;
-            border-radius: 8px;
-            border: 1px solid #ccc;
-            font-size: 15px;
-        }
-
-        .stateBox,
-        .ageTag {
+        .badge {
             margin-top: 6px;
-            font-weight: 600;
+            font-size: 13px;
             color: #0d3b66;
-            display: none;
+            font-weight: 600;
         }
 
         #submitBtn {
+            margin-top: 12px;
             width: 100%;
             padding: 12px;
             border: none;
             border-radius: 10px;
-            background: #0d3b66;
+            background: #ff7a00;
             color: white;
-            font-weight: 800;
-            margin-top: 12px;
-            opacity: .4;
-        }
-
-        #summaryList {
-            margin-top: 20px;
+            font-size: 16px;
         }
 
         .summary-row {
@@ -144,12 +116,10 @@
             padding: 6px 0;
         }
 
-        #thanks {
-            display: none;
-            text-align: center;
-            padding: 40px 20px;
-            font-size: 18px;
-            font-weight: 700;
+        @media(max-width:600px) {
+            .app {
+                padding: 8px
+            }
         }
     </style>
 </head>
@@ -159,8 +129,8 @@
     <div class="app">
 
         <div class="header">
-            <img src="https://github.com/bangdaop/33cimg/blob/9c0a0d694849c5fcc4fde282076fc70f0c46492f/33%20combo.PNG">
-            <div class="heroTitle">🔥 Taste Buds Choices 🍟🥟🥤</div>
+            <img
+                src="https://raw.githubusercontent.com/bangdaop/33cimg/9c0a0d694849c5fcc4fde282076fc70f0c46492f/33%20combo.PNG">
         </div>
 
         <div id="loadWrap">
@@ -170,7 +140,7 @@
             <div id="loadText">Loading…</div>
         </div>
 
-        <div id="surveyWrap">
+        <div id="surveyWrap" style="display:none">
             <div id="surveyBar">
                 <div id="surveyBarInner"></div>
             </div>
@@ -180,13 +150,18 @@
 
         <button id="submitBtn" disabled>Finish</button>
 
-        <div id="thanks"></div>
+        <div id="thankYou" style="display:none"></div>
 
     </div>
 
     <script>
-
         const WEBAPP_URL = "https://script.google.com/macros/s/AKfycbwXlYjodsqdwXD1lpUObHRUxO-4g99cRvMU77rJ3YMi7ySHMHmiLM-hNceq5RvbCTUw/exec";
+
+        let sessionId = localStorage.getItem("tb_session_id");
+        if (!sessionId) {
+            sessionId = 's_' + Math.random().toString(36).slice(2, 12);
+            localStorage.setItem("tb_session_id", sessionId);
+        }
 
         const answers = {}
         let configFields = []
@@ -194,42 +169,51 @@
         let ageTags = {}
 
         function qs(x) { return document.querySelector(x) }
-        function el(t, a = {}, ...c) { const n = document.createElement(t); for (const k in a) n.setAttribute(k, a[k]); c.forEach(x => n.append(x)); return n }
+
+        function el(t, a = {}, ...c) {
+            const n = document.createElement(t)
+            for (const k in a) n.setAttribute(k, a[k])
+            c.forEach(x => n.append(x))
+            return n
+        }
 
         function setLoad(p) {
             qs('#loadBar').style.width = p + '%'
             qs('#loadText').innerText = 'Loading… ' + p + '%'
         }
 
+        function autosave(k, v) {
+            fetch(WEBAPP_URL, {
+                method: 'POST',
+                body: JSON.stringify({ sessionId, fieldName: k, fieldValue: v })
+            })
+        }
+
         function updateProgress() {
             let done = 0
             configFields.forEach(f => {
                 const v = answers[f.key]
-                if (v !== undefined && v !== '') done++
+                if (Array.isArray(v) ? v.length : (v !== '' && v != null)) done++
             })
             const pct = Math.round(done / configFields.length * 100)
             qs('#surveyBarInner').style.width = pct + '%'
+            qs('#surveyWrap').style.display = 'block'
             qs('#submitBtn').disabled = done !== configFields.length
-            qs('#submitBtn').style.opacity = done === configFields.length ? '1' : '0.4'
         }
 
         async function loadConfig() {
-            try {
-                setLoad(20)
-                const r = await fetch(WEBAPP_URL)
-                setLoad(60)
-                const j = await r.json()
+            setLoad(20)
+            const r = await fetch(WEBAPP_URL)
+            setLoad(60)
+            const j = await r.json()
 
-                configFields = j.config || []
-                cityMap = j.cityMappings?.cityToState || {}
-                j.ageTags?.forEach(a => ageTags[a.key] = a.displayLabel)
+            configFields = j.config || []
+            cityMap = j.cityMappings?.cityToState || {}
+                ; (j.ageTags || []).forEach(a => ageTags[a.key] = a.displayLabel)
 
-                setLoad(85)
-                buildForm()
-                setTimeout(() => qs('#loadWrap').style.display = 'none', 300)
-            } catch (e) {
-                qs('#loadText').innerText = 'Failed loading form'
-            }
+            setLoad(90)
+            buildForm()
+            setTimeout(() => qs('#loadWrap').style.display = 'none', 300)
         }
 
         function buildForm() {
@@ -241,76 +225,77 @@
                 box.append(el('label', {}, f.label))
 
                 if (f.type === 'select') {
-                    const s = el('select')
-                    s.append(el('option', { value: '', disabled: true, selected: true }, 'Select…'))
-
+                    const s = el('select', { name: f.key })
+                    s.append(el('option', { value: '', hidden: true }, ''))
                     f.options.split(/;|,/).forEach(o => {
-                        const v = o.trim()
-                        if (v) s.append(el('option', { value: v }, v))
+                        s.append(el('option', { value: o.trim() }, o.trim()))
                     })
-
-                    const state = el('div', { class: 'stateBox' })
-                    const ageTag = el('div', { class: 'ageTag' })
-
                     s.onchange = () => {
                         answers[f.key] = s.value
+                        autosave(f.key, s.value)
 
                         if (f.key === 'City') {
-                            state.innerText = '📍 ' + (cityMap[s.value] || '')
-                            state.style.display = 'block'
+                            const st = cityMap[s.value] || ''
+                            answers.state = st
+                            box.append(el('div', { class: 'badge' }, st))
                         }
 
                         if (f.key === 'Age') {
-                            ageTag.innerText = '✨ ' + (ageTags[s.value] || '')
-                            ageTag.style.display = 'block'
+                            box.append(el('div', { class: 'badge' }, ageTags[s.value] || ''))
                         }
 
                         updateProgress()
                     }
-
                     box.append(s)
-                    if (f.key === 'City') box.append(state)
-                    if (f.key === 'Age') { box.prepend(ageTag) }
-
                 }
 
                 else if (f.type === 'number' || f.type === 'text') {
                     const i = el('input', { type: f.type })
-                    i.oninput = () => { answers[f.key] = i.value; updateProgress() }
+                    i.oninput = () => {
+                        answers[f.key] = i.value
+                        autosave(f.key, i.value)
+                        updateProgress()
+                    }
                     box.append(i)
                 }
 
                 else if (f.type === 'radio') {
                     f.options.split(/;|,/).forEach(o => {
                         const v = o.trim()
-                        if (!v) return
-                        const r = el('input', { type: 'radio', name: f.key })
-                        r.onchange = () => { answers[f.key] = v; updateProgress() }
+                        const r = el('input', { type: 'radio', name: f.key, value: v })
+                        r.onchange = () => {
+                            answers[f.key] = v
+                            autosave(f.key, v)
+                            updateProgress()
+                        }
                         box.append(el('label', {}, r, ' ' + v))
                     })
                 }
 
                 w.append(box)
             })
-
         }
 
         qs('#submitBtn').onclick = async () => {
-            await fetch(WEBAPP_URL, { method: 'POST', body: JSON.stringify({ submitted: true, answers }) })
-
-            let out = 'Thank you guys!! See ya soon with Smoky Flavours 🎉❤️‍🔥<br><br>'
-            Object.keys(answers).forEach(k => {
-                out += `<div>${k} : ${answers[k]}</div>`
+            await fetch(WEBAPP_URL, {
+                method: 'POST',
+                body: JSON.stringify({ sessionId, submitted: true, answers })
             })
 
-            qs('#formWrapper').innerHTML = ''
+            qs('#formWrapper').style.display = 'none'
             qs('#submitBtn').style.display = 'none'
-            qs('#thanks').innerHTML = out
-            qs('#thanks').style.display = 'block'
+            qs('#surveyWrap').style.display = 'none'
+
+            let out = '<h3>Thank you guys!! See ya soon with Smoky Flavours 🎉❤️‍🔥</h3>'
+            Object.keys(answers).forEach(k => {
+                out += `<div class="summary-row"><b>${k}</b><span>${answers[k]}</span></div>`
+            })
+
+            qs('#thankYou').innerHTML = out
+            qs('#thankYou').style.display = 'block'
         }
 
         loadConfig()
-
     </script>
 
 </body>
