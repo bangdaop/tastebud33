@@ -11,109 +11,149 @@
         body {
             margin: 0;
             font-family: system-ui;
-            background: #f6f8fa
+            background: linear-gradient(180deg, #f3f6fb, #e9eef5);
         }
 
         .app {
             max-width: 720px;
             margin: auto;
-            padding: 12px
+            padding: 12px;
         }
 
         .header img {
             width: 100%;
             border-radius: 14px;
-            display: block
-        }
-
-        #loadWrap {
-            text-align: center;
-            margin: 12px 0
-        }
-
-        #loadTrack {
-            height: 6px;
-            background: #eee;
-            border-radius: 6px;
-            overflow: hidden
-        }
-
-        #loadBar {
-            height: 100%;
-            width: 0%;
-            background: linear-gradient(90deg, #ff7a00, #ffb347);
-            transition: .3s
-        }
-
-        #loadText {
-            font-size: 12px;
-            margin-top: 6px;
-            opacity: .7
-        }
-
-        .field {
-            background: white;
-            padding: 12px;
-            border-radius: 12px;
-            margin-bottom: 10px;
-            box-shadow: 0 4px 10px rgba(0, 0, 0, .05)
-        }
-
-        label {
-            font-weight: 600;
             display: block;
-            margin-bottom: 6px
         }
 
-        input,
-        select {
-            width: 100%;
-            padding: 10px;
-            border-radius: 8px;
-            border: 1px solid #ddd
-        }
+        /* ===== Floating progress ===== */
 
         #surveyWrap {
-            margin: 12px 0
+            position: sticky;
+            top: 0;
+            z-index: 20;
+            background: #f3f6fb;
+            padding: 8px 0;
         }
 
         #surveyBar {
             height: 6px;
-            background: #ddd;
+            background: #d9dee6;
             border-radius: 6px;
-            overflow: hidden
+            overflow: hidden;
         }
 
         #surveyBarInner {
             height: 100%;
             width: 0%;
             background: linear-gradient(90deg, #0d3b66, #3fa9f5);
-            transition: .3s
+            transition: .35s ease;
+        }
+
+        /* ===== Loader ===== */
+
+        #loadWrap {
+            margin: 12px 0;
+            text-align: center;
+        }
+
+        #loadTrack {
+            height: 6px;
+            background: #ddd;
+            border-radius: 6px;
+            overflow: hidden;
+        }
+
+        #loadBar {
+            height: 100%;
+            width: 0%;
+            background: linear-gradient(90deg, #ff7a00, #ffb347);
+            transition: .3s;
+        }
+
+        #loadText {
+            font-size: 12px;
+            margin-top: 6px;
+            opacity: .7;
+        }
+
+        /* ===== Cards ===== */
+
+        .field {
+            background: #ffffff;
+            padding: 14px;
+            border-radius: 14px;
+            margin-bottom: 14px;
+            box-shadow: 0 8px 18px rgba(0, 0, 0, .06);
+            opacity: 0;
+            transform: translateY(12px);
+            animation: fadeUp .4s forwards;
+        }
+
+        @keyframes fadeUp {
+            to {
+                opacity: 1;
+                transform: none
+            }
+        }
+
+        label {
+            font-weight: 600;
+            display: block;
+            margin-bottom: 8px;
+        }
+
+        input,
+        select {
+            width: 100%;
+            padding: 12px;
+            border-radius: 10px;
+            border: 1px solid #d7dce4;
+            background: #fafbfc;
+            font-size: 15px;
+        }
+
+        input:focus,
+        select:focus {
+            outline: none;
+            border-color: #3fa9f5;
+            box-shadow: 0 0 0 2px rgba(63, 169, 245, .15);
         }
 
         .badge {
-            margin-top: 6px;
+            margin-top: 8px;
             font-size: 13px;
             color: #0d3b66;
-            font-weight: 600
+            font-weight: 600;
         }
 
+        /* ===== Button ===== */
+
         #submitBtn {
-            margin-top: 12px;
+            margin-top: 16px;
             width: 100%;
-            padding: 12px;
+            padding: 14px;
             border: none;
-            border-radius: 10px;
+            border-radius: 12px;
             background: #ff7a00;
             color: white;
-            font-size: 16px
+            font-size: 16px;
+            opacity: .4;
+            transition: .3s;
         }
+
+        #submitBtn:not(:disabled) {
+            opacity: 1;
+        }
+
+        /* ===== Summary ===== */
 
         .summary-row {
             display: flex;
             justify-content: space-between;
             font-size: 13px;
-            padding: 6px 0
+            padding: 6px 0;
+            border-bottom: 1px dashed #ddd;
         }
 
         @media(max-width:600px) {
@@ -155,12 +195,8 @@
     </div>
 
     <script>
+        const WEBAPP_URL = "https://script.google.com/macros/s/AKfycbwXlYjodsqdwXD1lpUObHRUxO-4g99cRvMU77rJ3YMi7ySHMHmiLM-hNceq5RvbCTUw/exec";
 
-        /* 🔴 YOUR LATEST WEBAPP */
-        const WEBAPP_URL =
-            "https://script.google.com/macros/s/AKfycbyvtTpTUlPLz_b_maxO8p73hdSd_eNel2SdhrCE6n4KSCy4IBcuaDA0490c2kGEyCt1/exec";
-
-        /* session */
         let sessionId = localStorage.getItem("tb_session_id");
         if (!sessionId) {
             sessionId = 's_' + Math.random().toString(36).slice(2, 12);
@@ -171,25 +207,32 @@
         let configFields = []
         let cityMap = {}
         let ageTags = {}
-        let autoTimer = null
 
         function qs(x) { return document.querySelector(x) }
-        function el(t, a = {}, ...c) { const n = document.createElement(t); for (const k in a) n.setAttribute(k, a[k]); c.forEach(x => n.append(x)); return n }
+
+        function el(t, a = {}, ...c) {
+            const n = document.createElement(t)
+            for (const k in a) n.setAttribute(k, a[k])
+            c.forEach(x => n.append(x))
+            return n
+        }
 
         function setLoad(p) {
             qs('#loadBar').style.width = p + '%'
             qs('#loadText').innerText = 'Loading… ' + p + '%'
         }
 
-        /* debounce autosave */
         function autosave(k, v) {
-            if (autoTimer) clearTimeout(autoTimer)
-            autoTimer = setTimeout(() => {
-                fetch(WEBAPP_URL, {
-                    method: 'POST',
-                    body: JSON.stringify({ sessionId, fieldName: k, fieldValue: v })
-                })
-            }, 300)
+            fetch(WEBAPP_URL, {
+                method: 'POST',
+                body: JSON.stringify({ sessionId, fieldName: k, fieldValue: v })
+            })
+        }
+
+        function scrollNext(card) {
+            setTimeout(() => {
+                card.nextElementSibling?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+            }, 250)
         }
 
         function updateProgress() {
@@ -223,43 +266,46 @@
             const w = qs('#formWrapper')
             w.innerHTML = ''
 
-            configFields.forEach((f, idx) => {
+            configFields.forEach(f => {
                 const box = el('div', { class: 'field' })
                 box.append(el('label', {}, f.label))
 
                 if (f.type === 'select') {
                     const s = el('select', { name: f.key })
                     s.append(el('option', { value: '', hidden: true }, ''))
+
                     f.options.split(/;|,/).forEach(o => {
                         s.append(el('option', { value: o.trim() }, o.trim()))
                     })
+
                     s.onchange = () => {
                         answers[f.key] = s.value
                         autosave(f.key, s.value)
 
                         if (f.key === 'City') {
-                            const st = cityMap[s.value] || ''
-                            answers.state = st
-                            box.append(el('div', { class: 'badge' }, st))
+                            box.querySelector('.badge')?.remove()
+                            box.append(el('div', { class: 'badge' }, cityMap[s.value] || ''))
                         }
 
                         if (f.key === 'Age') {
+                            box.querySelector('.badge')?.remove()
                             box.append(el('div', { class: 'badge' }, ageTags[s.value] || ''))
                         }
 
                         updateProgress()
-                        box.nextElementSibling?.scrollIntoView({ behavior: 'smooth', block: 'center' })
+                        scrollNext(box)
                     }
+
                     box.append(s)
                 }
 
                 else if (f.type === 'number' || f.type === 'text') {
                     const i = el('input', { type: f.type })
-                    i.oninput = () => {
+                    i.onblur = () => {
                         answers[f.key] = i.value
                         autosave(f.key, i.value)
                         updateProgress()
-                        box.nextElementSibling?.scrollIntoView({ behavior: 'smooth', block: 'center' })
+                        scrollNext(box)
                     }
                     box.append(i)
                 }
@@ -272,7 +318,7 @@
                             answers[f.key] = v
                             autosave(f.key, v)
                             updateProgress()
-                            box.nextElementSibling?.scrollIntoView({ behavior: 'smooth', block: 'center' })
+                            scrollNext(box)
                         }
                         box.append(el('label', {}, r, ' ' + v))
                     })
@@ -302,8 +348,8 @@
         }
 
         loadConfig()
-
     </script>
+
 </body>
 
 </html>
