@@ -19,6 +19,16 @@
             padding: 12px;
         }
 
+        h1 {
+            text-align: center;
+            margin: 10px 0 14px;
+            color: #ffea00;
+            text-shadow:
+                0 0 8px #ff2828,
+                0 0 16px #ff2828,
+                0 0 30px #ff4444;
+        }
+
         .header img {
             width: 100%;
             border-radius: 12px;
@@ -28,9 +38,22 @@
         .card {
             background: white;
             padding: 14px;
-            border-radius: 12px;
+            border-radius: 14px;
             margin-bottom: 14px;
-            box-shadow: 0 4px 14px rgba(0, 0, 0, .06);
+            box-shadow: 0 4px 14px rgba(0, 0, 0, .08);
+            animation: fadeUp .4s ease;
+        }
+
+        @keyframes fadeUp {
+            from {
+                opacity: 0;
+                transform: translateY(12px)
+            }
+
+            to {
+                opacity: 1;
+                transform: none
+            }
         }
 
         label {
@@ -103,10 +126,21 @@
             opacity: .4
         }
 
+        #stateCard,
+        #ageTagCard {
+            display: none
+        }
+
         #thanks {
             text-align: center;
-            font-size: 20px;
-            padding: 40px;
+            padding: 30px;
+        }
+
+        .summary-row {
+            display: flex;
+            justify-content: space-between;
+            font-size: 14px;
+            margin: 6px 0;
         }
 
         @media(max-width:600px) {
@@ -120,6 +154,8 @@
 <body>
 
     <div class="container">
+
+        <h1>Taste Buds Choices</h1>
 
         <div class="header">
             <img src="https://raw.githubusercontent.com/bangdaop/33cimg/main/photo_6062312442882100596_y.jpg">
@@ -138,9 +174,15 @@
 
         <div id="formWrapper"></div>
 
+        <div id="stateCard" class="card"></div>
+        <div id="ageTagCard" class="card"></div>
+
         <button id="submitBtn" disabled>Finish</button>
 
-        <div id="thanks" style="display:none">🙏 Thanks! Your response is saved.</div>
+        <div id="thanks" style="display:none">
+            <h2>Thank you guys!! See ya soon with Smoky Flavours 🎉❤️‍🔥</h2>
+            <div id="finalSummary"></div>
+        </div>
 
     </div>
 
@@ -155,6 +197,8 @@
 
         const answers = {}
         let configFields = []
+        let cityToState = {}
+        let ageTags = {}
 
         function qs(x) { return document.querySelector(x) }
         function el(t, a = {}, ...c) {
@@ -194,6 +238,8 @@
                 setLoad(60)
                 const j = await r.json()
                 configFields = j.config || []
+                cityToState = j.cityMappings?.cityToState || {}
+                    ; (j.ageTags || []).forEach(a => ageTags[a.key] = a.displayLabel)
                 setLoad(90)
                 buildForm()
                 updateSurveyProgress()
@@ -213,7 +259,6 @@
 
                 if (f.type === 'select') {
                     const input = el('select')
-                    input.append(el('option', { value: '' }, 'Select'))
                         ; (f.options || '').split(/;|,/).forEach(o => {
                             o = o.trim()
                             if (o) input.append(el('option', { value: o }, o))
@@ -222,6 +267,23 @@
                         answers[f.key] = input.value
                         autosave(f.key, input.value)
                         updateSurveyProgress()
+
+                        if (f.key === 'City') {
+                            const s = cityToState[input.value]
+                            if (s) {
+                                qs('#stateCard').style.display = 'block'
+                                qs('#stateCard').innerText = "State: " + s
+                            }
+                        }
+
+                        if (f.key === 'Age') {
+                            const tag = ageTags[input.value]
+                            if (tag) {
+                                qs('#ageTagCard').style.display = 'block'
+                                qs('#ageTagCard').innerText = tag
+                            }
+                        }
+
                     }
                     box.append(input)
                 }
@@ -261,9 +323,19 @@
                 method: 'POST',
                 body: JSON.stringify({ sessionId, submitted: true, answers })
             })
+
             qs('#formWrapper').style.display = 'none'
-            qs('#submitBtn').style.display = 'none'
             qs('#surveyBar').style.display = 'none'
+            qs('#submitBtn').style.display = 'none'
+            qs('#stateCard').style.display = 'none'
+            qs('#ageTagCard').style.display = 'none'
+
+            const sum = qs('#finalSummary')
+            sum.innerHTML = ''
+            Object.keys(answers).forEach(k => {
+                sum.append(el('div', { class: 'summary-row' }, k, answers[k]))
+            })
+
             qs('#thanks').style.display = 'block'
         }
 
