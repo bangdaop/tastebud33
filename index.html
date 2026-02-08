@@ -11,44 +11,44 @@
         body {
             margin: 0;
             font-family: system-ui;
-            background: #f6f8fa;
+            background: #f6f8fa
         }
 
         .app {
             max-width: 720px;
             margin: auto;
-            padding: 12px;
+            padding: 12px
         }
 
         .header img {
             width: 100%;
             border-radius: 14px;
-            display: block;
+            display: block
         }
 
         #loadWrap {
-            margin: 12px 0;
             text-align: center;
+            margin: 12px 0
         }
 
         #loadTrack {
             height: 6px;
             background: #eee;
             border-radius: 6px;
-            overflow: hidden;
+            overflow: hidden
         }
 
         #loadBar {
             height: 100%;
             width: 0%;
             background: linear-gradient(90deg, #ff7a00, #ffb347);
-            transition: .3s;
+            transition: .3s
         }
 
         #loadText {
             font-size: 12px;
             margin-top: 6px;
-            opacity: .7;
+            opacity: .7
         }
 
         .field {
@@ -56,13 +56,13 @@
             padding: 12px;
             border-radius: 12px;
             margin-bottom: 10px;
-            box-shadow: 0 4px 10px rgba(0, 0, 0, .05);
+            box-shadow: 0 4px 10px rgba(0, 0, 0, .05)
         }
 
         label {
             font-weight: 600;
             display: block;
-            margin-bottom: 6px;
+            margin-bottom: 6px
         }
 
         input,
@@ -70,7 +70,7 @@
             width: 100%;
             padding: 10px;
             border-radius: 8px;
-            border: 1px solid #ddd;
+            border: 1px solid #ddd
         }
 
         #surveyWrap {
@@ -81,21 +81,21 @@
             height: 6px;
             background: #ddd;
             border-radius: 6px;
-            overflow: hidden;
+            overflow: hidden
         }
 
         #surveyBarInner {
             height: 100%;
             width: 0%;
             background: linear-gradient(90deg, #0d3b66, #3fa9f5);
-            transition: .3s;
+            transition: .3s
         }
 
         .badge {
             margin-top: 6px;
             font-size: 13px;
             color: #0d3b66;
-            font-weight: 600;
+            font-weight: 600
         }
 
         #submitBtn {
@@ -106,14 +106,14 @@
             border-radius: 10px;
             background: #ff7a00;
             color: white;
-            font-size: 16px;
+            font-size: 16px
         }
 
         .summary-row {
             display: flex;
             justify-content: space-between;
             font-size: 13px;
-            padding: 6px 0;
+            padding: 6px 0
         }
 
         @media(max-width:600px) {
@@ -155,8 +155,12 @@
     </div>
 
     <script>
-        const WEBAPP_URL = "https://script.google.com/macros/s/AKfycbwXlYjodsqdwXD1lpUObHRUxO-4g99cRvMU77rJ3YMi7ySHMHmiLM-hNceq5RvbCTUw/exec";
 
+        /* 🔴 YOUR LATEST WEBAPP */
+        const WEBAPP_URL =
+            "https://script.google.com/macros/s/AKfycbyvtTpTUlPLz_b_maxO8p73hdSd_eNel2SdhrCE6n4KSCy4IBcuaDA0490c2kGEyCt1/exec";
+
+        /* session */
         let sessionId = localStorage.getItem("tb_session_id");
         if (!sessionId) {
             sessionId = 's_' + Math.random().toString(36).slice(2, 12);
@@ -167,26 +171,25 @@
         let configFields = []
         let cityMap = {}
         let ageTags = {}
+        let autoTimer = null
 
         function qs(x) { return document.querySelector(x) }
-
-        function el(t, a = {}, ...c) {
-            const n = document.createElement(t)
-            for (const k in a) n.setAttribute(k, a[k])
-            c.forEach(x => n.append(x))
-            return n
-        }
+        function el(t, a = {}, ...c) { const n = document.createElement(t); for (const k in a) n.setAttribute(k, a[k]); c.forEach(x => n.append(x)); return n }
 
         function setLoad(p) {
             qs('#loadBar').style.width = p + '%'
             qs('#loadText').innerText = 'Loading… ' + p + '%'
         }
 
+        /* debounce autosave */
         function autosave(k, v) {
-            fetch(WEBAPP_URL, {
-                method: 'POST',
-                body: JSON.stringify({ sessionId, fieldName: k, fieldValue: v })
-            })
+            if (autoTimer) clearTimeout(autoTimer)
+            autoTimer = setTimeout(() => {
+                fetch(WEBAPP_URL, {
+                    method: 'POST',
+                    body: JSON.stringify({ sessionId, fieldName: k, fieldValue: v })
+                })
+            }, 300)
         }
 
         function updateProgress() {
@@ -220,7 +223,7 @@
             const w = qs('#formWrapper')
             w.innerHTML = ''
 
-            configFields.forEach(f => {
+            configFields.forEach((f, idx) => {
                 const box = el('div', { class: 'field' })
                 box.append(el('label', {}, f.label))
 
@@ -245,6 +248,7 @@
                         }
 
                         updateProgress()
+                        box.nextElementSibling?.scrollIntoView({ behavior: 'smooth', block: 'center' })
                     }
                     box.append(s)
                 }
@@ -255,6 +259,7 @@
                         answers[f.key] = i.value
                         autosave(f.key, i.value)
                         updateProgress()
+                        box.nextElementSibling?.scrollIntoView({ behavior: 'smooth', block: 'center' })
                     }
                     box.append(i)
                 }
@@ -267,6 +272,7 @@
                             answers[f.key] = v
                             autosave(f.key, v)
                             updateProgress()
+                            box.nextElementSibling?.scrollIntoView({ behavior: 'smooth', block: 'center' })
                         }
                         box.append(el('label', {}, r, ' ' + v))
                     })
@@ -296,8 +302,8 @@
         }
 
         loadConfig()
-    </script>
 
+    </script>
 </body>
 
 </html>
