@@ -4,7 +4,6 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width,initial-scale=1">
-
     <title>Taste Buds</title>
 
     <style>
@@ -27,7 +26,6 @@
         }
 
         /* ===== Floating progress ===== */
-
         #surveyWrap {
             position: sticky;
             top: 0;
@@ -51,7 +49,6 @@
         }
 
         /* ===== Loader ===== */
-
         #loadWrap {
             margin: 12px 0;
             text-align: center;
@@ -78,7 +75,6 @@
         }
 
         /* ===== Cards ===== */
-
         .field {
             background: #ffffff;
             padding: 14px;
@@ -103,10 +99,13 @@
             margin-bottom: 8px;
         }
 
+        /* ===== INPUT SIZE FIX ===== */
         input,
         select {
             width: 100%;
+            height: 46px;
             padding: 12px;
+            box-sizing: border-box;
             border-radius: 10px;
             border: 1px solid #d7dce4;
             background: #fafbfc;
@@ -120,15 +119,18 @@
             box-shadow: 0 0 0 2px rgba(63, 169, 245, .15);
         }
 
+        /* ===== BADGES (STATE / AGE) ===== */
         .badge {
-            margin-top: 8px;
-            font-size: 13px;
-            color: #0d3b66;
+            margin-top: 10px;
+            padding: 10px 12px;
+            border-radius: 10px;
+            background: #f1f6ff;
+            font-size: 15px;
             font-weight: 600;
+            color: #0d3b66;
         }
 
         /* ===== Button ===== */
-
         #submitBtn {
             margin-top: 16px;
             width: 100%;
@@ -147,7 +149,6 @@
         }
 
         /* ===== Summary ===== */
-
         .summary-row {
             display: flex;
             justify-content: space-between;
@@ -203,151 +204,150 @@
             localStorage.setItem("tb_session_id", sessionId);
         }
 
-        const answers = {}
-        let configFields = []
-        let cityMap = {}
-        let ageTags = {}
+        const answers = {};
+        let configFields = [];
+        let cityMap = {};
+        let ageTags = {};
 
         function qs(x) { return document.querySelector(x) }
-
         function el(t, a = {}, ...c) {
-            const n = document.createElement(t)
-            for (const k in a) n.setAttribute(k, a[k])
-            c.forEach(x => n.append(x))
-            return n
+            const n = document.createElement(t);
+            for (const k in a) n.setAttribute(k, a[k]);
+            c.forEach(x => n.append(x));
+            return n;
         }
 
         function setLoad(p) {
-            qs('#loadBar').style.width = p + '%'
-            qs('#loadText').innerText = 'Loading… ' + p + '%'
+            qs('#loadBar').style.width = p + '%';
+            qs('#loadText').innerText = 'Loading… ' + p + '%';
         }
 
         function autosave(k, v) {
             fetch(WEBAPP_URL, {
                 method: 'POST',
                 body: JSON.stringify({ sessionId, fieldName: k, fieldValue: v })
-            })
+            });
         }
 
         function scrollNext(card) {
             setTimeout(() => {
-                card.nextElementSibling?.scrollIntoView({ behavior: 'smooth', block: 'center' })
-            }, 250)
+                card.nextElementSibling?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }, 250);
         }
 
         function updateProgress() {
-            let done = 0
+            let done = 0;
             configFields.forEach(f => {
-                const v = answers[f.key]
-                if (Array.isArray(v) ? v.length : (v !== '' && v != null)) done++
-            })
-            const pct = Math.round(done / configFields.length * 100)
-            qs('#surveyBarInner').style.width = pct + '%'
-            qs('#surveyWrap').style.display = 'block'
-            qs('#submitBtn').disabled = done !== configFields.length
+                const v = answers[f.key];
+                if (Array.isArray(v) ? v.length : (v !== '' && v != null)) done++;
+            });
+            const pct = Math.round(done / configFields.length * 100);
+            qs('#surveyBarInner').style.width = pct + '%';
+            qs('#surveyWrap').style.display = 'block';
+            qs('#submitBtn').disabled = done !== configFields.length;
         }
 
         async function loadConfig() {
-            setLoad(20)
-            const r = await fetch(WEBAPP_URL)
-            setLoad(60)
-            const j = await r.json()
+            setLoad(20);
+            const r = await fetch(WEBAPP_URL);
+            setLoad(60);
+            const j = await r.json();
 
-            configFields = j.config || []
-            cityMap = j.cityMappings?.cityToState || {}
-                ; (j.ageTags || []).forEach(a => ageTags[a.key] = a.displayLabel)
+            configFields = j.config || [];
+            cityMap = j.cityMappings?.cityToState || {};
+            (j.ageTags || []).forEach(a => ageTags[a.key] = a.displayLabel);
 
-            setLoad(90)
-            buildForm()
-            setTimeout(() => qs('#loadWrap').style.display = 'none', 300)
+            setLoad(90);
+            buildForm();
+            setTimeout(() => qs('#loadWrap').style.display = 'none', 300);
         }
 
         function buildForm() {
-            const w = qs('#formWrapper')
-            w.innerHTML = ''
+            const w = qs('#formWrapper');
+            w.innerHTML = '';
 
             configFields.forEach(f => {
-                const box = el('div', { class: 'field' })
-                box.append(el('label', {}, f.label))
+                const box = el('div', { class: 'field' });
+                box.append(el('label', {}, f.label));
 
                 if (f.type === 'select') {
-                    const s = el('select', { name: f.key })
-                    s.append(el('option', { value: '', hidden: true }, ''))
+                    const s = el('select', { name: f.key });
+                    s.append(el('option', { value: '', hidden: true }, ''));
 
                     f.options.split(/;|,/).forEach(o => {
-                        s.append(el('option', { value: o.trim() }, o.trim()))
-                    })
+                        s.append(el('option', { value: o.trim() }, o.trim()));
+                    });
 
                     s.onchange = () => {
-                        answers[f.key] = s.value
-                        autosave(f.key, s.value)
+                        answers[f.key] = s.value;
+                        autosave(f.key, s.value);
 
                         if (f.key === 'City') {
-                            box.querySelector('.badge')?.remove()
-                            box.append(el('div', { class: 'badge' }, cityMap[s.value] || ''))
+                            box.querySelector('.badge')?.remove();
+                            box.append(el('div', { class: 'badge' }, '📍 ' + (cityMap[s.value] || '')));
                         }
 
                         if (f.key === 'Age') {
-                            box.querySelector('.badge')?.remove()
-                            box.append(el('div', { class: 'badge' }, ageTags[s.value] || ''))
+                            box.querySelector('.badge')?.remove();
+                            box.append(el('div', { class: 'badge' }, ageTags[s.value] || ''));
                         }
 
-                        updateProgress()
-                        scrollNext(box)
-                    }
+                        updateProgress();
+                        scrollNext(box);
+                    };
 
-                    box.append(s)
+                    box.append(s);
                 }
 
                 else if (f.type === 'number' || f.type === 'text') {
-                    const i = el('input', { type: f.type })
+                    const i = el('input', { type: f.type });
                     i.onblur = () => {
-                        answers[f.key] = i.value
-                        autosave(f.key, i.value)
-                        updateProgress()
-                        scrollNext(box)
-                    }
-                    box.append(i)
+                        answers[f.key] = i.value;
+                        autosave(f.key, i.value);
+                        updateProgress();
+                        scrollNext(box);
+                    };
+                    box.append(i);
                 }
 
                 else if (f.type === 'radio') {
                     f.options.split(/;|,/).forEach(o => {
-                        const v = o.trim()
-                        const r = el('input', { type: 'radio', name: f.key, value: v })
+                        const v = o.trim();
+                        const r = el('input', { type: 'radio', name: f.key, value: v });
                         r.onchange = () => {
-                            answers[f.key] = v
-                            autosave(f.key, v)
-                            updateProgress()
-                            scrollNext(box)
-                        }
-                        box.append(el('label', {}, r, ' ' + v))
-                    })
+                            answers[f.key] = v;
+                            autosave(f.key, v);
+                            updateProgress();
+                            scrollNext(box);
+                        };
+                        box.append(el('label', {}, r, ' ' + v));
+                    });
                 }
 
-                w.append(box)
-            })
+                w.append(box);
+            });
         }
 
         qs('#submitBtn').onclick = async () => {
             await fetch(WEBAPP_URL, {
                 method: 'POST',
                 body: JSON.stringify({ sessionId, submitted: true, answers })
-            })
+            });
 
-            qs('#formWrapper').style.display = 'none'
-            qs('#submitBtn').style.display = 'none'
-            qs('#surveyWrap').style.display = 'none'
+            qs('#formWrapper').style.display = 'none';
+            qs('#submitBtn').style.display = 'none';
+            qs('#surveyWrap').style.display = 'none';
 
-            let out = '<h3>Thank you guys!! See ya soon with Smoky Flavours 🎉❤️‍🔥</h3>'
+            let out = '<h3>Thank you guys!! See ya soon with Smoky Flavours 🎉❤️‍🔥</h3>';
             Object.keys(answers).forEach(k => {
-                out += `<div class="summary-row"><b>${k}</b><span>${answers[k]}</span></div>`
-            })
+                out += `<div class="summary-row"><b>${k}</b><span>${answers[k]}</span></div>`;
+            });
 
-            qs('#thankYou').innerHTML = out
-            qs('#thankYou').style.display = 'block'
-        }
+            qs('#thankYou').innerHTML = out;
+            qs('#thankYou').style.display = 'block';
+        };
 
-        loadConfig()
+        loadConfig();
     </script>
 
 </body>
