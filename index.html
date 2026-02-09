@@ -4,13 +4,14 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width,initial-scale=1">
+
     <title>Taste Buds</title>
 
     <style>
         body {
             margin: 0;
             font-family: system-ui;
-            background: linear-gradient(180deg, #f3f6fb, #e9eef5);
+            background: linear-gradient(180deg, #eaf2ff, #f7fbff);
         }
 
         .app {
@@ -21,22 +22,23 @@
 
         .header img {
             width: 100%;
-            border-radius: 14px;
+            border-radius: 16px;
             display: block;
         }
 
-        /* ===== Floating progress ===== */
+        /* floating progress */
+
         #surveyWrap {
             position: sticky;
             top: 0;
-            z-index: 20;
-            background: #f3f6fb;
+            z-index: 30;
+            background: #eaf2ff;
             padding: 8px 0;
         }
 
         #surveyBar {
             height: 6px;
-            background: #d9dee6;
+            background: #d5def0;
             border-radius: 6px;
             overflow: hidden;
         }
@@ -44,92 +46,107 @@
         #surveyBarInner {
             height: 100%;
             width: 0%;
-            background: linear-gradient(90deg, #0d3b66, #3fa9f5);
-            transition: .35s ease;
+            background: linear-gradient(90deg, #ff7a00, #ffb347);
+            transition: .35s;
         }
 
-        /* ===== Loader ===== */
+        /* loader */
+
         #loadWrap {
-            margin: 12px 0;
             text-align: center;
+            margin: 12px 0
         }
 
         #loadTrack {
             height: 6px;
             background: #ddd;
             border-radius: 6px;
-            overflow: hidden;
+            overflow: hidden
         }
 
         #loadBar {
             height: 100%;
             width: 0%;
-            background: linear-gradient(90deg, #ff7a00, #ffb347);
-            transition: .3s;
+            background: linear-gradient(90deg, #ff7a00, #ffb347)
         }
 
         #loadText {
             font-size: 12px;
             margin-top: 6px;
-            opacity: .7;
+            opacity: .7
         }
 
-        /* ===== Cards ===== */
+        /* cards */
+
         .field {
-            background: #ffffff;
+            background: rgba(255, 255, 255, .8);
+            backdrop-filter: blur(6px);
             padding: 14px;
-            border-radius: 14px;
+            border-radius: 16px;
             margin-bottom: 14px;
-            box-shadow: 0 8px 18px rgba(0, 0, 0, .06);
-            transition: .35s ease;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, .06);
             opacity: .45;
+            transition: .35s;
         }
 
-        /* ACTIVE CARD */
         .field.active {
             opacity: 1;
-            background: #fffaf2;
-            box-shadow: 0 10px 24px rgba(255, 122, 0, .18);
+            background: rgba(255, 248, 235, .9);
             border: 1px solid rgba(255, 122, 0, .25);
+            box-shadow: 0 10px 26px rgba(255, 122, 0, .25);
         }
 
         label {
             font-weight: 600;
-            display: block;
             margin-bottom: 8px;
+            display: block;
         }
 
         input,
         select {
             width: 100%;
             padding: 12px;
-            border-radius: 10px;
+            border-radius: 12px;
             border: 1px solid #d7dce4;
             background: #fafbfc;
             font-size: 15px;
         }
 
-        input:focus,
-        select:focus {
+        select:focus,
+        input:focus {
             outline: none;
-            border-color: #3fa9f5;
-            box-shadow: 0 0 0 2px rgba(63, 169, 245, .15);
+            border-color: #ff7a00;
+            box-shadow: 0 0 0 2px rgba(255, 122, 0, .2);
+            background: white;
         }
+
+        /* dropdown polish */
+
+        select {
+            transition: .2s;
+        }
+
+        select:focus {
+            transform: scale(1.02);
+        }
+
+        /* badge */
 
         .badge {
-            margin-top: 8px;
-            font-size: 13px;
-            color: #0d3b66;
+            margin-top: 10px;
+            font-size: 15px;
             font-weight: 600;
+            color: #0d3b66;
         }
 
-        /* ===== Button ===== */
+        /* button */
+
         #submitBtn {
             margin-top: 16px;
             width: 100%;
             padding: 14px;
             border: none;
-            border-radius: 12px;
+            border-radius: 14px;
             background: #ff7a00;
             color: white;
             font-size: 16px;
@@ -138,14 +155,15 @@
         }
 
         #submitBtn:not(:disabled) {
-            opacity: 1;
+            opacity: 1
         }
 
-        /* ===== Summary ===== */
+        /* summary */
+
         .summary-row {
             display: flex;
             justify-content: space-between;
-            font-size: 13px;
+            font-size: 14px;
             padding: 6px 0;
             border-bottom: 1px dashed #ddd;
         }
@@ -189,7 +207,7 @@
     </div>
 
     <script>
-        const WEBAPP_URL = "https://script.google.com/macros/s/AKfycbwXlYjodsqdwXD1lpUObHRUxO-4g99cRvMU77rJ3YMi7ySHMHmiLM-hNceq5RvbCTUw/exec";
+        const WEBAPP_URL = "https://script.google.com/macros/s/AKfycbyvtTpTUlPLz_b_maxO8p73hdSd_eNel2SdhrCE6n4KSCy4IBcuaDA0490c2kGEyCt1/exec";
 
         let sessionId = localStorage.getItem("tb_session_id");
         if (!sessionId) {
@@ -197,12 +215,13 @@
             localStorage.setItem("tb_session_id", sessionId);
         }
 
-        const answers = {};
-        let configFields = [];
-        let cityMap = {};
-        let ageTags = {};
+        const answers = {}
+        let configFields = []
+        let cityMap = {}
+        let ageTags = {}
 
         function qs(x) { return document.querySelector(x) }
+
         function el(t, a = {}, ...c) {
             const n = document.createElement(t);
             for (const k in a) n.setAttribute(k, a[k]);
@@ -216,22 +235,23 @@
         }
 
         function autosave(k, v) {
-            fetch(WEBAPP_URL, {
-                method: 'POST',
-                body: JSON.stringify({ sessionId, fieldName: k, fieldValue: v })
-            });
+            fetch(WEBAPP_URL, { method: 'POST', body: JSON.stringify({ sessionId, fieldName: k, fieldValue: v }) });
         }
 
-        function setActiveCard(card) {
+        function setActive(card) {
             document.querySelectorAll('.field').forEach(f => f.classList.remove('active'));
             card.classList.add('active');
+        }
+
+        function scrollNext(card) {
+            setTimeout(() => card.nextElementSibling?.scrollIntoView({ behavior: 'smooth', block: 'center' }), 250);
         }
 
         function updateProgress() {
             let done = 0;
             configFields.forEach(f => {
                 const v = answers[f.key];
-                if (Array.isArray(v) ? v.length : (v !== '' && v != null)) done++;
+                if (v !== '' && v != null) done++;
             });
             const pct = Math.round(done / configFields.length * 100);
             qs('#surveyBarInner').style.width = pct + '%';
@@ -258,39 +278,50 @@
             const w = qs('#formWrapper');
             w.innerHTML = '';
 
-            configFields.forEach((f, idx) => {
+            configFields.forEach((f, i) => {
                 const box = el('div', { class: 'field' });
-                box.append(el('label', {}, f.label));
+                if (i === 0) box.classList.add('active');
 
-                if (idx === 0) box.classList.add('active');
+                box.append(el('label', {}, f.label));
 
                 if (f.type === 'select') {
                     const s = el('select', { name: f.key });
                     s.append(el('option', { value: '', hidden: true }, ''));
 
-                    f.options.split(/;|,/).forEach(o => {
-                        s.append(el('option', { value: o.trim() }, o.trim()));
-                    });
+                    f.options.split(/;|,/).forEach(o => s.append(el('option', { value: o.trim() }, o.trim())));
 
                     s.onchange = () => {
                         answers[f.key] = s.value;
                         autosave(f.key, s.value);
+
+                        if (f.key === 'City') {
+                            box.querySelector('.badge')?.remove();
+                            box.append(el('div', { class: 'badge' }, '📍 ' + (cityMap[s.value] || '')));
+                        }
+
+                        if (f.key === 'Age') {
+                            box.querySelector('.badge')?.remove();
+                            box.append(el('div', { class: 'badge' }, ageTags[s.value] || ''));
+                        }
+
                         updateProgress();
-                        setActiveCard(box);
+                        setActive(box);
+                        scrollNext(box);
                     };
 
                     box.append(s);
                 }
 
-                else if (f.type === 'number' || f.type === 'text') {
-                    const i = el('input', { type: f.type });
-                    i.onblur = () => {
-                        answers[f.key] = i.value;
-                        autosave(f.key, i.value);
+                else if (f.type === 'text' || f.type === 'number') {
+                    const i2 = el('input', { type: f.type });
+                    i2.onblur = () => {
+                        answers[f.key] = i2.value;
+                        autosave(f.key, i2.value);
                         updateProgress();
-                        setActiveCard(box);
+                        setActive(box);
+                        scrollNext(box);
                     };
-                    box.append(i);
+                    box.append(i2);
                 }
 
                 else if (f.type === 'radio') {
@@ -301,7 +332,8 @@
                             answers[f.key] = v;
                             autosave(f.key, v);
                             updateProgress();
-                            setActiveCard(box);
+                            setActive(box);
+                            scrollNext(box);
                         };
                         box.append(el('label', {}, r, ' ' + v));
                     });
@@ -312,19 +344,14 @@
         }
 
         qs('#submitBtn').onclick = async () => {
-            await fetch(WEBAPP_URL, {
-                method: 'POST',
-                body: JSON.stringify({ sessionId, submitted: true, answers })
-            });
+            await fetch(WEBAPP_URL, { method: 'POST', body: JSON.stringify({ sessionId, submitted: true, answers }) });
 
             qs('#formWrapper').style.display = 'none';
             qs('#submitBtn').style.display = 'none';
             qs('#surveyWrap').style.display = 'none';
 
             let out = '<h3>Thank you guys!! See ya soon with Smoky Flavours 🎉❤️‍🔥</h3>';
-            Object.keys(answers).forEach(k => {
-                out += `<div class="summary-row"><b>${k}</b><span>${answers[k]}</span></div>`;
-            });
+            Object.keys(answers).forEach(k => out += `<div class="summary-row"><b>${k}</b><span>${answers[k]}</span></div>`);
 
             qs('#thankYou').innerHTML = out;
             qs('#thankYou').style.display = 'block';
