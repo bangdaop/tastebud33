@@ -226,9 +226,7 @@
             setLoad(60)
             const j = await r.json()
 
-            // REMOVE BLANK ROWS
             configFields = (j.config || []).filter(f => f.key && f.type)
-
             cityMap = j.cityMappings?.cityToState || {}
                 ; (j.ageTags || []).forEach(a => ageTags[a.key] = a.displayLabel)
 
@@ -245,11 +243,7 @@
                 const box = el("div", { class: "field" })
                 box.append(el("label", {}, f.label))
 
-                // STATEMENT ONLY
-                if (f.type === "statement") {
-                    w.append(box)
-                    return
-                }
+                if (f.type === "statement") { w.append(box); return }
 
                 if (f.type === "select") {
                     const s = el("select")
@@ -264,11 +258,11 @@
                             box.append(el("div", { class: "badge" }, "📍 " + (cityMap[s.value] || "")))
 
                         if (f.key.toLowerCase().includes("age"))
-                            box.append(el("div", { class: "badge" }, ageTags[s.value] || "")
+                            box.append(el("div", { class: "badge" }, ageTags[s.value] || ""))
 
-updateProgress()
-scrollNext(box)
-}
+                        updateProgress()
+                        scrollNext(box)
+                    }
                     box.append(s)
                 }
 
