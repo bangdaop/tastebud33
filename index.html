@@ -26,7 +26,8 @@
             display: block
         }
 
-        /* progress */
+        /* Floating progress */
+
         #surveyWrap {
             position: sticky;
             top: 0;
@@ -49,7 +50,8 @@
             transition: .35s ease
         }
 
-        /* loader */
+        /* Loader */
+
         #loadWrap {
             text-align: center;
             margin: 12px 0
@@ -75,7 +77,8 @@
             opacity: .7
         }
 
-        /* cards */
+        /* Cards */
+
         .field {
             background: #fff;
             padding: 14px;
@@ -84,7 +87,14 @@
             box-shadow: 0 8px 18px rgba(0, 0, 0, .06);
             opacity: 0;
             transform: translateY(12px);
-            animation: fadeUp .4s forwards
+            animation: fadeUp .4s forwards;
+            transition: .35s ease;
+        }
+
+        .field.focused {
+            background: #fffaf2;
+            box-shadow: 0 12px 26px rgba(255, 122, 0, .22);
+            transform: scale(1.01);
         }
 
         @keyframes fadeUp {
@@ -110,14 +120,30 @@
             font-size: 15px;
             box-sizing: border-box;
             height: 46px;
+            transition: .25s ease;
+        }
+
+        select {
+            appearance: none;
+            background-image:
+                linear-gradient(45deg, transparent 50%, #777 50%),
+                linear-gradient(135deg, #777 50%, transparent 50%);
+            background-position:
+                calc(100% - 18px) calc(1em + 2px),
+                calc(100% - 13px) calc(1em + 2px);
+            background-size: 5px 5px, 5px 5px;
+            background-repeat: no-repeat;
         }
 
         input:focus,
         select:focus {
             outline: none;
             border-color: #3fa9f5;
-            box-shadow: 0 0 0 2px rgba(63, 169, 245, .15)
+            box-shadow: 0 0 0 3px rgba(63, 169, 245, .18);
+            background: #fff;
         }
+
+        /* Badge */
 
         .badge {
             margin-top: 8px;
@@ -126,7 +152,8 @@
             font-weight: 600
         }
 
-        /* submit */
+        /* Submit */
+
         #submitBtn {
             margin-top: 16px;
             width: 100%;
@@ -144,7 +171,8 @@
             opacity: 1
         }
 
-        /* summary */
+        /* Summary */
+
         .summary-row {
             display: flex;
             justify-content: space-between;
@@ -153,7 +181,8 @@
             border-bottom: 1px dashed #ddd
         }
 
-        /* matrix overlay */
+        /* Matrix overlay */
+
         #matrixOverlay {
             position: fixed;
             inset: 0;
@@ -162,14 +191,14 @@
             display: none;
             align-items: center;
             justify-content: center;
-            z-index: 9999;
+            z-index: 9999
         }
 
         #matrixText {
             color: #00ff66;
             font-family: monospace;
             font-size: 18px;
-            letter-spacing: 1px;
+            letter-spacing: 1px
         }
 
         @media(max-width:600px) {
@@ -291,6 +320,9 @@
 
                     f.options.split(/;|,/).forEach(o => s.append(el('option', { value: o.trim() }, o.trim())))
 
+                    s.onfocus = () => box.classList.add('focused')
+                    s.onblur = () => box.classList.remove('focused')
+
                     s.onchange = () => {
                         answers[f.key] = s.value
                         autosave(f.key, s.value)
@@ -314,7 +346,9 @@
 
                 else if (f.type === 'number' || f.type === 'text') {
                     const i = el('input', { type: f.type })
+                    i.onfocus = () => box.classList.add('focused')
                     i.onblur = () => {
+                        box.classList.remove('focused')
                         answers[f.key] = i.value
                         autosave(f.key, i.value)
                         updateProgress()
@@ -341,7 +375,7 @@
             })
         }
 
-        /* MATRIX SUBMIT */
+        /* Matrix submit */
 
         qs('#submitBtn').onclick = async () => {
 
