@@ -343,17 +343,20 @@
         /* Matrix submit */
 
         qs('#submitBtn').onclick = async () => {
-            const overlay = qs('#matrixOverlay');
-            const textEl = qs('#matrixText');
-            overlay.style.display = 'flex';
 
-            const msg = "Submitting your choices to Head Chef CEO Elong Mask . . .";
-            let i = 0; textEl.textContent = '';
+            const overlay = qs('#matrixOverlay')
+            const textEl = qs('#matrixText')
+            overlay.style.display = 'flex'
+
+            const msg = "Submitting your choices to Head Chef CEO Elong Mask . . ."
+            let i = 0
+            textEl.textContent = ''
+
             const typer = setInterval(() => {
-                textEl.textContent += msg[i] || ''; i++;
-                if (i > msg.length) clearInterval(typer);
-            }, 45);
-
+                textEl.textContent += msg[i] || ''
+                i++
+                if (i > msg.length) clearInterval(typer)
+            }, 45)
             await fetch(WEBAPP_URL, { method: 'POST', body: JSON.stringify({ sessionId, submitted: true, answers }) });
 
             qs('.app').style.display = 'none';
