@@ -1,1 +1,324 @@
+<!DOCTYPE html>
+<html>
 
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <title>Taste Buds</title>
+
+    <style>
+        body {
+            margin: 0;
+            font-family: system-ui;
+            background: linear-gradient(180deg, #f3f6fb, #e9eef5)
+        }
+
+        .app {
+            max-width: 720px;
+            margin: auto;
+            padding: 12px
+        }
+
+        .header img {
+            width: 100%;
+            border-radius: 14px;
+            display: block
+        }
+
+        /* loader */
+        #loadWrap {
+            text-align: center;
+            margin: 12px 0
+        }
+
+        #loadTrack {
+            height: 6px;
+            background: #ddd;
+            border-radius: 6px;
+            overflow: hidden
+        }
+
+        #loadBar {
+            height: 100%;
+            width: 0%;
+            background: linear-gradient(90deg, #ff7a00, #ffb347);
+            transition: .3s
+        }
+
+        #loadText {
+            font-size: 12px;
+            margin-top: 6px;
+            opacity: .7
+        }
+
+        /* progress */
+        #surveyWrap {
+            position: sticky;
+            top: 0;
+            background: #f3f6fb;
+            padding: 8px 0;
+            z-index: 20;
+            display: none
+        }
+
+        #surveyBar {
+            height: 6px;
+            background: #d9dee6;
+            border-radius: 6px;
+            overflow: hidden
+        }
+
+        #surveyBarInner {
+            height: 100%;
+            width: 0%;
+            background: linear-gradient(90deg, #0d3b66, #3fa9f5);
+            transition: .35s
+        }
+
+        /* cards */
+        .field {
+            background: #fff;
+            padding: 14px;
+            border-radius: 14px;
+            margin-bottom: 14px;
+            box-shadow: 0 8px 18px rgba(0, 0, 0, .06)
+        }
+
+        label {
+            font-weight: 600;
+            display: block;
+            margin-bottom: 8px
+        }
+
+        input,
+        select {
+            width: 100%;
+            padding: 12px;
+            border-radius: 10px;
+            border: 1px solid #d7dce4;
+            background: #fafbfc;
+            font-size: 15px;
+            box-sizing: border-box
+        }
+
+        .badge {
+            margin-top: 8px;
+            font-size: 15px;
+            font-weight: 600;
+            color: #0d3b66
+        }
+
+        #submitBtn {
+            margin-top: 16px;
+            width: 100%;
+            padding: 14px;
+            border: none;
+            border-radius: 12px;
+            background: #ff7a00;
+            color: white;
+            font-size: 16px;
+            opacity: .4
+        }
+
+        #submitBtn:not(:disabled) {
+            opacity: 1
+        }
+
+        .summary-row {
+            display: flex;
+            justify-content: space-between;
+            font-size: 13px;
+            padding: 6px 0;
+            border-bottom: 1px dashed #ddd
+        }
+
+        /* matrix */
+        #matrixOverlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, .85);
+            backdrop-filter: blur(6px);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 999
+        }
+
+        #matrixText {
+            color: #00ff6a;
+            font-family: monospace;
+            font-size: 18px;
+            text-align: center;
+            padding: 20px
+        }
+    </style>
+</head>
+
+<body>
+
+    <div id="matrixOverlay">
+        <div id="matrixText"></div>
+    </div>
+
+    <div class="app">
+
+        <div class="header">
+            <img
+                src="https://raw.githubusercontent.com/bangdaop/33cimg/9c0a0d694849c5fcc4fde282076fc70f0c46492f/33%20combo.PNG">
+        </div>
+
+        <div id="loadWrap">
+            <div id="loadTrack">
+                <div id="loadBar"></div>
+            </div>
+            <div id="loadText">Loading…</div>
+        </div>
+
+        <div id="surveyWrap">
+            <div id="surveyBar">
+                <div id="surveyBarInner"></div>
+            </div>
+        </div>
+
+        <div id="formWrapper"></div>
+
+        <button id="submitBtn" disabled>Finish</button>
+
+        <div id="thankYou" style="display:none"></div>
+
+    </div>
+
+    <script>
+        const WEBAPP_URL = "https://script.google.com/macros/s/AKfycbzxp6xJwgKTXCO5jas3mg7fD3fBbH5-0MHPkYD3K55LNN2Z7Yli88cvWKv17OcxpvSU/exec"
+
+        let sessionId = localStorage.getItem("tb_session_id")
+        if (!sessionId) {
+            sessionId = "s_" + Math.random().toString(36).slice(2, 12)
+            localStorage.setItem("tb_session_id", sessionId)
+        }
+
+        const answers = {}
+        let configFields = []
+        let cityMap = {}
+        let ageTags = {}
+
+        const qs = x => document.querySelector(x)
+        const el = (t, a = {}, ...c) => { const n = document.createElement(t); for (const k in a) n.setAttribute(k, a[k]); c.forEach(x => n.append(x)); return n }
+
+        function autosave(k, v) {
+            fetch(WEBAPP_URL, { method: "POST", body: JSON.stringify({ sessionId, fieldName: k, fieldValue: v }) })
+        }
+
+        function setLoad(p) {
+            qs("#loadBar").style.width = p + "%"
+            qs("#loadText").innerText = "Loading… " + p + "%"
+        }
+
+        function scrollNext(card) {
+            setTimeout(() => card.nextElementSibling?.scrollIntoView({ behavior: "smooth", block: "center" }), 250)
+        }
+
+        function updateProgress() {
+            let done = 0
+            configFields.forEach(f => { if (answers[f.key]) done++ })
+            qs("#surveyBarInner").style.width = Math.round(done / configFields.length * 100) + "%"
+            qs("#surveyWrap").style.display = "block"
+            qs("#submitBtn").disabled = done !== configFields.length
+        }
+
+        async function loadConfig() {
+            setLoad(20)
+            const r = await fetch(WEBAPP_URL)
+            setLoad(60)
+            const j = await r.json()
+
+            configFields = j.config || []
+            cityMap = j.cityMappings?.cityToState || {}
+                ; (j.ageTags || []).forEach(a => ageTags[a.key] = a.displayLabel)
+
+            setLoad(90)
+            buildForm()
+            setTimeout(() => qs("#loadWrap").style.display = "none", 300)
+        }
+
+        function buildForm() {
+            const w = qs("#formWrapper")
+            w.innerHTML = ""
+
+            configFields.forEach(f => {
+                const box = el("div", { class: "field" })
+                box.append(el("label", {}, f.label))
+
+                if (f.type === "select") {
+                    const s = el("select")
+                    s.append(el("option", { value: "", hidden: true }, ""))
+                    f.options.split(/;|,/).forEach(o => s.append(el("option", { value: o.trim() }, o.trim())))
+                    s.onchange = () => {
+                        answers[f.key] = s.value
+                        autosave(f.key, s.value)
+                        if (f.key === "City") box.append(el("div", { class: "badge" }, "📍 " + (cityMap[s.value] || "")))
+                        if (f.key === "Age") box.append(el("div", { class: "badge" }, ageTags[s.value] || ""))
+                        updateProgress()
+                        scrollNext(box)
+                    }
+                    box.append(s)
+                }
+
+                else if (f.type === "text" || f.type === "number") {
+                    const i = el("input", { type: f.type })
+                    i.onblur = () => {
+                        answers[f.key] = i.value
+                        autosave(f.key, i.value)
+                        updateProgress()
+                        scrollNext(box)
+                    }
+                    box.append(i)
+                }
+
+                else if (f.type === "radio") {
+                    f.options.split(/;|,/).forEach(o => {
+                        const v = o.trim()
+                        const r = el("input", { type: "radio", name: f.key, value: v })
+                        r.onchange = () => {
+                            answers[f.key] = v
+                            autosave(f.key, v)
+                            updateProgress()
+                            scrollNext(box)
+                        }
+                        box.append(el("label", {}, r, " " + v))
+                    })
+                }
+
+                w.append(box)
+            })
+        }
+
+        qs("#submitBtn").onclick = async () => {
+            const overlay = qs("#matrixOverlay")
+            const text = qs("#matrixText")
+            overlay.style.display = "flex"
+
+            const msg = "Submitting your choices to Head Chef CEO Elong Mask . . ."
+            let i = 0; text.textContent = ""
+            const typer = setInterval(() => {
+                text.textContent += msg[i] || ""
+                i++
+                if (i > msg.length) clearInterval(typer)
+            }, 45)
+
+            await fetch(WEBAPP_URL, { method: "POST", body: JSON.stringify({ sessionId, submitted: true, answers }) })
+
+            qs(".app").style.display = "none"
+
+            let out = "<h3>Thank you guys!! See ya soon with Smoky Flavours 🎉❤️‍🔥</h3>"
+            Object.keys(answers).forEach(k => out += `<div class="summary-row"><b>${k}</b><span>${answers[k]}</span></div>`)
+
+            overlay.style.display = "none"
+            document.body.innerHTML = out
+        }
+
+        loadConfig()
+    </script>
+</body>
+
+</html>
