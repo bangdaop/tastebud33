@@ -79,6 +79,13 @@
             box-shadow: 0 8px 18px rgba(0, 0, 0, .06)
         }
 
+        .statement {
+            background: transparent;
+            box-shadow: none;
+            font-weight: 600;
+            font-size: 16px
+        }
+
         label {
             font-weight: 600;
             display: block;
@@ -129,7 +136,6 @@
 </head>
 
 <body>
-
     <div class="app">
 
         <div class="header">
@@ -153,7 +159,6 @@
         <div id="formWrapper"></div>
 
         <button id="submitBtn" disabled>Finish</button>
-
         <div id="thankYou" style="display:none"></div>
 
     </div>
@@ -169,8 +174,8 @@
         let cityMap = {}
         let ageTags = {}
 
-        function qs(x) { return document.querySelector(x) }
-        function el(t, a = {}, ...c) { const n = document.createElement(t); for (const k in a) n.setAttribute(k, a[k]); c.forEach(x => n.append(x)); return n }
+        const qs = x => document.querySelector(x)
+        const el = (t, a = {}, ...c) => { const n = document.createElement(t); for (const k in a) n.setAttribute(k, a[k]); c.forEach(x => n.append(x)); return n }
 
         function setLoad(p) { qs('#loadBar').style.width = p + '%'; qs('#loadText').innerText = 'Loading… ' + p + '%' }
 
@@ -183,11 +188,15 @@
         }
 
         function updateProgress() {
+            const answerable = configFields.filter(f => f.type !== 'statement')
             let done = 0
-            configFields.forEach(f => { const v = answers[f.key]; if (v !== '' && v != null) done++ })
-            qs('#surveyBarInner').style.width = Math.round(done / configFields.length * 100) + '%'
+            answerable.forEach(f => {
+                const v = answers[f.key]
+                if (v !== '' && v != null) done++
+            })
+            qs('#surveyBarInner').style.width = Math.round(done / answerable.length * 100) + '%'
             qs('#surveyWrap').style.display = 'block'
-            qs('#submitBtn').disabled = done !== configFields.length
+            qs('#submitBtn').disabled = done !== answerable.length
         }
 
         async function loadConfig() {
@@ -196,9 +205,9 @@
             setLoad(60)
             const j = await r.json()
 
-            configFields = j.config || []
+            configFields = j.config.filter(f => f && f.type)
             cityMap = j.cityMappings?.cityToState || {}
-                ; (j.ageTags || []).forEach(a => ageTags[a.key.trim()] = a.displayLabel)
+                ; (j.ageTags || []).forEach(a => ageTags[a.key] = a.displayLabel)
 
             setLoad(90)
             buildForm()
@@ -210,6 +219,11 @@
             w.innerHTML = ''
 
             configFields.forEach(f => {
+                if (f.type === 'statement') {
+                    w.append(el('div', { class: 'field statement' }, f.label))
+                    return
+                }
+
                 const box = el('div', { class: 'field' })
                 box.append(el('label', {}, f.label))
 
@@ -225,14 +239,11 @@
 
                         box.querySelector('.badge')?.remove()
 
-                        if (f.key.toLowerCase().includes('city')) {
-                            const st = cityMap[s.value.trim()]
-                            if (st) box.append(el('div', { class: 'badge' }, '📍 ' + st))
+                        if (cityMap[s.value]) {
+                            box.append(el('div', { class: 'badge' }, '📍 ' + cityMap[s.value]))
                         }
-
-                        if (f.key.toLowerCase().includes('age')) {
-                            const tag = ageTags[s.value.trim()]
-                            if (tag) box.append(el('div', { class: 'badge' }, tag))
+                        if (ageTags[s.value]) {
+                            box.append(el('div', { class: 'badge' }, ageTags[s.value]))
                         }
 
                         updateProgress()
@@ -242,7 +253,7 @@
                     box.append(s)
                 }
 
-                else if (f.type === 'number' || f.type === 'text') {
+                else if (f.type === 'text' || f.type === 'number') {
                     const i = el('input', { type: f.type })
                     i.onblur = () => { answers[f.key] = i.value; autosave(f.key, i.value); updateProgress(); scrollNext(box) }
                     box.append(i)
@@ -274,7 +285,6 @@
 
         loadConfig()
     </script>
-
 </body>
 
 </html>
