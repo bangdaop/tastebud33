@@ -7,6 +7,10 @@
     <title>Taste Buds</title>
 
     <style>
+        * {
+            box-sizing: border-box
+        }
+
         body {
             margin: 0;
             font-family: system-ui;
@@ -25,7 +29,8 @@
             display: block
         }
 
-        /* floating progress */
+        /* progress */
+
         #surveyWrap {
             position: sticky;
             top: 0;
@@ -49,6 +54,7 @@
         }
 
         /* loader */
+
         #loadWrap {
             text-align: center;
             margin: 12px 0
@@ -75,6 +81,7 @@
         }
 
         /* cards */
+
         .field {
             background: #fff;
             padding: 14px;
@@ -106,6 +113,8 @@
             color: #0d3b66
         }
 
+        /* button */
+
         #submitBtn {
             margin-top: 16px;
             width: 100%;
@@ -122,12 +131,36 @@
             opacity: 1
         }
 
+        /* summary */
+
         .summary-row {
             display: flex;
             justify-content: space-between;
             font-size: 13px;
             padding: 6px 0;
             border-bottom: 1px dashed #ddd
+        }
+
+        /* MATRIX */
+
+        #matrixOverlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, .85);
+            backdrop-filter: blur(6px);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 9999
+        }
+
+        #matrixText {
+            color: #00ff66;
+            font-family: monospace;
+            font-size: 18px;
+            white-space: pre-wrap;
+            max-width: 80%;
+            text-align: center
         }
     </style>
 </head>
@@ -160,6 +193,10 @@
 
         <div id="thankYou" style="display:none"></div>
 
+    </div>
+
+    <div id="matrixOverlay">
+        <div id="matrixText"></div>
     </div>
 
     <script>
@@ -201,18 +238,18 @@
 
         function updateProgress() {
 
-            const answerable = configFields.filter(f => f && f.key && f.type);
+            const usable = configFields.filter(f => f && f.key);
 
             let done = 0;
-            answerable.forEach(f => {
+            usable.forEach(f => {
                 const v = answers[f.key];
                 if (v !== '' && v != null) done++;
             });
 
-            const pct = Math.round(done / answerable.length * 100);
+            const pct = Math.round(done / usable.length * 100);
             qs('#surveyBarInner').style.width = pct + '%';
             qs('#surveyWrap').style.display = 'block';
-            qs('#submitBtn').disabled = done !== answerable.length;
+            qs('#submitBtn').disabled = done !== usable.length;
         }
 
         async function loadConfig() {
@@ -223,7 +260,6 @@
             const j = await r.json();
 
             configFields = (j.config || []).filter(f => f && f.key);
-
             cityMap = j.cityMappings?.cityToState || {};
             (j.ageTags || []).forEach(a => ageTags[a.key] = a.displayLabel);
 
@@ -245,7 +281,7 @@
                 if (f.type === 'select') {
 
                     const s = el('select', { name: f.key });
-                    s.append(el('option', { value: '', hidden: true }, ''))
+                    s.append(el('option', { value: '', hidden: true }, ''));
 
                     f.options.split(/;|,/).forEach(o => {
                         s.append(el('option', { value: o.trim() }, o.trim()));
@@ -258,13 +294,8 @@
 
                         box.querySelectorAll('.badge').forEach(b => b.remove());
 
-                        if (cityMap[s.value]) {
-                            box.append(el('div', { class: 'badge' }, '📍 ' + cityMap[s.value]));
-                        }
-
-                        if (ageTags[s.value]) {
-                            box.append(el('div', { class: 'badge' }, ageTags[s.value]));
-                        }
+                        if (cityMap[s.value]) box.append(el('div', { class: 'badge' }, '📍 ' + cityMap[s.value]));
+                        if (ageTags[s.value]) box.append(el('div', { class: 'badge' }, ageTags[s.value]));
 
                         updateProgress();
                         scrollNext(box);
@@ -290,7 +321,6 @@
                 else if (f.type === 'radio') {
 
                     f.options.split(/;|,/).forEach(o => {
-
                         const v = o.trim();
                         const r = el('input', { type: 'radio', name: f.key, value: v });
 
@@ -309,9 +339,27 @@
             });
         }
 
+        /* MATRIX SUBMIT */
+
         qs('#submitBtn').onclick = async () => {
 
+            const overlay = qs('#matrixOverlay');
+            const textEl = qs('#matrixText');
+            overlay.style.display = 'flex';
+
+            const msg = "Submitting your choices to Head Chef CEO Elong Mask . . .";
+            let i = 0;
+            textEl.textContent = '';
+
+            const typer = setInterval(() => {
+                textEl.textContent += msg[i] || '';
+                i++;
+                if (i > msg.length) clearInterval(typer);
+            }, 45);
+
             await fetch(WEBAPP_URL, { method: 'POST', body: JSON.stringify({ sessionId, submitted: true, answers }) });
+
+            overlay.style.display = 'none';
 
             qs('#formWrapper').style.display = 'none';
             qs('#submitBtn').style.display = 'none';
