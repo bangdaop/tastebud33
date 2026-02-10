@@ -7,69 +7,55 @@
     <title>Taste Buds</title>
 
     <style>
-        /* =====================
-   iOS SPRING SYSTEM
-===================== */
         :root {
-            --spring-fast: cubic-bezier(.34, 1.56, .64, 1);
-            --spring-soft: cubic-bezier(.25, 1.4, .5, 1);
+            --spring: cubic-bezier(.25, 1.4, .5, 1);
         }
 
-        /* =====================
-   BASE
-===================== */
         body {
             margin: 0;
-            font-family: system-ui, -apple-system, BlinkMacSystemFont;
+            font-family: system-ui;
             background: linear-gradient(180deg, #f3f6fb, #e9eef5);
         }
 
         .app {
             max-width: 720px;
             margin: auto;
-            padding: 12px;
+            padding: 12px
         }
 
-        /* =====================
-   HEADER IMAGE
-===================== */
         .header img {
             width: 100%;
             border-radius: 14px;
-            display: block;
+            display: block
         }
 
-        /* =====================
-   LOADER
-===================== */
+        /* Loader */
         #loadWrap {
-            margin: 12px 0;
             text-align: center;
+            margin: 12px 0
         }
 
         #loadTrack {
             height: 6px;
             background: #ddd;
             border-radius: 6px;
-            overflow: hidden;
+            overflow: hidden
         }
 
         #loadBar {
             height: 100%;
-            width: 0%;
+            width: 0;
             background: linear-gradient(90deg, #ff7a00, #ffb347);
-            transition: width .5s var(--spring-soft);
+            transition: .5s var(--spring)
         }
 
         #loadText {
             font-size: 12px;
             margin-top: 6px;
-            opacity: .7;
+            opacity: .7
         }
 
-        /* =====================
-   FLOATING PROGRESS
-===================== */
+        /* Floating survey progress */
         #surveyWrap {
             position: sticky;
             top: 0;
@@ -83,19 +69,17 @@
             height: 6px;
             background: #d9dee6;
             border-radius: 6px;
-            overflow: hidden;
+            overflow: hidden
         }
 
         #surveyBarInner {
             height: 100%;
-            width: 0%;
+            width: 0;
             background: linear-gradient(90deg, #0d3b66, #3fa9f5);
-            transition: width .6s var(--spring-soft);
+            transition: .6s var(--spring)
         }
 
-        /* =====================
-   QUESTION CARDS
-===================== */
+        /* Cards */
         .field {
             background: rgba(255, 255, 255, .85);
             backdrop-filter: blur(10px);
@@ -105,7 +89,8 @@
             box-shadow: 0 8px 18px rgba(0, 0, 0, .06);
             opacity: 0;
             transform: translateY(14px);
-            animation: cardIn .55s var(--spring-soft) forwards;
+            animation: cardIn .5s var(--spring) forwards;
+            transition: .35s var(--spring);
         }
 
         @keyframes cardIn {
@@ -115,13 +100,18 @@
             }
         }
 
-        label {
-            font-weight: 600;
-            display: block;
-            margin-bottom: 8px;
+        .field.active {
+            background: #fff7ec;
+            box-shadow: 0 12px 28px rgba(255, 122, 0, .35);
+            border: 1px solid rgba(255, 122, 0, .35);
         }
 
-        /* Inputs unified size */
+        label {
+            font-weight: 600;
+            margin-bottom: 8px;
+            display: block
+        }
+
         input,
         select {
             width: 100%;
@@ -130,38 +120,24 @@
             border: 1px solid #d7dce4;
             background: #fafbfc;
             font-size: 15px;
-            appearance: none;
+            transition: .35s var(--spring);
         }
 
-        /* Smooth select feel */
-        select {
-            transition: box-shadow .35s var(--spring-soft),
-                transform .35s var(--spring-soft);
-        }
-
+        input:focus,
         select:focus {
             outline: none;
             transform: scale(1.01);
             box-shadow: 0 0 0 3px rgba(63, 169, 245, .2);
         }
 
-        input:focus {
-            outline: none;
-            box-shadow: 0 0 0 3px rgba(63, 169, 245, .2);
-        }
-
-        /* =====================
-   BADGES (STATE / AGE)
-===================== */
         .badge {
             margin-top: 10px;
             font-size: 15px;
             font-weight: 600;
             color: #0d3b66;
             display: flex;
-            align-items: center;
             gap: 6px;
-            animation: badgeIn .4s var(--spring-fast);
+            animation: badgeIn .4s var(--spring);
         }
 
         @keyframes badgeIn {
@@ -171,14 +147,10 @@
             }
 
             to {
-                opacity: 1;
-                transform: none
+                opacity: 1
             }
         }
 
-        /* =====================
-   SUBMIT BUTTON
-===================== */
         #submitBtn {
             margin-top: 16px;
             width: 100%;
@@ -189,52 +161,44 @@
             color: white;
             font-size: 16px;
             opacity: .4;
-            transition: opacity .4s var(--spring-soft),
-                transform .25s var(--spring-soft);
+            transition: .4s var(--spring);
         }
 
         #submitBtn:not(:disabled) {
-            opacity: 1;
+            opacity: 1
         }
 
         #submitBtn:active {
-            transform: scale(.97);
+            transform: scale(.97)
         }
 
-        /* =====================
-   SUBMIT OVERLAY
-===================== */
-        #submitOverlay {
-            position: fixed;
-            inset: 0;
-            background: rgba(0, 0, 0, .45);
-            backdrop-filter: blur(8px);
-            display: none;
-            align-items: center;
-            justify-content: center;
-            z-index: 50;
-        }
-
-        #terminal {
-            font-family: monospace;
-            color: #00ff66;
-            font-size: 14px;
-        }
-
-        /* =====================
-   THANK YOU
-===================== */
         .summary-row {
             display: flex;
             justify-content: space-between;
             font-size: 13px;
             padding: 6px 0;
-            border-bottom: 1px dashed #ddd;
+            border-bottom: 1px dashed #ddd
         }
 
-        /* =====================
-   MOBILE
-===================== */
+        /* Matrix overlay */
+        #matrixOverlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, .55);
+            backdrop-filter: blur(8px);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 99;
+        }
+
+        #matrixText {
+            color: #00ff66;
+            font-family: monospace;
+            font-size: 16px;
+            white-space: pre-wrap;
+        }
+
         @media(max-width:600px) {
             .app {
                 padding: 8px
@@ -268,14 +232,12 @@
         <div id="formWrapper"></div>
 
         <button id="submitBtn" disabled>Finish</button>
-
         <div id="thankYou" style="display:none"></div>
 
     </div>
 
-    <!-- SUBMIT OVERLAY -->
-    <div id="submitOverlay">
-        <div id="terminal"></div>
+    <div id="matrixOverlay">
+        <div id="matrixText"></div>
     </div>
 
     <script>
@@ -287,18 +249,11 @@
             localStorage.setItem("tb_session_id", sessionId);
         }
 
-        const answers = {};
-        let configFields = [];
-        let cityMap = {};
-        let ageTags = {};
+        const answers = {}, configFields = [];
+        let cityMap = {}, ageTags = {};
 
         const qs = x => document.querySelector(x);
-        const el = (t, a = {}, ...c) => {
-            const n = document.createElement(t);
-            for (const k in a) n.setAttribute(k, a[k]);
-            c.forEach(x => n.append(x));
-            return n;
-        };
+        const el = (t, a = {}, ...c) => { const n = document.createElement(t); for (const k in a) n.setAttribute(k, a[k]); c.forEach(x => n.append(x)); return n };
 
         function setLoad(p) {
             qs('#loadBar').style.width = p + '%';
@@ -309,17 +264,20 @@
             fetch(WEBAPP_URL, { method: 'POST', body: JSON.stringify({ sessionId, fieldName: k, fieldValue: v }) });
         }
 
+        function setActive(card) {
+            document.querySelectorAll('.field').forEach(f => f.classList.remove('active'));
+            card.classList.add('active');
+        }
+
         function scrollNext(card) {
-            setTimeout(() => {
-                card.nextElementSibling?.scrollIntoView({ behavior: 'smooth', block: 'center' });
-            }, 250);
+            setTimeout(() => card.nextElementSibling?.scrollIntoView({ behavior: 'smooth', block: 'center' }), 300);
         }
 
         function updateProgress() {
             let done = 0;
             configFields.forEach(f => {
                 const v = answers[f.key];
-                if (v !== undefined && v !== '') done++;
+                if (Array.isArray(v) ? v.length : (v !== '' && v != null)) done++;
             });
             const pct = Math.round(done / configFields.length * 100);
             qs('#surveyBarInner').style.width = pct + '%';
@@ -333,7 +291,7 @@
             setLoad(60);
             const j = await r.json();
 
-            configFields = j.config || [];
+            configFields.push(...(j.config || []));
             cityMap = j.cityMappings?.cityToState || {};
             (j.ageTags || []).forEach(a => ageTags[a.key] = a.displayLabel);
 
@@ -343,60 +301,37 @@
         }
 
         function buildForm() {
-            const w = qs('#formWrapper');
-            w.innerHTML = '';
+            const w = qs('#formWrapper'); w.innerHTML = '';
 
-            configFields.forEach(f => {
+            configFields.forEach((f, i) => {
                 const box = el('div', { class: 'field' });
+                if (i === 0) box.classList.add('active');
                 box.append(el('label', {}, f.label));
 
                 if (f.type === 'select') {
-                    const s = el('select', { name: f.key });
+                    const s = el('select', {});
                     s.append(el('option', { value: '', hidden: true }, ''));
-                    f.options.split(/;|,/).forEach(o => {
-                        s.append(el('option', { value: o.trim() }, o.trim()));
-                    });
+                    f.options.split(/;|,/).forEach(o => s.append(el('option', { value: o.trim() }, o.trim())));
                     s.onchange = () => {
-                        answers[f.key] = s.value;
-                        autosave(f.key, s.value);
-
-                        if (f.key === 'City') {
-                            box.querySelector('.badge')?.remove();
-                            box.append(el('div', { class: 'badge' }, '📍 ' + (cityMap[s.value] || '')));
-                        }
-
-                        if (f.key === 'Age') {
-                            box.querySelector('.badge')?.remove();
-                            box.append(el('div', { class: 'badge' }, ageTags[s.value] || ''));
-                        }
-
-                        updateProgress();
-                        scrollNext(box);
+                        answers[f.key] = s.value; autosave(f.key, s.value);
+                        if (f.key === 'City') { box.querySelector('.badge')?.remove(); box.append(el('div', { class: 'badge' }, '📍 ' + (cityMap[s.value] || ''))) }
+                        if (f.key === 'Age') { box.querySelector('.badge')?.remove(); box.append(el('div', { class: 'badge' }, ageTags[s.value] || '')) }
+                        updateProgress(); setActive(box); scrollNext(box);
                     };
                     box.append(s);
                 }
 
                 else if (f.type === 'text' || f.type === 'number') {
-                    const i = el('input', { type: f.type });
-                    i.onblur = () => {
-                        answers[f.key] = i.value;
-                        autosave(f.key, i.value);
-                        updateProgress();
-                        scrollNext(box);
-                    };
-                    box.append(i);
+                    const i2 = el('input', { type: f.type });
+                    i2.onblur = () => { answers[f.key] = i2.value; autosave(f.key, i2.value); updateProgress(); setActive(box); scrollNext(box) };
+                    box.append(i2);
                 }
 
                 else if (f.type === 'radio') {
                     f.options.split(/;|,/).forEach(o => {
                         const v = o.trim();
                         const r = el('input', { type: 'radio', name: f.key, value: v });
-                        r.onchange = () => {
-                            answers[f.key] = v;
-                            autosave(f.key, v);
-                            updateProgress();
-                            scrollNext(box);
-                        };
+                        r.onchange = () => { answers[f.key] = v; autosave(f.key, v); updateProgress(); setActive(box); scrollNext(box) };
                         box.append(el('label', {}, r, ' ' + v));
                     });
                 }
@@ -405,33 +340,29 @@
             });
         }
 
+        /* Matrix submit */
+
         qs('#submitBtn').onclick = async () => {
-            qs('#submitOverlay').style.display = 'flex';
+            const overlay = qs('#matrixOverlay');
+            const textEl = qs('#matrixText');
+            overlay.style.display = 'flex';
 
             const msg = "Submitting your choices to Head Chef CEO Elong Mask . . .";
-            let i = 0;
-            const t = qs('#terminal');
-            t.innerText = '';
+            let i = 0; textEl.textContent = '';
             const typer = setInterval(() => {
-                t.innerText += msg[i++] || '';
-                if (i >= msg.length) clearInterval(typer);
-            }, 40);
+                textEl.textContent += msg[i] || ''; i++;
+                if (i > msg.length) clearInterval(typer);
+            }, 45);
 
             await fetch(WEBAPP_URL, { method: 'POST', body: JSON.stringify({ sessionId, submitted: true, answers }) });
 
-            setTimeout(() => {
-                qs('#submitOverlay').style.display = 'none';
-                qs('#formWrapper').style.display = 'none';
-                qs('#submitBtn').style.display = 'none';
-                qs('#surveyWrap').style.display = 'none';
+            qs('.app').style.display = 'none';
 
-                let out = '<h3>Thank you guys!! See ya soon with Smoky Flavours 🎉❤️‍🔥</h3>';
-                Object.keys(answers).forEach(k => {
-                    out += `<div class="summary-row"><b>${k}</b><span>${answers[k]}</span></div>`;
-                });
-                qs('#thankYou').innerHTML = out;
-                qs('#thankYou').style.display = 'block';
-            }, 1200);
+            let out = '<h3>Thank you guys!! See ya soon with Smoky Flavours 🎉❤️‍🔥</h3>';
+            Object.keys(answers).forEach(k => out += `<div class="summary-row"><b>${k}</b><span>${answers[k]}</span></div>`);
+
+            overlay.style.display = 'none';
+            document.body.innerHTML = out;
         };
 
         loadConfig();
