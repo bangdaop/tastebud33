@@ -25,7 +25,6 @@
             display: block
         }
 
-        /* loader */
         #loadWrap {
             text-align: center;
             margin: 12px 0
@@ -51,7 +50,6 @@
             opacity: .7
         }
 
-        /* progress */
         #surveyWrap {
             position: sticky;
             top: 0;
@@ -75,7 +73,6 @@
             transition: .35s
         }
 
-        /* cards */
         .field {
             background: #fff;
             padding: 14px;
@@ -132,7 +129,6 @@
             border-bottom: 1px dashed #ddd
         }
 
-        /* matrix */
         #matrixOverlay {
             position: fixed;
             inset: 0;
@@ -181,9 +177,7 @@
         </div>
 
         <div id="formWrapper"></div>
-
         <button id="submitBtn" disabled>Finish</button>
-
         <div id="thankYou" style="display:none"></div>
 
     </div>
@@ -232,7 +226,9 @@
             setLoad(60)
             const j = await r.json()
 
-            configFields = j.config || []
+            // REMOVE BLANK ROWS
+            configFields = (j.config || []).filter(f => f.key && f.type)
+
             cityMap = j.cityMappings?.cityToState || {}
                 ; (j.ageTags || []).forEach(a => ageTags[a.key] = a.displayLabel)
 
@@ -249,18 +245,30 @@
                 const box = el("div", { class: "field" })
                 box.append(el("label", {}, f.label))
 
+                // STATEMENT ONLY
+                if (f.type === "statement") {
+                    w.append(box)
+                    return
+                }
+
                 if (f.type === "select") {
                     const s = el("select")
                     s.append(el("option", { value: "", hidden: true }, ""))
                     f.options.split(/;|,/).forEach(o => s.append(el("option", { value: o.trim() }, o.trim())))
+
                     s.onchange = () => {
                         answers[f.key] = s.value
                         autosave(f.key, s.value)
-                        if (f.key === "City") box.append(el("div", { class: "badge" }, "📍 " + (cityMap[s.value] || "")))
-                        if (f.key === "Age") box.append(el("div", { class: "badge" }, ageTags[s.value] || ""))
-                        updateProgress()
-                        scrollNext(box)
-                    }
+
+                        if (f.key.toLowerCase().includes("city"))
+                            box.append(el("div", { class: "badge" }, "📍 " + (cityMap[s.value] || "")))
+
+                        if (f.key.toLowerCase().includes("age"))
+                            box.append(el("div", { class: "badge" }, ageTags[s.value] || "")
+
+updateProgress()
+scrollNext(box)
+}
                     box.append(s)
                 }
 
