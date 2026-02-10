@@ -1,108 +1,114 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width,initial-scale=1">
-
     <title>Taste Buds</title>
 
     <style>
+        /* =====================
+   iOS SPRING SYSTEM
+===================== */
+        :root {
+            --spring-fast: cubic-bezier(.34, 1.56, .64, 1);
+            --spring-soft: cubic-bezier(.25, 1.4, .5, 1);
+        }
+
+        /* =====================
+   BASE
+===================== */
         body {
             margin: 0;
-            font-family: system-ui;
-            background: linear-gradient(180deg, #eaf1fb, #dfe8f5);
+            font-family: system-ui, -apple-system, BlinkMacSystemFont;
+            background: linear-gradient(180deg, #f3f6fb, #e9eef5);
         }
 
         .app {
             max-width: 720px;
             margin: auto;
-            padding: 12px
+            padding: 12px;
         }
 
+        /* =====================
+   HEADER IMAGE
+===================== */
         .header img {
             width: 100%;
-            border-radius: 16px;
-            display: block
+            border-radius: 14px;
+            display: block;
         }
 
-        /* Floating progress */
-
-        #surveyWrap {
-            position: sticky;
-            top: 0;
-            z-index: 20;
-            background: rgba(234, 241, 251, .8);
-            backdrop-filter: blur(6px);
-            padding: 8px 0
-        }
-
-        #surveyBar {
-            height: 6px;
-            background: #d9dee6;
-            border-radius: 6px;
-            overflow: hidden
-        }
-
-        #surveyBarInner {
-            height: 100%;
-            width: 0%;
-            background: linear-gradient(90deg, #0d3b66, #3fa9f5);
-            transition: .35s ease
-        }
-
-        /* Loader */
-
+        /* =====================
+   LOADER
+===================== */
         #loadWrap {
+            margin: 12px 0;
             text-align: center;
-            margin: 12px 0
         }
 
         #loadTrack {
             height: 6px;
             background: #ddd;
             border-radius: 6px;
-            overflow: hidden
+            overflow: hidden;
         }
 
         #loadBar {
             height: 100%;
             width: 0%;
             background: linear-gradient(90deg, #ff7a00, #ffb347);
-            transition: .3s
+            transition: width .5s var(--spring-soft);
         }
 
         #loadText {
             font-size: 12px;
             margin-top: 6px;
-            opacity: .7
+            opacity: .7;
         }
 
-        /* ===== GLASS CARDS ===== */
+        /* =====================
+   FLOATING PROGRESS
+===================== */
+        #surveyWrap {
+            position: sticky;
+            top: 0;
+            z-index: 20;
+            background: #f3f6fb;
+            padding: 8px 0;
+            display: none;
+        }
 
+        #surveyBar {
+            height: 6px;
+            background: #d9dee6;
+            border-radius: 6px;
+            overflow: hidden;
+        }
+
+        #surveyBarInner {
+            height: 100%;
+            width: 0%;
+            background: linear-gradient(90deg, #0d3b66, #3fa9f5);
+            transition: width .6s var(--spring-soft);
+        }
+
+        /* =====================
+   QUESTION CARDS
+===================== */
         .field {
-            background: rgba(255, 255, 255, .55);
+            background: rgba(255, 255, 255, .85);
             backdrop-filter: blur(10px);
-            -webkit-backdrop-filter: blur(10px);
-            padding: 16px;
-            border-radius: 16px;
-            margin-bottom: 16px;
-            box-shadow: 0 12px 30px rgba(0, 0, 0, .08);
-            border: 1px solid rgba(255, 255, 255, .35);
+            padding: 14px;
+            border-radius: 14px;
+            margin-bottom: 14px;
+            box-shadow: 0 8px 18px rgba(0, 0, 0, .06);
             opacity: 0;
-            transform: translateY(12px);
-            animation: fadeUp .45s forwards;
-            transition: .35s ease;
+            transform: translateY(14px);
+            animation: cardIn .55s var(--spring-soft) forwards;
         }
 
-        .field.focused {
-            background: rgba(255, 245, 230, .75);
-            box-shadow: 0 14px 34px rgba(255, 122, 0, .25);
-            border: 1px solid rgba(255, 122, 0, .35);
-            transform: scale(1.015);
-        }
-
-        @keyframes fadeUp {
+        @keyframes cardIn {
             to {
                 opacity: 1;
                 transform: none
@@ -112,103 +118,123 @@
         label {
             font-weight: 600;
             display: block;
-            margin-bottom: 10px;
+            margin-bottom: 8px;
         }
 
-        /* Inputs */
-
+        /* Inputs unified size */
         input,
         select {
             width: 100%;
             padding: 12px;
-            border-radius: 12px;
-            border: 1px solid rgba(0, 0, 0, .12);
-            background: rgba(255, 255, 255, .85);
+            border-radius: 10px;
+            border: 1px solid #d7dce4;
+            background: #fafbfc;
             font-size: 15px;
-            box-sizing: border-box;
-            height: 46px;
-            transition: .25s ease;
-        }
-
-        select {
             appearance: none;
-            background-image:
-                linear-gradient(45deg, transparent 50%, #777 50%),
-                linear-gradient(135deg, #777 50%, transparent 50%);
-            background-position:
-                calc(100% - 18px) calc(1em + 2px),
-                calc(100% - 13px) calc(1em + 2px);
-            background-size: 5px 5px, 5px 5px;
-            background-repeat: no-repeat;
         }
 
-        input:focus,
+        /* Smooth select feel */
+        select {
+            transition: box-shadow .35s var(--spring-soft),
+                transform .35s var(--spring-soft);
+        }
+
         select:focus {
             outline: none;
-            border-color: #3fa9f5;
+            transform: scale(1.01);
             box-shadow: 0 0 0 3px rgba(63, 169, 245, .2);
-            background: white;
         }
 
-        /* Badges */
+        input:focus {
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(63, 169, 245, .2);
+        }
 
+        /* =====================
+   BADGES (STATE / AGE)
+===================== */
         .badge {
             margin-top: 10px;
             font-size: 15px;
-            color: #0d3b66;
             font-weight: 600;
+            color: #0d3b66;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            animation: badgeIn .4s var(--spring-fast);
         }
 
-        /* Submit */
+        @keyframes badgeIn {
+            from {
+                opacity: 0;
+                transform: scale(.9)
+            }
 
+            to {
+                opacity: 1;
+                transform: none
+            }
+        }
+
+        /* =====================
+   SUBMIT BUTTON
+===================== */
         #submitBtn {
             margin-top: 16px;
             width: 100%;
             padding: 14px;
             border: none;
-            border-radius: 14px;
-            background: linear-gradient(135deg, #ff7a00, #ffb347);
+            border-radius: 12px;
+            background: #ff7a00;
             color: white;
             font-size: 16px;
             opacity: .4;
-            transition: .3s;
-            box-shadow: 0 8px 18px rgba(255, 122, 0, .35);
+            transition: opacity .4s var(--spring-soft),
+                transform .25s var(--spring-soft);
         }
 
         #submitBtn:not(:disabled) {
-            opacity: 1
+            opacity: 1;
         }
 
-        /* Summary */
+        #submitBtn:active {
+            transform: scale(.97);
+        }
 
+        /* =====================
+   SUBMIT OVERLAY
+===================== */
+        #submitOverlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, .45);
+            backdrop-filter: blur(8px);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 50;
+        }
+
+        #terminal {
+            font-family: monospace;
+            color: #00ff66;
+            font-size: 14px;
+        }
+
+        /* =====================
+   THANK YOU
+===================== */
         .summary-row {
             display: flex;
             justify-content: space-between;
             font-size: 13px;
             padding: 6px 0;
-            border-bottom: 1px dashed #ccc
+            border-bottom: 1px dashed #ddd;
         }
 
-        /* Matrix overlay */
-
-        #matrixOverlay {
-            position: fixed;
-            inset: 0;
-            background: rgba(0, 0, 0, .85);
-            backdrop-filter: blur(6px);
-            display: none;
-            align-items: center;
-            justify-content: center;
-            z-index: 9999
-        }
-
-        #matrixText {
-            color: #00ff66;
-            font-family: monospace;
-            font-size: 18px;
-            letter-spacing: 1px
-        }
-
+        /* =====================
+   MOBILE
+===================== */
         @media(max-width:600px) {
             .app {
                 padding: 8px
@@ -233,7 +259,7 @@
             <div id="loadText">Loading…</div>
         </div>
 
-        <div id="surveyWrap" style="display:none">
+        <div id="surveyWrap">
             <div id="surveyBar">
                 <div id="surveyBarInner"></div>
             </div>
@@ -247,8 +273,9 @@
 
     </div>
 
-    <div id="matrixOverlay">
-        <div id="matrixText"></div>
+    <!-- SUBMIT OVERLAY -->
+    <div id="submitOverlay">
+        <div id="terminal"></div>
     </div>
 
     <script>
@@ -260,167 +287,154 @@
             localStorage.setItem("tb_session_id", sessionId);
         }
 
-        const answers = {}
-        let configFields = []
-        let cityMap = {}
-        let ageTags = {}
+        const answers = {};
+        let configFields = [];
+        let cityMap = {};
+        let ageTags = {};
 
-        function qs(x) { return document.querySelector(x) }
-
-        function el(t, a = {}, ...c) {
-            const n = document.createElement(t)
-            for (const k in a) n.setAttribute(k, a[k])
-            c.forEach(x => n.append(x))
-            return n
-        }
+        const qs = x => document.querySelector(x);
+        const el = (t, a = {}, ...c) => {
+            const n = document.createElement(t);
+            for (const k in a) n.setAttribute(k, a[k]);
+            c.forEach(x => n.append(x));
+            return n;
+        };
 
         function setLoad(p) {
-            qs('#loadBar').style.width = p + '%'
-            qs('#loadText').innerText = 'Loading… ' + p + '%'
+            qs('#loadBar').style.width = p + '%';
+            qs('#loadText').innerText = 'Loading… ' + p + '%';
         }
 
         function autosave(k, v) {
-            fetch(WEBAPP_URL, { method: 'POST', body: JSON.stringify({ sessionId, fieldName: k, fieldValue: v }) })
+            fetch(WEBAPP_URL, { method: 'POST', body: JSON.stringify({ sessionId, fieldName: k, fieldValue: v }) });
         }
 
         function scrollNext(card) {
-            setTimeout(() => card.nextElementSibling?.scrollIntoView({ behavior: 'smooth', block: 'center' }), 250)
+            setTimeout(() => {
+                card.nextElementSibling?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }, 250);
         }
 
         function updateProgress() {
-            let done = 0
+            let done = 0;
             configFields.forEach(f => {
-                const v = answers[f.key]
-                if (Array.isArray(v) ? v.length : (v !== '' && v != null)) done++
-            })
-            const pct = Math.round(done / configFields.length * 100)
-            qs('#surveyBarInner').style.width = pct + '%'
-            qs('#surveyWrap').style.display = 'block'
-            qs('#submitBtn').disabled = done !== configFields.length
+                const v = answers[f.key];
+                if (v !== undefined && v !== '') done++;
+            });
+            const pct = Math.round(done / configFields.length * 100);
+            qs('#surveyBarInner').style.width = pct + '%';
+            qs('#surveyWrap').style.display = 'block';
+            qs('#submitBtn').disabled = done !== configFields.length;
         }
 
         async function loadConfig() {
-            setLoad(20)
-            const r = await fetch(WEBAPP_URL)
-            setLoad(60)
-            const j = await r.json()
+            setLoad(20);
+            const r = await fetch(WEBAPP_URL);
+            setLoad(60);
+            const j = await r.json();
 
-            configFields = j.config || []
-            cityMap = j.cityMappings?.cityToState || {}
-                ; (j.ageTags || []).forEach(a => ageTags[a.key] = a.displayLabel)
+            configFields = j.config || [];
+            cityMap = j.cityMappings?.cityToState || {};
+            (j.ageTags || []).forEach(a => ageTags[a.key] = a.displayLabel);
 
-            setLoad(90)
-            buildForm()
-            setTimeout(() => qs('#loadWrap').style.display = 'none', 300)
+            setLoad(90);
+            buildForm();
+            setTimeout(() => qs('#loadWrap').style.display = 'none', 300);
         }
 
         function buildForm() {
-            const w = qs('#formWrapper')
-            w.innerHTML = ''
+            const w = qs('#formWrapper');
+            w.innerHTML = '';
 
             configFields.forEach(f => {
-                const box = el('div', { class: 'field' })
-                box.append(el('label', {}, f.label))
+                const box = el('div', { class: 'field' });
+                box.append(el('label', {}, f.label));
 
                 if (f.type === 'select') {
-                    const s = el('select', { name: f.key })
-                    s.append(el('option', { value: '', hidden: true }, ''))
-
-                    f.options.split(/;|,/).forEach(o => s.append(el('option', { value: o.trim() }, o.trim())))
-
-                    s.onfocus = () => box.classList.add('focused')
-                    s.onblur = () => box.classList.remove('focused')
-
+                    const s = el('select', { name: f.key });
+                    s.append(el('option', { value: '', hidden: true }, ''));
+                    f.options.split(/;|,/).forEach(o => {
+                        s.append(el('option', { value: o.trim() }, o.trim()));
+                    });
                     s.onchange = () => {
-                        answers[f.key] = s.value
-                        autosave(f.key, s.value)
+                        answers[f.key] = s.value;
+                        autosave(f.key, s.value);
 
                         if (f.key === 'City') {
-                            box.querySelector('.badge')?.remove()
-                            box.append(el('div', { class: 'badge' }, '📍 ' + (cityMap[s.value] || '')))
+                            box.querySelector('.badge')?.remove();
+                            box.append(el('div', { class: 'badge' }, '📍 ' + (cityMap[s.value] || '')));
                         }
 
                         if (f.key === 'Age') {
-                            box.querySelector('.badge')?.remove()
-                            box.append(el('div', { class: 'badge' }, ageTags[s.value] || ''))
+                            box.querySelector('.badge')?.remove();
+                            box.append(el('div', { class: 'badge' }, ageTags[s.value] || ''));
                         }
 
-                        updateProgress()
-                        scrollNext(box)
-                    }
-
-                    box.append(s)
+                        updateProgress();
+                        scrollNext(box);
+                    };
+                    box.append(s);
                 }
 
-                else if (f.type === 'number' || f.type === 'text') {
-                    const i = el('input', { type: f.type })
-                    i.onfocus = () => box.classList.add('focused')
+                else if (f.type === 'text' || f.type === 'number') {
+                    const i = el('input', { type: f.type });
                     i.onblur = () => {
-                        box.classList.remove('focused')
-                        answers[f.key] = i.value
-                        autosave(f.key, i.value)
-                        updateProgress()
-                        scrollNext(box)
-                    }
-                    box.append(i)
+                        answers[f.key] = i.value;
+                        autosave(f.key, i.value);
+                        updateProgress();
+                        scrollNext(box);
+                    };
+                    box.append(i);
                 }
 
                 else if (f.type === 'radio') {
                     f.options.split(/;|,/).forEach(o => {
-                        const v = o.trim()
-                        const r = el('input', { type: 'radio', name: f.key, value: v })
+                        const v = o.trim();
+                        const r = el('input', { type: 'radio', name: f.key, value: v });
                         r.onchange = () => {
-                            answers[f.key] = v
-                            autosave(f.key, v)
-                            updateProgress()
-                            scrollNext(box)
-                        }
-                        box.append(el('label', {}, r, ' ' + v))
-                    })
+                            answers[f.key] = v;
+                            autosave(f.key, v);
+                            updateProgress();
+                            scrollNext(box);
+                        };
+                        box.append(el('label', {}, r, ' ' + v));
+                    });
                 }
 
-                w.append(box)
-            })
+                w.append(box);
+            });
         }
-
-        /* Matrix submit */
 
         qs('#submitBtn').onclick = async () => {
+            qs('#submitOverlay').style.display = 'flex';
 
-            const overlay = qs('#matrixOverlay')
-            const textEl = qs('#matrixText')
-            overlay.style.display = 'flex'
-
-            const msg = "Submitting your choices to Head Chef CEO Elong Mask . . ."
-            let i = 0
-            textEl.textContent = ''
-
+            const msg = "Submitting your choices to Head Chef CEO Elong Mask . . .";
+            let i = 0;
+            const t = qs('#terminal');
+            t.innerText = '';
             const typer = setInterval(() => {
-                textEl.textContent += msg[i] || ''
-                i++
-                if (i > msg.length) clearInterval(typer)
-            }, 45)
+                t.innerText += msg[i++] || '';
+                if (i >= msg.length) clearInterval(typer);
+            }, 40);
 
-            await fetch(WEBAPP_URL, { method: 'POST', body: JSON.stringify({ sessionId, submitted: true, answers }) })
+            await fetch(WEBAPP_URL, { method: 'POST', body: JSON.stringify({ sessionId, submitted: true, answers }) });
 
             setTimeout(() => {
-                overlay.style.display = 'none'
+                qs('#submitOverlay').style.display = 'none';
+                qs('#formWrapper').style.display = 'none';
+                qs('#submitBtn').style.display = 'none';
+                qs('#surveyWrap').style.display = 'none';
 
-                qs('#formWrapper').style.display = 'none'
-                qs('#submitBtn').style.display = 'none'
-                qs('#surveyWrap').style.display = 'none'
-
-                let out = '<h3>Thank you guys!! See ya soon with Smoky Flavours 🎉❤️‍🔥</h3>'
+                let out = '<h3>Thank you guys!! See ya soon with Smoky Flavours 🎉❤️‍🔥</h3>';
                 Object.keys(answers).forEach(k => {
-                    out += `<div class="summary-row"><b>${k}</b><span>${answers[k]}</span></div>`
-                })
+                    out += `<div class="summary-row"><b>${k}</b><span>${answers[k]}</span></div>`;
+                });
+                qs('#thankYou').innerHTML = out;
+                qs('#thankYou').style.display = 'block';
+            }, 1200);
+        };
 
-                qs('#thankYou').innerHTML = out
-                qs('#thankYou').style.display = 'block'
-            }, 1200)
-        }
-
-        loadConfig()
+        loadConfig();
     </script>
 
 </body>
