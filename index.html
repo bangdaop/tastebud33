@@ -7,6 +7,10 @@
     <title>Taste Buds</title>
 
     <style>
+        * {
+            box-sizing: border-box
+        }
+
         body {
             margin: 0;
             font-family: system-ui;
@@ -25,13 +29,12 @@
             display: block
         }
 
-        /* floating progress */
         #surveyWrap {
             position: sticky;
             top: 0;
-            z-index: 20;
             background: #f3f6fb;
-            padding: 8px 0
+            padding: 8px 0;
+            z-index: 20
         }
 
         #surveyBar {
@@ -45,10 +48,9 @@
             height: 100%;
             width: 0%;
             background: linear-gradient(90deg, #0d3b66, #3fa9f5);
-            transition: .35s
+            transition: .3s
         }
 
-        /* loader */
         #loadWrap {
             text-align: center;
             margin: 12px 0
@@ -73,9 +75,8 @@
             opacity: .7
         }
 
-        /* cards */
         .field {
-            background: #fff;
+            background: white;
             padding: 14px;
             border-radius: 14px;
             margin-bottom: 14px;
@@ -129,22 +130,21 @@
             border-bottom: 1px dashed #ddd
         }
 
-        /* Matrix submit */
+        /* MATRIX */
         #matrixOverlay {
             position: fixed;
             inset: 0;
+            background: rgba(0, 0, 0, .85);
             display: none;
             align-items: center;
             justify-content: center;
-            background: rgba(0, 0, 0, .85);
-            backdrop-filter: blur(6px);
             z-index: 9999
         }
 
         #matrixText {
             color: #00ff66;
             font-family: monospace;
-            font-size: 18px;
+            font-size: 20px;
             white-space: pre-wrap
         }
     </style>
@@ -176,7 +176,7 @@
 
         <button id="submitBtn" disabled>Finish</button>
 
-        <div id="thankYou" style="display:none"></div>
+        <div id="thankYou"></div>
 
     </div>
 
@@ -185,80 +185,60 @@
     </div>
 
     <script>
+        const WEBAPP_URL = "https://script.google.com/macros/s/AKfycbzxp6xJwgKTXCO5jas3mg7fD3fBbH5-0MHPkYD3K55LNN2Z7Yli88cvWKv17OcxpvSU/exec"
 
-        const WEBAPP_URL = "https://script.google.com/macros/s/AKfycbzxp6xJwgKTXCO5jas3mg7fD3fBbH5-0MHPkYD3K55LNN2Z7Yli88cvWKv17OcxpvSU/exec";
-
-        let sessionId = localStorage.getItem("tb_session_id");
+        let sessionId = localStorage.getItem("tb_session_id")
         if (!sessionId) {
-            sessionId = 's_' + Math.random().toString(36).slice(2, 12);
-            localStorage.setItem("tb_session_id", sessionId);
+            sessionId = 's_' + Math.random().toString(36).slice(2, 12)
+            localStorage.setItem("tb_session_id", sessionId)
         }
 
         const answers = {}
-        let configFields = []
+        let config = []
         let cityMap = {}
-        let ageTags = {}
+        let ageMap = {}
 
-        const qs = x => document.querySelector(x)
-
-        const el = (t, a = {}, ...c) => {
-            const n = document.createElement(t)
-            for (const k in a) n.setAttribute(k, a[k])
-            c.forEach(x => n.append(x))
-            return n
-        }
+        const qs = s => document.querySelector(s)
+        const el = (t, a = {}, ...c) => { const n = document.createElement(t); for (const k in a) n.setAttribute(k, a[k]); c.forEach(x => n.append(x)); return n }
 
         function autosave(k, v) {
             fetch(WEBAPP_URL, { method: 'POST', body: JSON.stringify({ sessionId, fieldName: k, fieldValue: v }) })
         }
 
-        function scrollNext(card) {
-            setTimeout(() => card.nextElementSibling?.scrollIntoView({ behavior: 'smooth', block: 'center' }), 250)
-        }
-
         function updateProgress() {
-            let done = 0
-            configFields.forEach(f => {
-                const v = answers[f.key]
-                if (v !== '' && v != null) done++
-            })
-            const pct = Math.round(done / configFields.length * 100)
-            qs('#surveyBarInner').style.width = pct + '%'
+            let d = 0
+            config.forEach(f => answers[f.key] != null && answers[f.key] !== '' && d++)
+            qs('#surveyBarInner').style.width = Math.round(d / config.length * 100) + '%'
             qs('#surveyWrap').style.display = 'block'
-            qs('#submitBtn').disabled = done !== configFields.length
+            qs('#submitBtn').disabled = d !== config.length
         }
 
-        async function loadConfig() {
-
-            qs('#loadBar').style.width = '30%'
-
+        async function load() {
+            qs('#loadBar').style.width = '40%'
             const r = await fetch(WEBAPP_URL)
             const j = await r.json()
 
-            /* ===== CRITICAL FIX ===== */
-            configFields = (j.config || []).filter(f =>
-                f && f.key && f.type && ["select", "radio", "text", "number"].includes(f.type)
-            )
-            /* ======================= */
+            config = j.config.filter(x => x.key)
 
+                ; (j.ageTags || []).forEach(a => ageMap[a.key] = a.displayLabel)
             cityMap = j.cityMappings?.cityToState || {}
-                ; (j.ageTags || []).forEach(a => ageTags[a.key] = a.displayLabel)
 
             qs('#loadBar').style.width = '90%'
-            buildForm()
+            build()
+
             setTimeout(() => qs('#loadWrap').style.display = 'none', 300)
         }
 
-        function buildForm() {
+        function build() {
             const w = qs('#formWrapper')
             w.innerHTML = ''
 
-            configFields.forEach(f => {
+            config.forEach(f => {
                 const box = el('div', { class: 'field' })
                 box.append(el('label', {}, f.label))
 
                 if (f.type === 'select') {
-                    const s = el('select', { name: f.key })
+                    const s = el('select')
                     s.append(el('option', { value: '', hidden: true }, ''))
 
                     f.options.split(/;|,/).forEach(o => s.append(el('option', { value: o.trim() }, o.trim())))
@@ -267,39 +247,30 @@
                         answers[f.key] = s.value
                         autosave(f.key, s.value)
 
-                        if (cityMap[s.value]) box.append(el('div', { class: 'badge' }, '📍 ' + cityMap[s.value]))
-                        if (ageTags[s.value]) box.append(el('div', { class: 'badge' }, ageTags[s.value]))
+                        box.querySelectorAll('.badge').forEach(b => b.remove())
+
+                        if (f.key.toLowerCase().includes('city')) {
+                            box.append(el('div', { class: 'badge' }, '📍 ' + (cityMap[s.value] || '')))
+                        }
+
+                        if (f.key.toLowerCase().includes('age')) {
+                            box.append(el('div', { class: 'badge' }, ageMap[s.value] || ''))
+                        }
 
                         updateProgress()
-                        scrollNext(box)
                     }
 
                     box.append(s)
                 }
 
-                else if (f.type === 'text' || f.type === 'number') {
+                else {
                     const i = el('input', { type: f.type })
                     i.onblur = () => {
                         answers[f.key] = i.value
                         autosave(f.key, i.value)
                         updateProgress()
-                        scrollNext(box)
                     }
                     box.append(i)
-                }
-
-                else if (f.type === 'radio') {
-                    f.options.split(/;|,/).forEach(o => {
-                        const v = o.trim()
-                        const r = el('input', { type: 'radio', name: f.key, value: v })
-                        r.onchange = () => {
-                            answers[f.key] = v
-                            autosave(f.key, v)
-                            updateProgress()
-                            scrollNext(box)
-                        }
-                        box.append(el('label', {}, r, ' ' + v))
-                    })
                 }
 
                 w.append(box)
@@ -307,34 +278,30 @@
         }
 
         qs('#submitBtn').onclick = async () => {
-
-            const overlay = qs('#matrixOverlay')
-            const textEl = qs('#matrixText')
-            overlay.style.display = 'flex'
+            const o = qs('#matrixOverlay')
+            const t = qs('#matrixText')
+            o.style.display = 'flex'
 
             const msg = "Submitting your choices to Head Chef CEO Elong Mask . . ."
             let i = 0
-            textEl.textContent = ''
+            t.textContent = ''
 
             const typer = setInterval(() => {
-                textEl.textContent += msg[i] || ''
-                i++
+                t.textContent += msg[i++] || ''
                 if (i > msg.length) clearInterval(typer)
-            }, 45)
+            }, 40)
 
             await fetch(WEBAPP_URL, { method: 'POST', body: JSON.stringify({ sessionId, submitted: true, answers }) })
 
             qs('.app').style.display = 'none'
+            o.style.display = 'none'
 
             let out = '<h3>Thank you guys!! See ya soon with Smoky Flavours 🎉❤️‍🔥</h3>'
             Object.keys(answers).forEach(k => out += `<div class="summary-row"><b>${k}</b><span>${answers[k]}</span></div>`)
-
-            overlay.style.display = 'none'
             document.body.innerHTML = out
         }
 
-        loadConfig()
-
+        load()
     </script>
 
 </body>
