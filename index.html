@@ -190,7 +190,7 @@
     </div>
 
     <script>
-        const WEBAPP_URL = "https://script.google.com/macros/s/AKfycbxI2OmTTch8t7ZYv4dTPyNHFSl9x9WZv3bMuz-KHaf6t9DFOpUZZ6CFJ9IWdK4LUzpB/exec"
+        const WEBAPP_URL = "https://script.google.com/macros/s/AKfycbzxp6xJwgKTXCO5jas3mg7fD3fBbH5-0MHPkYD3K55LNN2Z7Yli88cvWKv17OcxpvSU/exec"
 
         let sessionId = localStorage.getItem("tb_session_id")
         if (!sessionId) {
@@ -200,8 +200,71 @@
 
         const answers = {}
         let config = []
-        let cityMap = {}
-        let ageMap = {}
+
+        // HARDCODED MAPS (because current web app deployment is not sending them)
+        const ageMap = {
+            "Below 18 👶": "Congrats! Snack Squad (Under 18)",
+            "18–23👩‍🎓": "Cheers! Campus Cravers",
+            "24–28🕺": "Helloww Hustle Bites",
+            "29–35🧑‍💻": "Cool Weekend Foodies",
+            "35–45🧑‍🍼": "Nice! Comfort Connoisseurs",
+            "46+🧛‍♂️": "Absolutely Forever Young 46+"
+        }
+
+        const cityMap = {
+            "Ahmedabad": "Gujarat",
+            "Bengaluru": "Karnataka",
+            "Chennai": "Tamil Nadu",
+            "Coimbatore": "Tamil Nadu",
+            "Delhi": "Delhi",
+            "Guwahati": "Assam",
+            "Hyderabad": "Telangana",
+            "Indore": "Madhya Pradesh",
+            "Jaipur": "Rajasthan",
+            "Lucknow": "Uttar Pradesh",
+            "Mangaluru": "Karnataka",
+            "Mumbai": "Maharashtra",
+            "Nagpur": "Maharashtra",
+            "Patna": "Bihar",
+            "Pune": "Maharashtra",
+            "Surat": "Gujarat",
+            "Vadodara": "Gujarat",
+            "Visakhapatnam": "Andhra Pradesh",
+            "Vijayawada": "Andhra Pradesh",
+            "Kolkata": "West Bengal",
+            "Thiruvananthapuram": "Kerala",
+            "Kochi": "Kerala",
+            "Bhopal": "Madhya Pradesh",
+            "Ranchi": "Jharkhand",
+            "Bhubaneswar": "Odisha",
+            "Chandigarh": "Chandigarh",
+            "Amritsar": "Punjab",
+            "Jodhpur": "Rajasthan",
+            "Agra": "Uttar Pradesh",
+            "Varanasi": "Uttar Pradesh",
+            "Meerut": "Uttar Pradesh",
+            "Nashik": "Maharashtra",
+            "Rajkot": "Gujarat",
+            "Kozhikode": "Kerala",
+            "Madurai": "Tamil Nadu",
+            "Salem": "Tamil Nadu",
+            "Jamshedpur": "Jharkhand",
+            "Dehradun": "Uttarakhand",
+            "Ludhiana": "Punjab",
+            "Srinagar": "Jammu and Kashmir",
+            "Shimla": "Himachal Pradesh",
+            "Gangtok": "Sikkim",
+            "Imphal": "Manipur",
+            "Kohima": "Nagaland",
+            "Aizawl": "Mizoram",
+            "Itanagar": "Arunachal Pradesh",
+            "Port Blair": "Andaman and Nicobar",
+            "Daman": "Daman and Diu",
+            "Diu": "Daman and Diu",
+            "Panaji": "Goa",
+            "Thane": "Maharashtra",
+            "Kolhapur": "Maharashtra"
+        }
 
         const qs = s => document.querySelector(s)
         const el = (t, a = {}, ...c) => { const n = document.createElement(t); for (const k in a) n.setAttribute(k, a[k]); c.forEach(x => n.append(x)); return n }
@@ -227,7 +290,6 @@
             if (nextBox) {
                 nextBox.scrollIntoView({ behavior: 'smooth', block: 'center' });
             } else {
-                // If no next field, scroll to submit button
                 qs('#submitBtn').scrollIntoView({ behavior: 'smooth', block: 'center' });
             }
         }
@@ -239,33 +301,9 @@
 
             config = j.config.filter(x => x.key)
 
-            // ---- BUILD AGE MAP ----
-            ageMap = {}
-                ; (j.ageTags || []).forEach(r => {
-                    if (r.key && r.displayLabel) {
-                        ageMap[r.key.trim()] = r.displayLabel.trim()
-                    }
-                })
-
-            // ---- BUILD CITY → STATE MAP ----
-            cityMap = {}
-            const cityMappings = j.cityMappings || {};
-            if (Array.isArray(cityMappings)) {
-                cityMappings.forEach(r => {
-                    if (r.city && r.state) {
-                        cityMap[r.city.trim()] = r.state.trim()
-                    }
-                })
-            } else {
-                const cityToState = cityMappings.cityToState || {};
-                for (let city in cityToState) {
-                    cityMap[city.trim()] = cityToState[city].trim()
-                }
-            }
-
             qs('#loadBar').style.width = '90%'
             build()
-
+            updateProgress()          // ← THIS FIXES the missing progress bar %
             setTimeout(() => qs('#loadWrap').style.display = 'none', 300)
         }
 
