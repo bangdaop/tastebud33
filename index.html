@@ -243,17 +243,26 @@
             ageMap = {}
                 ; (j.ageTags || []).forEach(r => {
                     if (r.key && r.displayLabel) {
-                        ageMap[r.key.trim()] = r.displayLabel.trim()
+                        let cleanKey = r.key.replace(/[\u{1F000}-\u{1FFFF}]/gu, '').trim()
+                        ageMap[cleanKey] = r.displayLabel.trim()
                     }
                 })
 
             // ---- BUILD CITY → STATE MAP ----
             cityMap = {}
-                ; (j.cityMappings || []).forEach(r => {
+            const cityMappings = j.cityMappings || [];
+            if (Array.isArray(cityMappings)) {
+                cityMappings.forEach(r => {
                     if (r.city && r.state) {
                         cityMap[r.city.trim()] = r.state.trim()
                     }
                 })
+            } else {
+                const cityToState = j.cityMappings.cityToState || {};
+                for (let city in cityToState) {
+                    cityMap[city.trim()] = cityToState[city].trim()
+                }
+            }
 
             qs('#loadBar').style.width = '90%'
             build()
