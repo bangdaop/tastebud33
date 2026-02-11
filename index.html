@@ -130,7 +130,6 @@
             border-bottom: 1px dashed #ddd
         }
 
-        /* MATRIX */
         #matrixOverlay {
             position: fixed;
             inset: 0;
@@ -150,7 +149,7 @@
 
         .statement {
             font-weight: bold;
-            font-size: 16px;
+            font-size: 16px
         }
     </style>
 </head>
@@ -193,15 +192,11 @@
         const WEBAPP_URL = "https://script.google.com/macros/s/AKfycbzxp6xJwgKTXCO5jas3mg7fD3fBbH5-0MHPkYD3K55LNN2Z7Yli88cvWKv17OcxpvSU/exec"
 
         let sessionId = localStorage.getItem("tb_session_id")
-        if (!sessionId) {
-            sessionId = 's_' + Math.random().toString(36).slice(2, 12)
-            localStorage.setItem("tb_session_id", sessionId)
-        }
+        if (!sessionId) { sessionId = 's_' + Math.random().toString(36).slice(2, 12); localStorage.setItem("tb_session_id", sessionId) }
 
         const answers = {}
         let config = []
 
-        // HARDCODED MAPS (because current web app deployment is not sending them)
         const ageMap = {
             "Below 18 👶": "Congrats! Snack Squad (Under 18)",
             "18–23👩‍🎓": "Cheers! Campus Cravers",
@@ -211,63 +206,15 @@
             "46+🧛‍♂️": "Absolutely Forever Young 46+"
         }
 
-        const cityMap = {
-            "Ahmedabad": "Gujarat",
-            "Bengaluru": "Karnataka",
-            "Chennai": "Tamil Nadu",
-            "Coimbatore": "Tamil Nadu",
-            "Delhi": "Delhi",
-            "Guwahati": "Assam",
-            "Hyderabad": "Telangana",
-            "Indore": "Madhya Pradesh",
-            "Jaipur": "Rajasthan",
-            "Lucknow": "Uttar Pradesh",
-            "Mangaluru": "Karnataka",
-            "Mumbai": "Maharashtra",
-            "Nagpur": "Maharashtra",
-            "Patna": "Bihar",
-            "Pune": "Maharashtra",
-            "Surat": "Gujarat",
-            "Vadodara": "Gujarat",
-            "Visakhapatnam": "Andhra Pradesh",
-            "Vijayawada": "Andhra Pradesh",
-            "Kolkata": "West Bengal",
-            "Thiruvananthapuram": "Kerala",
-            "Kochi": "Kerala",
-            "Bhopal": "Madhya Pradesh",
-            "Ranchi": "Jharkhand",
-            "Bhubaneswar": "Odisha",
-            "Chandigarh": "Chandigarh",
-            "Amritsar": "Punjab",
-            "Jodhpur": "Rajasthan",
-            "Agra": "Uttar Pradesh",
-            "Varanasi": "Uttar Pradesh",
-            "Meerut": "Uttar Pradesh",
-            "Nashik": "Maharashtra",
-            "Rajkot": "Gujarat",
-            "Kozhikode": "Kerala",
-            "Madurai": "Tamil Nadu",
-            "Salem": "Tamil Nadu",
-            "Jamshedpur": "Jharkhand",
-            "Dehradun": "Uttarakhand",
-            "Ludhiana": "Punjab",
-            "Srinagar": "Jammu and Kashmir",
-            "Shimla": "Himachal Pradesh",
-            "Gangtok": "Sikkim",
-            "Imphal": "Manipur",
-            "Kohima": "Nagaland",
-            "Aizawl": "Mizoram",
-            "Itanagar": "Arunachal Pradesh",
-            "Port Blair": "Andaman and Nicobar",
-            "Daman": "Daman and Diu",
-            "Diu": "Daman and Diu",
-            "Panaji": "Goa",
-            "Thane": "Maharashtra",
-            "Kolhapur": "Maharashtra"
-        }
+        const cityMap = { "Hyderabad": "Telangana", "Mumbai": "Maharashtra", "Delhi": "Delhi", "Bengaluru": "Karnataka", "Chennai": "Tamil Nadu" }
 
         const qs = s => document.querySelector(s)
         const el = (t, a = {}, ...c) => { const n = document.createElement(t); for (const k in a) n.setAttribute(k, a[k]); c.forEach(x => n.append(x)); return n }
+
+        function setLoad(p) {
+            qs('#loadBar').style.width = p + '%'
+            qs('#loadText').innerText = 'Loading… ' + p + '%'
+        }
 
         function autosave(k, v) {
             fetch(WEBAPP_URL, { method: 'POST', body: JSON.stringify({ sessionId, fieldName: k, fieldValue: v }) })
@@ -275,112 +222,74 @@
 
         function updateProgress() {
             let d = 0
-            const requiredFields = config.filter(f => f.type !== 'statement')
-            requiredFields.forEach(f => answers[f.key] != null && answers[f.key] !== '' && d++)
-            qs('#surveyBarInner').style.width = Math.round(d / requiredFields.length * 100) + '%'
+            const req = config.filter(f => f.type !== 'statement')
+            req.forEach(f => answers[f.key] != null && answers[f.key] !== '' && d++)
+            qs('#surveyBarInner').style.width = Math.round(d / req.length * 100) + '%'
             qs('#surveyWrap').style.display = 'block'
-            qs('#submitBtn').disabled = d !== requiredFields.length
+            qs('#submitBtn').disabled = d !== req.length
         }
 
-        function scrollToNextField(currentBox) {
-            let nextBox = currentBox.nextElementSibling;
-            while (nextBox && !nextBox.classList.contains('field')) {
-                nextBox = nextBox.nextElementSibling;
-            }
-            if (nextBox) {
-                nextBox.scrollIntoView({ behavior: 'smooth', block: 'center' });
-            } else {
-                qs('#submitBtn').scrollIntoView({ behavior: 'smooth', block: 'center' });
-            }
+        function scrollToNextField(b) {
+            let n = b.nextElementSibling
+            while (n && !n.classList.contains('field')) n = n.nextElementSibling
+            if (n) n.scrollIntoView({ behavior: 'smooth', block: 'center' })
+            else qs('#submitBtn').scrollIntoView({ behavior: 'smooth', block: 'center' })
         }
 
         async function load() {
-            qs('#loadBar').style.width = '40%'
+            setLoad(20)
             const r = await fetch(WEBAPP_URL)
+            setLoad(60)
             const j = await r.json()
+            setLoad(85)
 
             config = j.config.filter(x => x.key)
 
-            qs('#loadBar').style.width = '90%'
             build()
-            updateProgress()          // ← THIS FIXES the missing progress bar %
-            setTimeout(() => qs('#loadWrap').style.display = 'none', 300)
+            updateProgress()
+            setLoad(100)
+            setTimeout(() => qs('#loadWrap').style.display = 'none', 400)
         }
 
         function build() {
-            const w = qs('#formWrapper')
-            w.innerHTML = ''
-
+            const w = qs('#formWrapper'); w.innerHTML = ''
             config.forEach(f => {
                 const box = el('div', { class: 'field' })
-
-                if (f.type === 'statement') {
-                    box.append(el('p', { class: 'statement' }, f.label))
-                } else {
+                if (f.type === 'statement') { box.append(el('p', { class: 'statement' }, f.label)) }
+                else {
                     box.append(el('label', {}, f.label))
-
                     if (f.type === 'select') {
                         const s = el('select')
                         s.append(el('option', { value: '', hidden: true }, ''))
-
                         f.options.split(/;|,/).forEach(o => s.append(el('option', { value: o.trim() }, o.trim())))
-
                         s.onchange = () => {
                             answers[f.key] = s.value
                             autosave(f.key, s.value)
-
                             box.querySelectorAll('.badge').forEach(b => b.remove())
-
-                            if (f.key.toLowerCase().includes('city')) {
-                                box.append(el('div', { class: 'badge' }, '📍 ' + (cityMap[s.value] || '')))
-                            }
-
-                            if (f.key.toLowerCase().includes('age')) {
-                                box.append(el('div', { class: 'badge' }, ageMap[s.value] || ''))
-                            }
-
-                            updateProgress()
-                            scrollToNextField(box)
+                            if (f.key.toLowerCase().includes('city')) box.append(el('div', { class: 'badge' }, '📍 ' + (cityMap[s.value] || '')))
+                            if (f.key.toLowerCase().includes('age')) box.append(el('div', { class: 'badge' }, ageMap[s.value] || ''))
+                            updateProgress(); scrollToNextField(box)
                         }
-
                         box.append(s)
-                    }
-
-                    else {
+                    } else {
                         const i = el('input', { type: f.type })
-                        i.onblur = () => {
-                            answers[f.key] = i.value
-                            autosave(f.key, i.value)
-                            updateProgress()
-                            scrollToNextField(box)
-                        }
+                        i.onblur = () => { answers[f.key] = i.value; autosave(f.key, i.value); updateProgress(); scrollToNextField(box) }
                         box.append(i)
                     }
                 }
-
                 w.append(box)
             })
         }
 
         qs('#submitBtn').onclick = async () => {
-            const o = qs('#matrixOverlay')
-            const t = qs('#matrixText')
+            const o = qs('#matrixOverlay'), t = qs('#matrixText')
             o.style.display = 'flex'
-
             const msg = "Submitting your choices to Head Chef CEO Elong Mask . . ."
-            let i = 0
-            t.textContent = ''
-
-            const typer = setInterval(() => {
-                t.textContent += msg[i++] || ''
-                if (i > msg.length) clearInterval(typer)
-            }, 40)
-
+            let i = 0; t.textContent = ''
+            const typer = setInterval(() => { t.textContent += msg[i++] || ''; if (i > msg.length) clearInterval(typer) }, 40)
             await fetch(WEBAPP_URL, { method: 'POST', body: JSON.stringify({ sessionId, submitted: true, answers }) })
-
             qs('.app').style.display = 'none'
             o.style.display = 'none'
-
             let out = '<h3>Thank you guys!! See ya soon with Smoky Flavours 🎉❤️‍🔥</h3>'
             Object.keys(answers).forEach(k => out += `<div class="summary-row"><b>${k}</b><span>${answers[k]}</span></div>`)
             document.body.innerHTML = out
