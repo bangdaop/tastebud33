@@ -241,16 +241,15 @@
 
             // ---- BUILD AGE MAP ----
             ageMap = {}
-                ; (j.AgeTags || []).forEach(r => {
+                ; (j.ageTags || []).forEach(r => {
                     if (r.key && r.displayLabel) {
-                        let cleanKey = r.key.replace(/[\u{1F000}-\u{1FFFF}]/gu, '').trim()
-                        ageMap[cleanKey] = r.displayLabel.trim()
+                        ageMap[r.key.trim()] = r.displayLabel.trim()
                     }
                 })
 
             // ---- BUILD CITY → STATE MAP ----
             cityMap = {}
-            const cityMappings = j.CityMappings || [];
+            const cityMappings = j.cityMappings || {};
             if (Array.isArray(cityMappings)) {
                 cityMappings.forEach(r => {
                     if (r.city && r.state) {
@@ -258,7 +257,7 @@
                     }
                 })
             } else {
-                const cityToState = j.cityMappings.cityToState || {};
+                const cityToState = cityMappings.cityToState || {};
                 for (let city in cityToState) {
                     cityMap[city.trim()] = cityToState[city].trim()
                 }
