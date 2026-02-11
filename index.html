@@ -147,6 +147,11 @@
             font-size: 20px;
             white-space: pre-wrap
         }
+
+        .statement {
+            font-weight: bold;
+            font-size: 16px;
+        }
     </style>
 </head>
 
@@ -214,6 +219,19 @@
             qs('#submitBtn').disabled = d !== requiredFields.length
         }
 
+        function scrollToNextField(currentBox) {
+            let nextBox = currentBox.nextElementSibling;
+            while (nextBox && !nextBox.classList.contains('field')) {
+                nextBox = nextBox.nextElementSibling;
+            }
+            if (nextBox) {
+                nextBox.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            } else {
+                // If no next field, scroll to submit button
+                qs('#submitBtn').scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }
+        }
+
         async function load() {
             qs('#loadBar').style.width = '40%'
             const r = await fetch(WEBAPP_URL)
@@ -251,7 +269,7 @@
                 const box = el('div', { class: 'field' })
 
                 if (f.type === 'statement') {
-                    box.append(el('p', {}, f.label))
+                    box.append(el('p', { class: 'statement' }, f.label))
                 } else {
                     box.append(el('label', {}, f.label))
 
@@ -276,6 +294,7 @@
                             }
 
                             updateProgress()
+                            scrollToNextField(box)
                         }
 
                         box.append(s)
@@ -287,6 +306,7 @@
                             answers[f.key] = i.value
                             autosave(f.key, i.value)
                             updateProgress()
+                            scrollToNextField(box)
                         }
                         box.append(i)
                     }
