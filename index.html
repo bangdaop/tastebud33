@@ -7,10 +7,6 @@
     <title>Taste Buds</title>
 
     <style>
-        * {
-            box-sizing: border-box
-        }
-
         body {
             margin: 0;
             font-family: system-ui;
@@ -29,8 +25,7 @@
             display: block
         }
 
-        /* progress */
-
+        /* floating progress */
         #surveyWrap {
             position: sticky;
             top: 0;
@@ -48,13 +43,12 @@
 
         #surveyBarInner {
             height: 100%;
-            width: 0;
+            width: 0%;
             background: linear-gradient(90deg, #0d3b66, #3fa9f5);
             transition: .35s
         }
 
         /* loader */
-
         #loadWrap {
             text-align: center;
             margin: 12px 0
@@ -69,9 +63,8 @@
 
         #loadBar {
             height: 100%;
-            width: 0;
-            background: linear-gradient(90deg, #ff7a00, #ffb347);
-            transition: .3s
+            width: 0%;
+            background: linear-gradient(90deg, #ff7a00, #ffb347)
         }
 
         #loadText {
@@ -81,7 +74,6 @@
         }
 
         /* cards */
-
         .field {
             background: #fff;
             padding: 14px;
@@ -113,8 +105,6 @@
             color: #0d3b66
         }
 
-        /* button */
-
         #submitBtn {
             margin-top: 16px;
             width: 100%;
@@ -131,8 +121,6 @@
             opacity: 1
         }
 
-        /* summary */
-
         .summary-row {
             display: flex;
             justify-content: space-between;
@@ -141,16 +129,15 @@
             border-bottom: 1px dashed #ddd
         }
 
-        /* MATRIX */
-
+        /* Matrix submit */
         #matrixOverlay {
             position: fixed;
             inset: 0;
-            background: rgba(0, 0, 0, .85);
-            backdrop-filter: blur(6px);
             display: none;
             align-items: center;
             justify-content: center;
+            background: rgba(0, 0, 0, .85);
+            backdrop-filter: blur(6px);
             z-index: 9999
         }
 
@@ -158,9 +145,7 @@
             color: #00ff66;
             font-family: monospace;
             font-size: 18px;
-            white-space: pre-wrap;
-            max-width: 80%;
-            text-align: center
+            white-space: pre-wrap
         }
     </style>
 </head>
@@ -214,168 +199,141 @@
         let cityMap = {}
         let ageTags = {}
 
-        function qs(x) { return document.querySelector(x) }
+        const qs = x => document.querySelector(x)
 
-        function el(t, a = {}, ...c) {
-            const n = document.createElement(t);
-            for (const k in a) n.setAttribute(k, a[k]);
-            c.forEach(x => n.append(x));
+        const el = (t, a = {}, ...c) => {
+            const n = document.createElement(t)
+            for (const k in a) n.setAttribute(k, a[k])
+            c.forEach(x => n.append(x))
             return n
         }
 
-        function setLoad(p) {
-            qs('#loadBar').style.width = p + '%';
-            qs('#loadText').innerText = 'Loading… ' + p + '%';
-        }
-
         function autosave(k, v) {
-            fetch(WEBAPP_URL, { method: 'POST', body: JSON.stringify({ sessionId, fieldName: k, fieldValue: v }) });
+            fetch(WEBAPP_URL, { method: 'POST', body: JSON.stringify({ sessionId, fieldName: k, fieldValue: v }) })
         }
 
         function scrollNext(card) {
-            setTimeout(() => card.nextElementSibling?.scrollIntoView({ behavior: 'smooth', block: 'center' }), 250);
+            setTimeout(() => card.nextElementSibling?.scrollIntoView({ behavior: 'smooth', block: 'center' }), 250)
         }
 
         function updateProgress() {
-
-            const usable = configFields.filter(f => f && f.key);
-
-            let done = 0;
-            usable.forEach(f => {
-                const v = answers[f.key];
-                if (v !== '' && v != null) done++;
-            });
-
-            const pct = Math.round(done / usable.length * 100);
-            qs('#surveyBarInner').style.width = pct + '%';
-            qs('#surveyWrap').style.display = 'block';
-            qs('#submitBtn').disabled = done !== usable.length;
+            let done = 0
+            configFields.forEach(f => {
+                const v = answers[f.key]
+                if (v !== '' && v != null) done++
+            })
+            const pct = Math.round(done / configFields.length * 100)
+            qs('#surveyBarInner').style.width = pct + '%'
+            qs('#surveyWrap').style.display = 'block'
+            qs('#submitBtn').disabled = done !== configFields.length
         }
 
         async function loadConfig() {
 
-            setLoad(20);
-            const r = await fetch(WEBAPP_URL);
-            setLoad(60);
-            const j = await r.json();
+            qs('#loadBar').style.width = '30%'
 
-            configFields = (j.config || []).filter(f => f && f.key);
-            cityMap = j.cityMappings?.cityToState || {};
-            (j.ageTags || []).forEach(a => ageTags[a.key] = a.displayLabel);
+            const r = await fetch(WEBAPP_URL)
+            const j = await r.json()
 
-            setLoad(90);
-            buildForm();
-            setTimeout(() => qs('#loadWrap').style.display = 'none', 300);
+            /* ===== CRITICAL FIX ===== */
+            configFields = (j.config || []).filter(f =>
+                f && f.key && f.type && ["select", "radio", "text", "number"].includes(f.type)
+            )
+            /* ======================= */
+
+            cityMap = j.cityMappings?.cityToState || {}
+                ; (j.ageTags || []).forEach(a => ageTags[a.key] = a.displayLabel)
+
+            qs('#loadBar').style.width = '90%'
+            buildForm()
+            setTimeout(() => qs('#loadWrap').style.display = 'none', 300)
         }
 
         function buildForm() {
-
-            const w = qs('#formWrapper');
-            w.innerHTML = '';
+            const w = qs('#formWrapper')
+            w.innerHTML = ''
 
             configFields.forEach(f => {
-
-                const box = el('div', { class: 'field' });
-                box.append(el('label', {}, f.label));
+                const box = el('div', { class: 'field' })
+                box.append(el('label', {}, f.label))
 
                 if (f.type === 'select') {
+                    const s = el('select', { name: f.key })
+                    s.append(el('option', { value: '', hidden: true }, ''))
 
-                    const s = el('select', { name: f.key });
-                    s.append(el('option', { value: '', hidden: true }, ''));
-
-                    f.options.split(/;|,/).forEach(o => {
-                        s.append(el('option', { value: o.trim() }, o.trim()));
-                    });
+                    f.options.split(/;|,/).forEach(o => s.append(el('option', { value: o.trim() }, o.trim())))
 
                     s.onchange = () => {
+                        answers[f.key] = s.value
+                        autosave(f.key, s.value)
 
-                        answers[f.key] = s.value;
-                        autosave(f.key, s.value);
+                        if (cityMap[s.value]) box.append(el('div', { class: 'badge' }, '📍 ' + cityMap[s.value]))
+                        if (ageTags[s.value]) box.append(el('div', { class: 'badge' }, ageTags[s.value]))
 
-                        box.querySelectorAll('.badge').forEach(b => b.remove());
+                        updateProgress()
+                        scrollNext(box)
+                    }
 
-                        if (cityMap[s.value]) box.append(el('div', { class: 'badge' }, '📍 ' + cityMap[s.value]));
-                        if (ageTags[s.value]) box.append(el('div', { class: 'badge' }, ageTags[s.value]));
-
-                        updateProgress();
-                        scrollNext(box);
-                    };
-
-                    box.append(s);
+                    box.append(s)
                 }
 
                 else if (f.type === 'text' || f.type === 'number') {
-
-                    const i = el('input', { type: f.type });
-
+                    const i = el('input', { type: f.type })
                     i.onblur = () => {
-                        answers[f.key] = i.value;
-                        autosave(f.key, i.value);
-                        updateProgress();
-                        scrollNext(box);
-                    };
-
-                    box.append(i);
+                        answers[f.key] = i.value
+                        autosave(f.key, i.value)
+                        updateProgress()
+                        scrollNext(box)
+                    }
+                    box.append(i)
                 }
 
                 else if (f.type === 'radio') {
-
                     f.options.split(/;|,/).forEach(o => {
-                        const v = o.trim();
-                        const r = el('input', { type: 'radio', name: f.key, value: v });
-
+                        const v = o.trim()
+                        const r = el('input', { type: 'radio', name: f.key, value: v })
                         r.onchange = () => {
-                            answers[f.key] = v;
-                            autosave(f.key, v);
-                            updateProgress();
-                            scrollNext(box);
-                        };
-
-                        box.append(el('label', {}, r, ' ' + v));
-                    });
+                            answers[f.key] = v
+                            autosave(f.key, v)
+                            updateProgress()
+                            scrollNext(box)
+                        }
+                        box.append(el('label', {}, r, ' ' + v))
+                    })
                 }
 
-                w.append(box);
-            });
+                w.append(box)
+            })
         }
-
-        /* MATRIX SUBMIT */
 
         qs('#submitBtn').onclick = async () => {
 
-            const overlay = qs('#matrixOverlay');
-            const textEl = qs('#matrixText');
-            overlay.style.display = 'flex';
+            const overlay = qs('#matrixOverlay')
+            const textEl = qs('#matrixText')
+            overlay.style.display = 'flex'
 
-            const msg = "Submitting your choices to Head Chef CEO Elong Mask . . .";
-            let i = 0;
-            textEl.textContent = '';
+            const msg = "Submitting your choices to Head Chef CEO Elong Mask . . ."
+            let i = 0
+            textEl.textContent = ''
 
             const typer = setInterval(() => {
-                textEl.textContent += msg[i] || '';
-                i++;
-                if (i > msg.length) clearInterval(typer);
-            }, 45);
+                textEl.textContent += msg[i] || ''
+                i++
+                if (i > msg.length) clearInterval(typer)
+            }, 45)
 
-            await fetch(WEBAPP_URL, { method: 'POST', body: JSON.stringify({ sessionId, submitted: true, answers }) });
+            await fetch(WEBAPP_URL, { method: 'POST', body: JSON.stringify({ sessionId, submitted: true, answers }) })
 
-            overlay.style.display = 'none';
+            qs('.app').style.display = 'none'
 
-            qs('#formWrapper').style.display = 'none';
-            qs('#submitBtn').style.display = 'none';
-            qs('#surveyWrap').style.display = 'none';
+            let out = '<h3>Thank you guys!! See ya soon with Smoky Flavours 🎉❤️‍🔥</h3>'
+            Object.keys(answers).forEach(k => out += `<div class="summary-row"><b>${k}</b><span>${answers[k]}</span></div>`)
 
-            let out = '<h3>Thank you guys!! See ya soon with Smoky Flavours 🎉❤️‍🔥</h3>';
+            overlay.style.display = 'none'
+            document.body.innerHTML = out
+        }
 
-            Object.keys(answers).forEach(k => {
-                out += `<div class="summary-row"><b>${k}</b><span>${answers[k]}</span></div>`;
-            });
-
-            qs('#thankYou').innerHTML = out;
-            qs('#thankYou').style.display = 'block';
-        };
-
-        loadConfig();
+        loadConfig()
 
     </script>
 
