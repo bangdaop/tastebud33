@@ -220,8 +220,21 @@
 
             config = j.config.filter(x => x.key)
 
-                ; (j.ageTags || []).forEach(a => ageMap[a.key] = a.displayLabel)
-            cityMap = j.cityMappings?.cityToState || {}
+            // ---- BUILD AGE MAP ----
+            ageMap = {}
+                ; (j.ageTags || []).forEach(r => {
+                    if (r.key && r.displayLabel) {
+                        ageMap[r.key.trim()] = r.displayLabel.trim()
+                    }
+                })
+
+            // ---- BUILD CITY → STATE MAP ----
+            cityMap = {}
+                ; (j.cityMappings || []).forEach(r => {
+                    if (r.city && r.state) {
+                        cityMap[r.city.trim()] = r.state.trim()
+                    }
+                })
 
             qs('#loadBar').style.width = '90%'
             build()
