@@ -241,7 +241,7 @@
 
             // ---- BUILD AGE MAP ----
             ageMap = {}
-                ; (j.ageTags || []).forEach(r => {
+                ; (j.AgeTags || []).forEach(r => {
                     if (r.key && r.displayLabel) {
                         let cleanKey = r.key.replace(/[\u{1F000}-\u{1FFFF}]/gu, '').trim()
                         ageMap[cleanKey] = r.displayLabel.trim()
@@ -250,7 +250,7 @@
 
             // ---- BUILD CITY → STATE MAP ----
             cityMap = {}
-            const cityMappings = j.cityMappings || [];
+            const cityMappings = j.CityMappings || [];
             if (Array.isArray(cityMappings)) {
                 cityMappings.forEach(r => {
                     if (r.city && r.state) {
