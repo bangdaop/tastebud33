@@ -185,7 +185,7 @@
     </div>
 
     <script>
-        const WEBAPP_URL = "https://script.google.com/macros/s/AKfycbzWkOEDuC20dnugq8v1m1i1axn0iQqRTUZ9SpTdSYFr0AP-wcjfv0v-JIP4QBDnHoAt/exec"
+        const WEBAPP_URL = "https://script.google.com/macros/s/AKfycbzxp6xJwgKTXCO5jas3mg7fD3fBbH5-0MHPkYD3K55LNN2Z7Yli88cvWKv17OcxpvSU/exec"
 
         let sessionId = localStorage.getItem("tb_session_id")
         if (!sessionId) {
@@ -207,10 +207,11 @@
 
         function updateProgress() {
             let d = 0
-            config.forEach(f => answers[f.key] != null && answers[f.key] !== '' && d++)
-            qs('#surveyBarInner').style.width = Math.round(d / config.length * 100) + '%'
+            const requiredFields = config.filter(f => f.type !== 'statement')
+            requiredFields.forEach(f => answers[f.key] != null && answers[f.key] !== '' && d++)
+            qs('#surveyBarInner').style.width = Math.round(d / requiredFields.length * 100) + '%'
             qs('#surveyWrap').style.display = 'block'
-            qs('#submitBtn').disabled = d !== config.length
+            qs('#submitBtn').disabled = d !== requiredFields.length
         }
 
         async function load() {
@@ -248,42 +249,47 @@
 
             config.forEach(f => {
                 const box = el('div', { class: 'field' })
-                box.append(el('label', {}, f.label))
 
-                if (f.type === 'select') {
-                    const s = el('select')
-                    s.append(el('option', { value: '', hidden: true }, ''))
+                if (f.type === 'statement') {
+                    box.append(el('p', {}, f.label))
+                } else {
+                    box.append(el('label', {}, f.label))
 
-                    f.options.split(/;|,/).forEach(o => s.append(el('option', { value: o.trim() }, o.trim())))
+                    if (f.type === 'select') {
+                        const s = el('select')
+                        s.append(el('option', { value: '', hidden: true }, ''))
 
-                    s.onchange = () => {
-                        answers[f.key] = s.value
-                        autosave(f.key, s.value)
+                        f.options.split(/;|,/).forEach(o => s.append(el('option', { value: o.trim() }, o.trim())))
 
-                        box.querySelectorAll('.badge').forEach(b => b.remove())
+                        s.onchange = () => {
+                            answers[f.key] = s.value
+                            autosave(f.key, s.value)
 
-                        if (f.key.toLowerCase().includes('city')) {
-                            box.append(el('div', { class: 'badge' }, '📍 ' + (cityMap[s.value] || '')))
+                            box.querySelectorAll('.badge').forEach(b => b.remove())
+
+                            if (f.key.toLowerCase().includes('city')) {
+                                box.append(el('div', { class: 'badge' }, '📍 ' + (cityMap[s.value] || '')))
+                            }
+
+                            if (f.key.toLowerCase().includes('age')) {
+                                box.append(el('div', { class: 'badge' }, ageMap[s.value] || ''))
+                            }
+
+                            updateProgress()
                         }
 
-                        if (f.key.toLowerCase().includes('age')) {
-                            box.append(el('div', { class: 'badge' }, ageMap[s.value] || ''))
+                        box.append(s)
+                    }
+
+                    else {
+                        const i = el('input', { type: f.type })
+                        i.onblur = () => {
+                            answers[f.key] = i.value
+                            autosave(f.key, i.value)
+                            updateProgress()
                         }
-
-                        updateProgress()
+                        box.append(i)
                     }
-
-                    box.append(s)
-                }
-
-                else {
-                    const i = el('input', { type: f.type })
-                    i.onblur = () => {
-                        answers[f.key] = i.value
-                        autosave(f.key, i.value)
-                        updateProgress()
-                    }
-                    box.append(i)
                 }
 
                 w.append(box)
