@@ -167,7 +167,7 @@
             <div id="loadTrack">
                 <div id="loadBar"></div>
             </div>
-            <div id="loadText">Loading…</div>
+            <div id="loadText">Loading… 0%</div>
         </div>
 
         <div id="surveyWrap" style="display:none">
@@ -237,19 +237,27 @@
         }
 
         async function load() {
-            setLoad(20)
-            const r = await fetch(WEBAPP_URL)
-            setLoad(60)
-            const j = await r.json()
-            setLoad(85)
 
-            config = j.config.filter(x => x.key)
+            setLoad(20);
 
-            build()
-            updateProgress()
-            setLoad(100)
-            setTimeout(() => qs('#loadWrap').style.display = 'none', 400)
+            const r = await fetch(WEBAPP_URL);
+            setLoad(60);
+
+            const j = await r.json();
+            config = j.config.filter(x => x.key);
+
+            setLoad(85);
+
+            build();
+            updateProgress();
+
+            setLoad(100);
+
+            setTimeout(() => {
+                qs('#loadWrap').style.display = 'none';
+            }, 400);
         }
+
 
         function build() {
             const w = qs('#formWrapper'); w.innerHTML = ''
