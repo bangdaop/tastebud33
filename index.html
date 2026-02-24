@@ -33,8 +33,6 @@
             display: block;
         }
 
-        /* progress */
-
         #surveyWrap {
             position: sticky;
             top: 0;
@@ -56,8 +54,6 @@
             background: linear-gradient(90deg, #0d3b66, #3fa9f5);
             transition: .3s;
         }
-
-        /* loader */
 
         #loadWrap {
             text-align: center;
@@ -83,14 +79,12 @@
             opacity: .7
         }
 
-        /* ===== HORIZONTAL FORM ===== */
+        /* HORIZONTAL FORM */
 
         #formWrapper {
             flex: 1;
             display: flex;
-            flex-direction: row;
             overflow-x: auto;
-            overflow-y: hidden;
             scroll-snap-type: x mandatory;
             gap: 20px;
             padding-bottom: 10px;
@@ -98,7 +92,6 @@
 
         .field {
             flex: 0 0 100%;
-            min-width: 100%;
             scroll-snap-align: center;
             background: white;
             padding: 16px;
@@ -108,8 +101,6 @@
             flex-direction: column;
             justify-content: center;
         }
-
-        /* inputs */
 
         label {
             font-weight: 600;
@@ -133,8 +124,6 @@
             color: #0d3b66;
         }
 
-        /* submit */
-
         #submitBtn {
             margin-top: 10px;
             padding: 14px;
@@ -149,8 +138,6 @@
         #submitBtn:not(:disabled) {
             opacity: 1
         }
-
-        /* summary */
 
         .summary-row {
             display: flex;
@@ -223,10 +210,7 @@
         const WEBAPP_URL = "https://script.google.com/macros/s/AKfycbzxp6xJwgKTXCO5jas3mg7fD3fBbH5-0MHPkYD3K55LNN2Z7Yli88cvWKv17OcxpvSU/exec"
 
         let sessionId = localStorage.getItem("tb_session_id")
-        if (!sessionId) {
-            sessionId = 's_' + Math.random().toString(36).slice(2, 12)
-            localStorage.setItem("tb_session_id", sessionId)
-        }
+        if (!sessionId) { sessionId = 's_' + Math.random().toString(36).slice(2, 12); localStorage.setItem("tb_session_id", sessionId) }
 
         const answers = {}
         let config = []
@@ -240,20 +224,12 @@
             "46+🧛‍♂️": "Absolutely Forever Young 46+"
         }
 
-        const cityMap = {
-            "Hyderabad": "Telangana",
-            "Mumbai": "Maharashtra",
-            "Delhi": "Delhi",
-            "Bengaluru": "Karnataka",
-            "Chennai": "Tamil Nadu"
-        }
+        const cityMap = { "Hyderabad": "Telangana", "Mumbai": "Maharashtra", "Delhi": "Delhi", "Bengaluru": "Karnataka", "Chennai": "Tamil Nadu" }
 
         const qs = s => document.querySelector(s)
         const el = (t, a = {}, ...c) => { const n = document.createElement(t); for (const k in a) n.setAttribute(k, a[k]); c.forEach(x => n.append(x)); return n }
 
-        function autosave(k, v) {
-            fetch(WEBAPP_URL, { method: 'POST', body: JSON.stringify({ sessionId, fieldName: k, fieldValue: v }) })
-        }
+        function autosave(k, v) { fetch(WEBAPP_URL, { method: 'POST', body: JSON.stringify({ sessionId, fieldName: k, fieldValue: v }) }) }
 
         function updateProgress() {
             const req = config.filter(f => f.type !== 'statement')
@@ -264,7 +240,7 @@
             qs('#submitBtn').disabled = d !== req.length
         }
 
-        function slideNext() {
+        function slideNext(box) {
             const wrap = qs('#formWrapper')
             wrap.scrollBy({ left: wrap.clientWidth + 20, behavior: 'smooth' })
         }
@@ -304,14 +280,11 @@
 
                             box.querySelectorAll('.badge').forEach(b => b.remove())
 
-                            if (f.key.toLowerCase().includes('city'))
-                                box.append(el('div', { class: 'badge' }, '📍 ' + (cityMap[s.value] || '')))
-
-                            if (f.key.toLowerCase().includes('age'))
-                                box.append(el('div', { class: 'badge' }, ageMap[s.value] || ''))
+                            if (f.key.toLowerCase().includes('city')) box.append(el('div', { class: 'badge' }, '📍 ' + (cityMap[s.value] || '')))
+                            if (f.key.toLowerCase().includes('age')) box.append(el('div', { class: 'badge' }, ageMap[s.value] || ''))
 
                             updateProgress()
-                            slideNext()
+                            slideNext(box)
                         }
 
                         box.append(s)
@@ -321,7 +294,7 @@
                             answers[f.key] = i.value
                             autosave(f.key, i.value)
                             updateProgress()
-                            slideNext()
+                            slideNext(box)
                         }
                         box.append(i)
                     }
