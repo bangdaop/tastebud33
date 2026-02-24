@@ -33,7 +33,6 @@
             display: block
         }
 
-        /* progress */
         #surveyWrap {
             position: sticky;
             top: 0;
@@ -56,7 +55,6 @@
             transition: .3s
         }
 
-        /* loader */
         #loadWrap {
             text-align: center;
             margin: 12px 0
@@ -81,7 +79,6 @@
             opacity: .7
         }
 
-        /* horizontal container */
         #formWrapper {
             flex: 1;
             display: flex;
@@ -94,11 +91,9 @@
             display: none
         }
 
-        /* card */
         .field {
             flex: 0 0 100%;
             scroll-snap-align: center;
-            scroll-snap-stop: always;
             height: 100%;
             background: white;
             padding: 22px;
@@ -115,7 +110,6 @@
             margin-bottom: 20px;
         }
 
-        /* option buttons */
         .opt {
             padding: 14px;
             margin-bottom: 12px;
@@ -134,7 +128,6 @@
             border-color: #ff7a00
         }
 
-        /* inputs */
         input {
             width: 100%;
             padding: 14px;
@@ -144,17 +137,14 @@
             font-size: 16px;
         }
 
-        /* badges */
         .badge {
             margin-top: 10px;
-            font-size: 15px;
-            font-weight: 600;
+            font-size: 17px;
+            font-weight: 800;
             color: #0d3b66;
         }
 
-        /* submit */
         .finishSlide {
-            align-items: center;
             text-align: center
         }
 
@@ -173,7 +163,6 @@
             opacity: 1
         }
 
-        /* matrix */
         #matrixOverlay {
             position: fixed;
             inset: 0;
@@ -292,7 +281,6 @@
                 const box = el('div', { class: 'field' })
                 box.append(el('label', {}, f.label))
 
-                /* SELECT QUESTIONS */
                 if (f.type === "select") {
                     f.options.split(/;|,/).forEach(o => {
                         const v = o.trim()
@@ -301,13 +289,18 @@
                         b.onclick = () => {
                             answers[f.key] = v
                             autosave(f.key, v)
+
                             box.querySelectorAll('.badge').forEach(x => x.remove())
 
-                            if (f.key.toLowerCase().includes("city"))
-                                box.append(el("div", { class: "badge" }, "📍 " + (cityMap[v] || "")))
+                            if (f.key.toLowerCase().includes("city")) {
+                                const badge = el("div", { class: "badge" }, "📍 " + (cityMap[v] || ""))
+                                b.after(badge)
+                            }
 
-                            if (f.key.toLowerCase().includes("age"))
-                                box.append(el("div", { class: "badge" }, ageMap[v] || ""))
+                            if (f.key.toLowerCase().includes("age")) {
+                                const badge = el("div", { class: "badge" }, ageMap[v] || "")
+                                b.after(badge)
+                            }
 
                             updateProgress()
                             scrollNext()
@@ -317,22 +310,25 @@
                     })
                 }
 
-                /* TEXT / NUMBER */
                 else {
                     const i = el('input', { type: f.type })
-                    i.onblur = () => {
-                        answers[f.key] = i.value
-                        autosave(f.key, i.value)
-                        updateProgress()
-                        scrollNext()
-                    }
+
+                    i.addEventListener('keydown', e => {
+                        if (e.key === "Enter") {
+                            e.preventDefault()
+                            answers[f.key] = i.value
+                            autosave(f.key, i.value)
+                            updateProgress()
+                            scrollNext()
+                        }
+                    })
+
                     box.append(i)
                 }
 
                 w.append(box)
             })
 
-            /* FINAL SLIDE */
             const finish = el('div', { class: 'field finishSlide' })
             const btn = el('button', { id: 'submitBtn' }, 'Finish')
             finish.append(btn)
