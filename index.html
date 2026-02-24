@@ -14,46 +14,46 @@
         body {
             margin: 0;
             font-family: system-ui;
-            background: linear-gradient(180deg, #f3f6fb, #e9eef5);
-            overflow: hidden;
+            background: linear-gradient(180deg, #f3f6fb, #e9eef5)
         }
 
         .app {
             max-width: 720px;
             margin: auto;
-            padding: 12px;
-            height: 100vh;
-            display: flex;
-            flex-direction: column;
+            padding: 12px
         }
 
         .header img {
             width: 100%;
             border-radius: 14px;
-            display: block;
+            display: block
         }
+
+        /* progress */
 
         #surveyWrap {
             position: sticky;
             top: 0;
             background: #f3f6fb;
             padding: 8px 0;
-            z-index: 20;
+            z-index: 20
         }
 
         #surveyBar {
             height: 6px;
             background: #d9dee6;
             border-radius: 6px;
-            overflow: hidden;
+            overflow: hidden
         }
 
         #surveyBarInner {
             height: 100%;
             width: 0%;
             background: linear-gradient(90deg, #0d3b66, #3fa9f5);
-            transition: .3s;
+            transition: .3s
         }
+
+        /* loader */
 
         #loadWrap {
             text-align: center;
@@ -79,75 +79,82 @@
             opacity: .7
         }
 
-        /* HORIZONTAL FORM */
-
-        #formWrapper {
-            flex: 1;
-            display: flex;
-            overflow-x: auto;
-            scroll-snap-type: x mandatory;
-            gap: 20px;
-            padding-bottom: 10px;
-        }
+        /* card */
 
         .field {
-            flex: 0 0 100%;
-            scroll-snap-align: center;
             background: white;
-            padding: 16px;
+            padding: 14px;
             border-radius: 14px;
+            margin-bottom: 14px;
             box-shadow: 0 8px 18px rgba(0, 0, 0, .06);
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
+            padding-top: 15vh;
         }
 
         label {
-            font-weight: 600;
-            margin-bottom: 10px
+            font-weight: 800;
+            font-size: 28px;
+            line-height: 1.3;
+            margin-bottom: 20px;
+            display: block
         }
 
-        input,
-        select {
+        input {
             width: 100%;
             padding: 12px;
             border-radius: 10px;
             border: 1px solid #d7dce4;
             background: #fafbfc;
-            font-size: 15px;
+            font-size: 15px
         }
+
+        /* option buttons */
+
+        .opt {
+            padding: 14px;
+            margin-bottom: 10px;
+            border-radius: 12px;
+            border: 1px solid #ddd;
+            background: white;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: .25s;
+            text-align: left
+        }
+
+        .opt:hover {
+            background: #fff3e6;
+            border-color: #ff7a00
+        }
+
+        /* badge */
 
         .badge {
             margin-top: 8px;
             font-size: 15px;
             font-weight: 600;
-            color: #0d3b66;
+            color: #0d3b66
         }
 
+        /* submit */
+
         #submitBtn {
-            margin-top: 10px;
+            margin-top: 16px;
+            width: 100%;
             padding: 14px;
             border: none;
             border-radius: 12px;
             background: #ff7a00;
             color: white;
             font-size: 16px;
-            opacity: .4;
+            opacity: .4
         }
 
         #submitBtn:not(:disabled) {
             opacity: 1
         }
 
-        .summary-row {
-            display: flex;
-            justify-content: space-between;
-            font-size: 13px;
-            padding: 6px 0;
-            border-bottom: 1px dashed #ddd;
-        }
-
-        /* MATRIX */
+        /* matrix */
 
         #matrixOverlay {
             position: fixed;
@@ -156,19 +163,27 @@
             display: none;
             align-items: center;
             justify-content: center;
-            z-index: 9999;
+            z-index: 9999
         }
 
         #matrixText {
             color: #00ff66;
             font-family: monospace;
             font-size: 20px;
-            white-space: pre-wrap;
+            white-space: pre-wrap
+        }
+
+        .summary-row {
+            display: flex;
+            justify-content: space-between;
+            font-size: 13px;
+            padding: 6px 0;
+            border-bottom: 1px dashed #ddd
         }
 
         .statement {
             font-weight: bold;
-            font-size: 16px
+            font-size: 18px
         }
     </style>
 </head>
@@ -199,6 +214,8 @@
 
         <button id="submitBtn" disabled>Finish</button>
 
+        <div id="thankYou"></div>
+
     </div>
 
     <div id="matrixOverlay">
@@ -210,7 +227,10 @@
         const WEBAPP_URL = "https://script.google.com/macros/s/AKfycbzxp6xJwgKTXCO5jas3mg7fD3fBbH5-0MHPkYD3K55LNN2Z7Yli88cvWKv17OcxpvSU/exec"
 
         let sessionId = localStorage.getItem("tb_session_id")
-        if (!sessionId) { sessionId = 's_' + Math.random().toString(36).slice(2, 12); localStorage.setItem("tb_session_id", sessionId) }
+        if (!sessionId) {
+            sessionId = 's_' + Math.random().toString(36).slice(2, 12)
+            localStorage.setItem("tb_session_id", sessionId)
+        }
 
         const answers = {}
         let config = []
@@ -224,25 +244,35 @@
             "46+🧛‍♂️": "Absolutely Forever Young 46+"
         }
 
-        const cityMap = { "Hyderabad": "Telangana", "Mumbai": "Maharashtra", "Delhi": "Delhi", "Bengaluru": "Karnataka", "Chennai": "Tamil Nadu" }
+        const cityMap = {
+            Hyderabad: "Telangana",
+            Mumbai: "Maharashtra",
+            Delhi: "Delhi",
+            Bengaluru: "Karnataka",
+            Chennai: "Tamil Nadu"
+        }
 
         const qs = s => document.querySelector(s)
         const el = (t, a = {}, ...c) => { const n = document.createElement(t); for (const k in a) n.setAttribute(k, a[k]); c.forEach(x => n.append(x)); return n }
 
-        function autosave(k, v) { fetch(WEBAPP_URL, { method: 'POST', body: JSON.stringify({ sessionId, fieldName: k, fieldValue: v }) }) }
+        function autosave(k, v) {
+            fetch(WEBAPP_URL, { method: 'POST', body: JSON.stringify({ sessionId, fieldName: k, fieldValue: v }) })
+        }
 
         function updateProgress() {
-            const req = config.filter(f => f.type !== 'statement')
             let d = 0
+            const req = config.filter(f => f.type !== 'statement')
             req.forEach(f => answers[f.key] != null && answers[f.key] !== '' && d++)
             qs('#surveyBarInner').style.width = Math.round(d / req.length * 100) + '%'
             qs('#surveyWrap').style.display = 'block'
             qs('#submitBtn').disabled = d !== req.length
         }
 
-        function slideNext(box) {
-            const wrap = qs('#formWrapper')
-            wrap.scrollBy({ left: wrap.clientWidth + 20, behavior: 'smooth' })
+        function scrollNext(card) {
+            let n = card.nextElementSibling
+            while (n && !n.classList.contains('field')) n = n.nextElementSibling
+            if (n) n.scrollIntoView({ behavior: 'smooth', block: 'center' })
+            else qs('#submitBtn').scrollIntoView({ behavior: 'smooth', block: 'center' })
         }
 
         async function load() {
@@ -265,36 +295,44 @@
 
                 if (f.type === 'statement') {
                     box.append(el('p', { class: 'statement' }, f.label))
-                } else {
+                }
+                else {
                     box.append(el('label', {}, f.label))
 
-                    if (f.type === 'select') {
-                        const s = el('select')
-                        s.append(el('option', { value: '', hidden: true }, ''))
+                    /* BOTH select + radio become buttons */
 
-                        f.options.split(/;|,/).forEach(o => s.append(el('option', { value: o.trim() }, o.trim())))
+                    if (f.type === 'select' || f.type === 'radio') {
+                        f.options.split(/;|,/).forEach(o => {
+                            const v = o.trim()
+                            const b = el('button', { class: 'opt' }, v)
 
-                        s.onchange = () => {
-                            answers[f.key] = s.value
-                            autosave(f.key, s.value)
+                            b.onclick = () => {
+                                answers[f.key] = v
+                                autosave(f.key, v)
 
-                            box.querySelectorAll('.badge').forEach(b => b.remove())
+                                box.querySelectorAll('.badge').forEach(x => x.remove())
 
-                            if (f.key.toLowerCase().includes('city')) box.append(el('div', { class: 'badge' }, '📍 ' + (cityMap[s.value] || '')))
-                            if (f.key.toLowerCase().includes('age')) box.append(el('div', { class: 'badge' }, ageMap[s.value] || ''))
+                                if (f.key.toLowerCase().includes('city'))
+                                    box.append(el('div', { class: 'badge' }, '📍 ' + (cityMap[v] || '')))
 
-                            updateProgress()
-                            slideNext(box)
-                        }
+                                if (f.key.toLowerCase().includes('age'))
+                                    box.append(el('div', { class: 'badge' }, ageMap[v] || ''))
 
-                        box.append(s)
-                    } else {
+                                updateProgress()
+                                scrollNext(box)
+                            }
+
+                            box.append(b)
+                        })
+                    }
+
+                    else {
                         const i = el('input', { type: f.type })
                         i.onblur = () => {
                             answers[f.key] = i.value
                             autosave(f.key, i.value)
                             updateProgress()
-                            slideNext(box)
+                            scrollNext(box)
                         }
                         box.append(i)
                     }
@@ -312,7 +350,11 @@
             const msg = "Submitting your choices to Head Chef CEO Elong Mask . . ."
             let i = 0
             t.textContent = ''
-            const typer = setInterval(() => { t.textContent += msg[i++] || ''; if (i > msg.length) clearInterval(typer) }, 40)
+
+            const typer = setInterval(() => {
+                t.textContent += msg[i++] || ''
+                if (i > msg.length) clearInterval(typer)
+            }, 40)
 
             await fetch(WEBAPP_URL, { method: 'POST', body: JSON.stringify({ sessionId, submitted: true, answers }) })
 
@@ -327,7 +369,6 @@
         load()
 
     </script>
-
 </body>
 
 </html>
