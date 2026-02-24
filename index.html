@@ -128,6 +128,12 @@
             border-color: #ff7a00
         }
 
+        .scrollOpts {
+            max-height: 55vh;
+            overflow-y: auto;
+            padding-right: 6px;
+        }
+
         input {
             width: 100%;
             padding: 14px;
@@ -240,7 +246,20 @@
             "46+🧛‍♂️": "Absolutely Forever Young 46+"
         }
 
-        const cityMap = { Hyderabad: "Telangana", Mumbai: "Maharashtra", Delhi: "Delhi", Bengaluru: "Karnataka", Chennai: "Tamil Nadu" }
+        /* FULL CITY MAP */
+        const cityMap = {
+            Ahmedabad: "Gujarat", Bengaluru: "Karnataka", Chennai: "Tamil Nadu", Coimbatore: "Tamil Nadu", Delhi: "Delhi",
+            Guwahati: "Assam", Hyderabad: "Telangana", Indore: "Madhya Pradesh", Jaipur: "Rajasthan", Lucknow: "Uttar Pradesh",
+            Mangaluru: "Karnataka", Mumbai: "Maharashtra", Nagpur: "Maharashtra", Patna: "Bihar", Pune: "Maharashtra",
+            Surat: "Gujarat", Vadodara: "Gujarat", Visakhapatnam: "Andhra Pradesh", Vijayawada: "Andhra Pradesh",
+            Kolkata: "West Bengal", Thiruvananthapuram: "Kerala", Kochi: "Kerala", Bhopal: "Madhya Pradesh", Ranchi: "Jharkhand",
+            Bhubaneswar: "Odisha", Chandigarh: "Chandigarh", Amritsar: "Punjab", Jodhpur: "Rajasthan", Agra: "Uttar Pradesh",
+            Varanasi: "Uttar Pradesh", Meerut: "Uttar Pradesh", Nashik: "Maharashtra", Rajkot: "Gujarat", Kozhikode: "Kerala",
+            Madurai: "Tamil Nadu", Salem: "Tamil Nadu", Jamshedpur: "Jharkhand", Dehradun: "Uttarakhand", Ludhiana: "Punjab",
+            Srinagar: "Jammu and Kashmir", Shimla: "Himachal Pradesh", Gangtok: "Sikkim", Imphal: "Manipur", Kohima: "Nagaland",
+            Aizawl: "Mizoram", Itanagar: "Arunachal Pradesh", PortBlair: "Andaman and Nicobar", Daman: "Daman and Diu",
+            Diu: "Daman and Diu", Panaji: "Goa", Thane: "Maharashtra", Kolhapur: "Maharashtra"
+        }
 
         const qs = s => document.querySelector(s)
         const el = (t, a = {}, ...c) => { const n = document.createElement(t); for (const k in a) n.setAttribute(k, a[k]); c.forEach(x => n.append(x)); return n }
@@ -255,7 +274,6 @@
             req.forEach(f => answers[f.key] != null && answers[f.key] !== '' && d++)
             qs('#surveyBarInner').style.width = Math.round(d / req.length * 100) + '%'
             qs('#surveyWrap').style.display = 'block'
-            qs('#submitBtn').disabled = d !== req.length
         }
 
         function scrollNext() {
@@ -282,47 +300,45 @@
                 box.append(el('label', {}, f.label))
 
                 if (f.type === "select") {
-                    f.options.split(/;|,/).forEach(o => {
+                    const wrap = f.key.toLowerCase().includes("city") ? el('div', { class: 'scrollOpts' }) : box
+
+                    f.options.split(/;|,/).sort().forEach(o => {
                         const v = o.trim()
                         const b = el('button', { class: 'opt' }, v)
 
                         b.onclick = () => {
                             answers[f.key] = v
                             autosave(f.key, v)
-
                             box.querySelectorAll('.badge').forEach(x => x.remove())
 
                             if (f.key.toLowerCase().includes("city")) {
-                                const badge = el("div", { class: "badge" }, "📍 " + (cityMap[v] || ""))
-                                b.after(badge)
+                                b.after(el("div", { class: "badge" }, "📍 " + (cityMap[v] || "")))
                             }
 
                             if (f.key.toLowerCase().includes("age")) {
-                                const badge = el("div", { class: "badge" }, ageMap[v] || "")
-                                b.after(badge)
+                                b.after(el("div", { class: "badge" }, ageMap[v] || ""))
                             }
 
                             updateProgress()
                             scrollNext()
                         }
 
-                        box.append(b)
+                        wrap.append(b)
                     })
+
+                    box.append(wrap)
                 }
 
                 else {
                     const i = el('input', { type: f.type })
-
                     i.addEventListener('keydown', e => {
                         if (e.key === "Enter") {
-                            e.preventDefault()
                             answers[f.key] = i.value
                             autosave(f.key, i.value)
                             updateProgress()
                             scrollNext()
                         }
                     })
-
                     box.append(i)
                 }
 
@@ -341,21 +357,13 @@
             const o = qs('#matrixOverlay')
             const t = qs('#matrixText')
             o.style.display = 'flex'
-
             const msg = "Submitting your choices to Head Chef CEO Elong Mask . . ."
             let i = 0
             t.textContent = ''
-
-            const typer = setInterval(() => {
-                t.textContent += msg[i++] || ''
-                if (i > msg.length) clearInterval(typer)
-            }, 40)
-
+            const typer = setInterval(() => { t.textContent += msg[i++] || ''; if (i > msg.length) clearInterval(typer) }, 40)
             await fetch(WEBAPP_URL, { method: 'POST', body: JSON.stringify({ sessionId, submitted: true, answers }) })
-
             qs('.app').style.display = 'none'
             o.style.display = 'none'
-
             let out = '<h3>Thank you guys!! See ya soon with Smoky Flavours 🎉❤️‍🔥</h3>'
             Object.keys(answers).forEach(k => out += `<div class="summary-row"><b>${k}</b><span>${answers[k]}</span></div>`)
             document.body.innerHTML = out
