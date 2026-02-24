@@ -30,35 +30,33 @@
         .header img {
             width: 100%;
             border-radius: 14px;
-            display: block;
+            display: block
         }
 
         /* progress */
-
         #surveyWrap {
             position: sticky;
             top: 0;
             background: #f3f6fb;
             padding: 8px 0;
-            z-index: 20;
+            z-index: 20
         }
 
         #surveyBar {
             height: 6px;
             background: #d9dee6;
             border-radius: 6px;
-            overflow: hidden;
+            overflow: hidden
         }
 
         #surveyBarInner {
             height: 100%;
             width: 0%;
             background: linear-gradient(90deg, #0d3b66, #3fa9f5);
-            transition: .3s;
+            transition: .3s
         }
 
         /* loader */
-
         #loadWrap {
             text-align: center;
             margin: 12px 0
@@ -84,7 +82,6 @@
         }
 
         /* horizontal container */
-
         #formWrapper {
             flex: 1;
             display: flex;
@@ -93,41 +90,32 @@
             scroll-snap-type: x mandatory;
         }
 
-        /* hide scrollbar */
         #formWrapper::-webkit-scrollbar {
             display: none
         }
 
-        /* cards */
-
+        /* card */
         .field {
             flex: 0 0 100%;
             scroll-snap-align: center;
             scroll-snap-stop: always;
-
             height: 100%;
             background: white;
-            padding: 20px;
+            padding: 22px;
             border-radius: 14px;
             box-shadow: 0 8px 18px rgba(0, 0, 0, .06);
-
             display: flex;
             flex-direction: column;
             justify-content: center;
         }
 
-        /* question */
-
         label {
             font-weight: 800;
             font-size: 22px;
-            line-height: 1.3;
             margin-bottom: 20px;
-            word-wrap: break-word;
         }
 
-        /* options */
-
+        /* option buttons */
         .opt {
             padding: 14px;
             margin-bottom: 12px;
@@ -143,22 +131,20 @@
 
         .opt:hover {
             background: #fff3e6;
-            border-color: #ff7a00;
+            border-color: #ff7a00
         }
 
-        /* input */
-
+        /* inputs */
         input {
             width: 100%;
-            padding: 12px;
+            padding: 14px;
             border-radius: 10px;
             border: 1px solid #d7dce4;
             background: #fafbfc;
-            font-size: 15px;
+            font-size: 16px;
         }
 
-        /* badge */
-
+        /* badges */
         .badge {
             margin-top: 10px;
             font-size: 15px;
@@ -166,11 +152,10 @@
             color: #0d3b66;
         }
 
-        /* submit slide */
-
+        /* submit */
         .finishSlide {
             align-items: center;
-            text-align: center;
+            text-align: center
         }
 
         #submitBtn {
@@ -189,7 +174,6 @@
         }
 
         /* matrix */
-
         #matrixOverlay {
             position: fixed;
             inset: 0;
@@ -203,8 +187,7 @@
         #matrixText {
             color: #00ff66;
             font-family: monospace;
-            font-size: 20px;
-            white-space: pre-wrap;
+            font-size: 20px
         }
 
         .summary-row {
@@ -213,11 +196,6 @@
             font-size: 13px;
             padding: 6px 0;
             border-bottom: 1px dashed #ddd;
-        }
-
-        .statement {
-            font-weight: bold;
-            font-size: 18px
         }
     </style>
 </head>
@@ -253,7 +231,6 @@
     </div>
 
     <script>
-
         const WEBAPP_URL = "https://script.google.com/macros/s/AKfycbzxp6xJwgKTXCO5jas3mg7fD3fBbH5-0MHPkYD3K55LNN2Z7Yli88cvWKv17OcxpvSU/exec"
 
         let sessionId = localStorage.getItem("tb_session_id")
@@ -274,13 +251,7 @@
             "46+🧛‍♂️": "Absolutely Forever Young 46+"
         }
 
-        const cityMap = {
-            Hyderabad: "Telangana",
-            Mumbai: "Maharashtra",
-            Delhi: "Delhi",
-            Bengaluru: "Karnataka",
-            Chennai: "Tamil Nadu"
-        }
+        const cityMap = { Hyderabad: "Telangana", Mumbai: "Maharashtra", Delhi: "Delhi", Bengaluru: "Karnataka", Chennai: "Tamil Nadu" }
 
         const qs = s => document.querySelector(s)
         const el = (t, a = {}, ...c) => { const n = document.createElement(t); for (const k in a) n.setAttribute(k, a[k]); c.forEach(x => n.append(x)); return n }
@@ -295,6 +266,7 @@
             req.forEach(f => answers[f.key] != null && answers[f.key] !== '' && d++)
             qs('#surveyBarInner').style.width = Math.round(d / req.length * 100) + '%'
             qs('#surveyWrap').style.display = 'block'
+            qs('#submitBtn').disabled = d !== req.length
         }
 
         function scrollNext() {
@@ -320,34 +292,47 @@
                 const box = el('div', { class: 'field' })
                 box.append(el('label', {}, f.label))
 
-                f.options.split(/;|,/).forEach(o => {
-                    const v = o.trim()
-                    const b = el('button', { class: 'opt' }, v)
+                /* SELECT QUESTIONS */
+                if (f.type === "select") {
+                    f.options.split(/;|,/).forEach(o => {
+                        const v = o.trim()
+                        const b = el('button', { class: 'opt' }, v)
 
-                    b.onclick = () => {
-                        answers[f.key] = v
-                        autosave(f.key, v)
+                        b.onclick = () => {
+                            answers[f.key] = v
+                            autosave(f.key, v)
+                            box.querySelectorAll('.badge').forEach(x => x.remove())
 
-                        box.querySelectorAll('.badge').forEach(x => x.remove())
+                            if (f.key.toLowerCase().includes("city"))
+                                box.append(el("div", { class: "badge" }, "📍 " + (cityMap[v] || "")))
 
-                        if (f.key.toLowerCase().includes('city'))
-                            box.append(el('div', { class: 'badge' }, '📍 ' + (cityMap[v] || '')))
+                            if (f.key.toLowerCase().includes("age"))
+                                box.append(el("div", { class: "badge" }, ageMap[v] || ""))
 
-                        if (f.key.toLowerCase().includes('age'))
-                            box.append(el('div', { class: 'badge' }, ageMap[v] || ''))
+                            updateProgress()
+                            scrollNext()
+                        }
 
+                        box.append(b)
+                    })
+                }
+
+                /* TEXT / NUMBER */
+                else {
+                    const i = el('input', { type: f.type })
+                    i.onblur = () => {
+                        answers[f.key] = i.value
+                        autosave(f.key, i.value)
                         updateProgress()
                         scrollNext()
                     }
-
-                    box.append(b)
-                })
+                    box.append(i)
+                }
 
                 w.append(box)
             })
 
             /* FINAL SLIDE */
-
             const finish = el('div', { class: 'field finishSlide' })
             const btn = el('button', { id: 'submitBtn' }, 'Finish')
             finish.append(btn)
@@ -381,7 +366,6 @@
         }
 
         load()
-
     </script>
 </body>
 
