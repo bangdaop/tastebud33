@@ -14,42 +14,50 @@
         body {
             margin: 0;
             font-family: system-ui;
-            background: linear-gradient(180deg, #f3f6fb, #e9eef5)
+            background: linear-gradient(180deg, #f3f6fb, #e9eef5);
+            overflow: hidden;
         }
 
         .app {
             max-width: 720px;
             margin: auto;
-            padding: 12px
+            padding: 12px;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
         }
 
         .header img {
             width: 100%;
             border-radius: 14px;
-            display: block
+            display: block;
         }
+
+        /* progress */
 
         #surveyWrap {
             position: sticky;
             top: 0;
             background: #f3f6fb;
             padding: 8px 0;
-            z-index: 20
+            z-index: 20;
         }
 
         #surveyBar {
             height: 6px;
             background: #d9dee6;
             border-radius: 6px;
-            overflow: hidden
+            overflow: hidden;
         }
 
         #surveyBarInner {
             height: 100%;
             width: 0%;
             background: linear-gradient(90deg, #0d3b66, #3fa9f5);
-            transition: .3s
+            transition: .3s;
         }
+
+        /* loader */
 
         #loadWrap {
             text-align: center;
@@ -75,18 +83,37 @@
             opacity: .7
         }
 
-        .field {
-            background: white;
-            padding: 14px;
-            border-radius: 14px;
-            margin-bottom: 14px;
-            box-shadow: 0 8px 18px rgba(0, 0, 0, .06)
+        /* ===== HORIZONTAL FORM ===== */
+
+        #formWrapper {
+            flex: 1;
+            display: flex;
+            flex-direction: row;
+            overflow-x: auto;
+            overflow-y: hidden;
+            scroll-snap-type: x mandatory;
+            gap: 20px;
+            padding-bottom: 10px;
         }
+
+        .field {
+            flex: 0 0 100%;
+            min-width: 100%;
+            scroll-snap-align: center;
+            background: white;
+            padding: 16px;
+            border-radius: 14px;
+            box-shadow: 0 8px 18px rgba(0, 0, 0, .06);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        /* inputs */
 
         label {
             font-weight: 600;
-            display: block;
-            margin-bottom: 8px
+            margin-bottom: 10px
         }
 
         input,
@@ -96,39 +123,44 @@
             border-radius: 10px;
             border: 1px solid #d7dce4;
             background: #fafbfc;
-            font-size: 15px
+            font-size: 15px;
         }
 
         .badge {
             margin-top: 8px;
             font-size: 15px;
             font-weight: 600;
-            color: #0d3b66
+            color: #0d3b66;
         }
 
+        /* submit */
+
         #submitBtn {
-            margin-top: 16px;
-            width: 100%;
+            margin-top: 10px;
             padding: 14px;
             border: none;
             border-radius: 12px;
             background: #ff7a00;
             color: white;
             font-size: 16px;
-            opacity: .4
+            opacity: .4;
         }
 
         #submitBtn:not(:disabled) {
             opacity: 1
         }
 
+        /* summary */
+
         .summary-row {
             display: flex;
             justify-content: space-between;
             font-size: 13px;
             padding: 6px 0;
-            border-bottom: 1px dashed #ddd
+            border-bottom: 1px dashed #ddd;
         }
+
+        /* MATRIX */
 
         #matrixOverlay {
             position: fixed;
@@ -137,14 +169,14 @@
             display: none;
             align-items: center;
             justify-content: center;
-            z-index: 9999
+            z-index: 9999;
         }
 
         #matrixText {
             color: #00ff66;
             font-family: monospace;
             font-size: 20px;
-            white-space: pre-wrap
+            white-space: pre-wrap;
         }
 
         .statement {
@@ -167,7 +199,7 @@
             <div id="loadTrack">
                 <div id="loadBar"></div>
             </div>
-            <div id="loadText">Loading… 0%</div>
+            <div id="loadText">Loading…</div>
         </div>
 
         <div id="surveyWrap" style="display:none">
@@ -180,8 +212,6 @@
 
         <button id="submitBtn" disabled>Finish</button>
 
-        <div id="thankYou"></div>
-
     </div>
 
     <div id="matrixOverlay">
@@ -189,10 +219,14 @@
     </div>
 
     <script>
+
         const WEBAPP_URL = "https://script.google.com/macros/s/AKfycbzxp6xJwgKTXCO5jas3mg7fD3fBbH5-0MHPkYD3K55LNN2Z7Yli88cvWKv17OcxpvSU/exec"
 
         let sessionId = localStorage.getItem("tb_session_id")
-        if (!sessionId) { sessionId = 's_' + Math.random().toString(36).slice(2, 12); localStorage.setItem("tb_session_id", sessionId) }
+        if (!sessionId) {
+            sessionId = 's_' + Math.random().toString(36).slice(2, 12)
+            localStorage.setItem("tb_session_id", sessionId)
+        }
 
         const answers = {}
         let config = []
@@ -207,155 +241,118 @@
         }
 
         const cityMap = {
-            "Ahmedabad": "Gujarat",
-            "Bengaluru": "Karnataka",
-            "Chennai": "Tamil Nadu",
-            "Coimbatore": "Tamil Nadu",
-            "Delhi": "Delhi",
-            "Guwahati": "Assam",
             "Hyderabad": "Telangana",
-            "Indore": "Madhya Pradesh",
-            "Jaipur": "Rajasthan",
-            "Lucknow": "Uttar Pradesh",
-            "Mangaluru": "Karnataka",
             "Mumbai": "Maharashtra",
-            "Nagpur": "Maharashtra",
-            "Patna": "Bihar",
-            "Pune": "Maharashtra",
-            "Surat": "Gujarat",
-            "Vadodara": "Gujarat",
-            "Visakhapatnam": "Andhra Pradesh",
-            "Vijayawada": "Andhra Pradesh",
-            "Kolkata": "West Bengal",
-            "Thiruvananthapuram": "Kerala",
-            "Kochi": "Kerala",
-            "Bhopal": "Madhya Pradesh",
-            "Ranchi": "Jharkhand",
-            "Bhubaneswar": "Odisha",
-            "Chandigarh": "Chandigarh",
-            "Amritsar": "Punjab",
-            "Jodhpur": "Rajasthan",
-            "Agra": "Uttar Pradesh",
-            "Varanasi": "Uttar Pradesh",
-            "Meerut": "Uttar Pradesh",
-            "Nashik": "Maharashtra",
-            "Rajkot": "Gujarat",
-            "Kozhikode": "Kerala",
-            "Madurai": "Tamil Nadu",
-            "Salem": "Tamil Nadu",
-            "Jamshedpur": "Jharkhand",
-            "Dehradun": "Uttarakhand",
-            "Ludhiana": "Punjab",
-            "Srinagar": "Jammu and Kashmir",
-            "Shimla": "Himachal Pradesh",
-            "Gangtok": "Sikkim",
-            "Imphal": "Manipur",
-            "Kohima": "Nagaland",
-            "Aizawl": "Mizoram",
-            "Itanagar": "Arunachal Pradesh",
-            "Port Blair": "Andaman and Nicobar",
-            "Daman": "Daman and Diu",
-            "Diu": "Daman and Diu",
-            "Panaji": "Goa",
-            "Thane": "Maharashtra",
-            "Kolhapur": "Maharashtra"
+            "Delhi": "Delhi",
+            "Bengaluru": "Karnataka",
+            "Chennai": "Tamil Nadu"
         }
+
         const qs = s => document.querySelector(s)
         const el = (t, a = {}, ...c) => { const n = document.createElement(t); for (const k in a) n.setAttribute(k, a[k]); c.forEach(x => n.append(x)); return n }
-
-        function setLoad(p) {
-            qs('#loadBar').style.width = p + '%'
-            qs('#loadText').innerText = 'Loading… ' + p + '%'
-        }
 
         function autosave(k, v) {
             fetch(WEBAPP_URL, { method: 'POST', body: JSON.stringify({ sessionId, fieldName: k, fieldValue: v }) })
         }
 
         function updateProgress() {
-            let d = 0
             const req = config.filter(f => f.type !== 'statement')
+            let d = 0
             req.forEach(f => answers[f.key] != null && answers[f.key] !== '' && d++)
             qs('#surveyBarInner').style.width = Math.round(d / req.length * 100) + '%'
             qs('#surveyWrap').style.display = 'block'
             qs('#submitBtn').disabled = d !== req.length
         }
 
-        function scrollToNextField(b) {
-            let n = b.nextElementSibling
-            while (n && !n.classList.contains('field')) n = n.nextElementSibling
-            if (n) n.scrollIntoView({ behavior: 'smooth', block: 'center' })
-            else qs('#submitBtn').scrollIntoView({ behavior: 'smooth', block: 'center' })
+        function slideNext() {
+            const wrap = qs('#formWrapper')
+            wrap.scrollBy({ left: wrap.clientWidth + 20, behavior: 'smooth' })
         }
 
         async function load() {
-
-            setLoad(20);
-
-            const r = await fetch(WEBAPP_URL);
-            setLoad(60);
-
-            const j = await r.json();
-            config = j.config.filter(x => x.key);
-
-            setLoad(85);
-
-            build();
-            updateProgress();
-
-            setLoad(100);
-
-            setTimeout(() => {
-                qs('#loadWrap').style.display = 'none';
-            }, 400);
+            qs('#loadBar').style.width = '40%'
+            const r = await fetch(WEBAPP_URL)
+            const j = await r.json()
+            config = j.config.filter(x => x.key)
+            qs('#loadBar').style.width = '90%'
+            build()
+            updateProgress()
+            setTimeout(() => qs('#loadWrap').style.display = 'none', 300)
         }
 
-
         function build() {
-            const w = qs('#formWrapper'); w.innerHTML = ''
+            const w = qs('#formWrapper')
+            w.innerHTML = ''
+
             config.forEach(f => {
                 const box = el('div', { class: 'field' })
-                if (f.type === 'statement') { box.append(el('p', { class: 'statement' }, f.label)) }
-                else {
+
+                if (f.type === 'statement') {
+                    box.append(el('p', { class: 'statement' }, f.label))
+                } else {
                     box.append(el('label', {}, f.label))
+
                     if (f.type === 'select') {
                         const s = el('select')
                         s.append(el('option', { value: '', hidden: true }, ''))
+
                         f.options.split(/;|,/).forEach(o => s.append(el('option', { value: o.trim() }, o.trim())))
+
                         s.onchange = () => {
                             answers[f.key] = s.value
                             autosave(f.key, s.value)
+
                             box.querySelectorAll('.badge').forEach(b => b.remove())
-                            if (f.key.toLowerCase().includes('city')) box.append(el('div', { class: 'badge' }, '📍 ' + (cityMap[s.value] || '')))
-                            if (f.key.toLowerCase().includes('age')) box.append(el('div', { class: 'badge' }, ageMap[s.value] || ''))
-                            updateProgress(); scrollToNextField(box)
+
+                            if (f.key.toLowerCase().includes('city'))
+                                box.append(el('div', { class: 'badge' }, '📍 ' + (cityMap[s.value] || '')))
+
+                            if (f.key.toLowerCase().includes('age'))
+                                box.append(el('div', { class: 'badge' }, ageMap[s.value] || ''))
+
+                            updateProgress()
+                            slideNext()
                         }
+
                         box.append(s)
                     } else {
                         const i = el('input', { type: f.type })
-                        i.onblur = () => { answers[f.key] = i.value; autosave(f.key, i.value); updateProgress(); scrollToNextField(box) }
+                        i.onblur = () => {
+                            answers[f.key] = i.value
+                            autosave(f.key, i.value)
+                            updateProgress()
+                            slideNext()
+                        }
                         box.append(i)
                     }
                 }
+
                 w.append(box)
             })
         }
 
         qs('#submitBtn').onclick = async () => {
-            const o = qs('#matrixOverlay'), t = qs('#matrixText')
+            const o = qs('#matrixOverlay')
+            const t = qs('#matrixText')
             o.style.display = 'flex'
+
             const msg = "Submitting your choices to Head Chef CEO Elong Mask . . ."
-            let i = 0; t.textContent = ''
+            let i = 0
+            t.textContent = ''
             const typer = setInterval(() => { t.textContent += msg[i++] || ''; if (i > msg.length) clearInterval(typer) }, 40)
+
             await fetch(WEBAPP_URL, { method: 'POST', body: JSON.stringify({ sessionId, submitted: true, answers }) })
+
             qs('.app').style.display = 'none'
             o.style.display = 'none'
+
             let out = '<h3>Thank you guys!! See ya soon with Smoky Flavours 🎉❤️‍🔥</h3>'
             Object.keys(answers).forEach(k => out += `<div class="summary-row"><b>${k}</b><span>${answers[k]}</span></div>`)
             document.body.innerHTML = out
         }
 
         load()
+
     </script>
 
 </body>
