@@ -123,9 +123,10 @@
             text-align: left;
         }
 
-        .opt:hover {
+        .opt.selected {
             background: #fff3e6;
-            border-color: #ff7a00
+            border-color: #ff7a00;
+            box-shadow: 0 0 0 2px rgba(255, 122, 0, .25);
         }
 
         .scrollOpts {
@@ -246,7 +247,6 @@
             "46+🧛‍♂️": "Absolutely Forever Young 46+"
         }
 
-        /* FULL CITY MAP */
         const cityMap = {
             Ahmedabad: "Gujarat", Bengaluru: "Karnataka", Chennai: "Tamil Nadu", Coimbatore: "Tamil Nadu", Delhi: "Delhi",
             Guwahati: "Assam", Hyderabad: "Telangana", Indore: "Madhya Pradesh", Jaipur: "Rajasthan", Lucknow: "Uttar Pradesh",
@@ -306,18 +306,22 @@
                         const v = o.trim()
                         const b = el('button', { class: 'opt' }, v)
 
+                        if (answers[f.key] === v) b.classList.add("selected")
+
                         b.onclick = () => {
                             answers[f.key] = v
                             autosave(f.key, v)
+
+                            wrap.querySelectorAll(".opt").forEach(x => x.classList.remove("selected"))
+                            b.classList.add("selected")
+
                             box.querySelectorAll('.badge').forEach(x => x.remove())
 
-                            if (f.key.toLowerCase().includes("city")) {
+                            if (f.key.toLowerCase().includes("city"))
                                 b.after(el("div", { class: "badge" }, "📍 " + (cityMap[v] || "")))
-                            }
 
-                            if (f.key.toLowerCase().includes("age")) {
+                            if (f.key.toLowerCase().includes("age"))
                                 b.after(el("div", { class: "badge" }, ageMap[v] || ""))
-                            }
 
                             updateProgress()
                             scrollNext()
