@@ -15,16 +15,12 @@
             margin: 0;
             font-family: system-ui;
             background: linear-gradient(180deg, #f3f6fb, #e9eef5);
-            overflow: hidden;
         }
 
         .app {
             max-width: 720px;
             margin: auto;
-            padding: 12px;
-            height: 100vh;
-            display: flex;
-            flex-direction: column;
+            padding: 12px
         }
 
         .header img {
@@ -79,60 +75,34 @@
             opacity: .7
         }
 
-        #formWrapper {
-            flex: 1;
-            display: flex;
-            overflow-x: auto;
-            overflow-y: hidden;
-            scroll-snap-type: x mandatory;
-        }
-
-        #formWrapper::-webkit-scrollbar {
-            display: none
-        }
-
         .field {
-            flex: 0 0 100%;
-            scroll-snap-align: center;
-            height: 100%;
             background: white;
-            padding: 22px;
+            padding: 18px;
             border-radius: 14px;
-            box-shadow: 0 8px 18px rgba(0, 0, 0, .06);
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
+            margin-bottom: 16px;
+            box-shadow: 0 8px 18px rgba(0, 0, 0, .06)
         }
 
         label {
             font-weight: 800;
-            font-size: 22px;
-            margin-bottom: 20px;
+            font-size: 20px;
+            margin-bottom: 12px;
+            display: block
         }
 
         .opt {
             padding: 14px;
-            margin-bottom: 12px;
-            border-radius: 12px;
             border: 1px solid #ddd;
-            background: white;
-            font-size: 16px;
+            border-radius: 12px;
+            margin-bottom: 10px;
             font-weight: 600;
             cursor: pointer;
-            transition: .25s;
-            text-align: left;
+            transition: .2s
         }
 
         .opt.selected {
             background: #fff3e6;
-            border-color: #ff7a00;
-            box-shadow: 0 0 0 2px rgba(255, 122, 0, .25);
-        }
-
-        .scrollOpts {
-            max-height: 55vh;
-            overflow-y: auto;
-            padding-right: 6px;
+            border-color: #ff7a00
         }
 
         input {
@@ -140,50 +110,29 @@
             padding: 14px;
             border-radius: 10px;
             border: 1px solid #d7dce4;
-            background: #fafbfc;
-            font-size: 16px;
+            font-size: 16px
         }
 
         .badge {
             margin-top: 10px;
             font-size: 17px;
             font-weight: 800;
-            color: #0d3b66;
-        }
-
-        .finishSlide {
-            text-align: center
+            color: #0d3b66
         }
 
         #submitBtn {
-            width: 80%;
+            width: 100%;
             padding: 16px;
             border: none;
             border-radius: 14px;
             background: #ff7a00;
             color: white;
             font-size: 18px;
-            opacity: .4;
+            opacity: .4
         }
 
         #submitBtn:not(:disabled) {
             opacity: 1
-        }
-
-        #matrixOverlay {
-            position: fixed;
-            inset: 0;
-            background: rgba(0, 0, 0, .85);
-            display: none;
-            align-items: center;
-            justify-content: center;
-            z-index: 9999;
-        }
-
-        #matrixText {
-            color: #00ff66;
-            font-family: monospace;
-            font-size: 20px
         }
 
         .summary-row {
@@ -191,7 +140,24 @@
             justify-content: space-between;
             font-size: 13px;
             padding: 6px 0;
-            border-bottom: 1px dashed #ddd;
+            border-bottom: 1px dashed #ddd
+        }
+
+        /* MATRIX */
+        #matrixOverlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, .85);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 9999
+        }
+
+        #matrixText {
+            color: #00ff66;
+            font-family: monospace;
+            font-size: 20px
         }
     </style>
 </head>
@@ -220,6 +186,8 @@
 
         <div id="formWrapper"></div>
 
+        <button id="submitBtn" disabled>Finish</button>
+
     </div>
 
     <div id="matrixOverlay">
@@ -247,19 +215,7 @@
             "46+🧛‍♂️": "Absolutely Forever Young 46+"
         }
 
-        const cityMap = {
-            Ahmedabad: "Gujarat", Bengaluru: "Karnataka", Chennai: "Tamil Nadu", Coimbatore: "Tamil Nadu", Delhi: "Delhi",
-            Guwahati: "Assam", Hyderabad: "Telangana", Indore: "Madhya Pradesh", Jaipur: "Rajasthan", Lucknow: "Uttar Pradesh",
-            Mangaluru: "Karnataka", Mumbai: "Maharashtra", Nagpur: "Maharashtra", Patna: "Bihar", Pune: "Maharashtra",
-            Surat: "Gujarat", Vadodara: "Gujarat", Visakhapatnam: "Andhra Pradesh", Vijayawada: "Andhra Pradesh",
-            Kolkata: "West Bengal", Thiruvananthapuram: "Kerala", Kochi: "Kerala", Bhopal: "Madhya Pradesh", Ranchi: "Jharkhand",
-            Bhubaneswar: "Odisha", Chandigarh: "Chandigarh", Amritsar: "Punjab", Jodhpur: "Rajasthan", Agra: "Uttar Pradesh",
-            Varanasi: "Uttar Pradesh", Meerut: "Uttar Pradesh", Nashik: "Maharashtra", Rajkot: "Gujarat", Kozhikode: "Kerala",
-            Madurai: "Tamil Nadu", Salem: "Tamil Nadu", Jamshedpur: "Jharkhand", Dehradun: "Uttarakhand", Ludhiana: "Punjab",
-            Srinagar: "Jammu and Kashmir", Shimla: "Himachal Pradesh", Gangtok: "Sikkim", Imphal: "Manipur", Kohima: "Nagaland",
-            Aizawl: "Mizoram", Itanagar: "Arunachal Pradesh", PortBlair: "Andaman and Nicobar", Daman: "Daman and Diu",
-            Diu: "Daman and Diu", Panaji: "Goa", Thane: "Maharashtra", Kolhapur: "Maharashtra"
-        }
+        const cityMap = { Hyderabad: "Telangana", Mumbai: "Maharashtra", Delhi: "Delhi", Bengaluru: "Karnataka", Chennai: "Tamil Nadu" }
 
         const qs = s => document.querySelector(s)
         const el = (t, a = {}, ...c) => { const n = document.createElement(t); for (const k in a) n.setAttribute(k, a[k]); c.forEach(x => n.append(x)); return n }
@@ -270,14 +226,14 @@
 
         function updateProgress() {
             let d = 0
-            const req = config.filter(f => f.type !== 'statement')
-            req.forEach(f => answers[f.key] != null && answers[f.key] !== '' && d++)
-            qs('#surveyBarInner').style.width = Math.round(d / req.length * 100) + '%'
+            config.forEach(f => answers[f.key] != null && answers[f.key] !== '' && d++)
+            qs('#surveyBarInner').style.width = Math.round(d / config.length * 100) + '%'
             qs('#surveyWrap').style.display = 'block'
+            qs('#submitBtn').disabled = d !== config.length
         }
 
-        function scrollNext() {
-            qs('#formWrapper').scrollBy({ left: qs('#formWrapper').clientWidth, behavior: 'smooth' })
+        function scrollNext(card) {
+            setTimeout(() => card.nextElementSibling?.scrollIntoView({ behavior: 'smooth', block: 'center' }), 250)
         }
 
         async function load() {
@@ -299,38 +255,27 @@
                 const box = el('div', { class: 'field' })
                 box.append(el('label', {}, f.label))
 
-                if (f.type === "select") {
-                    const wrap = f.key.toLowerCase().includes("city") ? el('div', { class: 'scrollOpts' }) : box
-
-                    f.options.split(/;|,/).sort().forEach(o => {
+                if (f.type === 'select') {
+                    f.options.split(/;|,/).forEach(o => {
                         const v = o.trim()
-                        const b = el('button', { class: 'opt' }, v)
-
-                        if (answers[f.key] === v) b.classList.add("selected")
+                        const b = el('div', { class: 'opt' }, v)
 
                         b.onclick = () => {
                             answers[f.key] = v
                             autosave(f.key, v)
-
-                            wrap.querySelectorAll(".opt").forEach(x => x.classList.remove("selected"))
-                            b.classList.add("selected")
+                            box.querySelectorAll('.opt').forEach(x => x.classList.remove('selected'))
+                            b.classList.add('selected')
 
                             box.querySelectorAll('.badge').forEach(x => x.remove())
-
-                            if (f.key.toLowerCase().includes("city"))
-                                b.after(el("div", { class: "badge" }, "📍 " + (cityMap[v] || "")))
-
-                            if (f.key.toLowerCase().includes("age"))
-                                b.after(el("div", { class: "badge" }, ageMap[v] || ""))
+                            if (f.key.toLowerCase().includes("city")) b.after(el("div", { class: "badge" }, "📍 " + (cityMap[v] || "")))
+                            if (f.key.toLowerCase().includes("age")) b.after(el("div", { class: "badge" }, ageMap[v] || ""))
 
                             updateProgress()
-                            scrollNext()
+                            scrollNext(box)
                         }
 
-                        wrap.append(b)
+                        box.append(b)
                     })
-
-                    box.append(wrap)
                 }
 
                 else {
@@ -340,7 +285,7 @@
                             answers[f.key] = i.value
                             autosave(f.key, i.value)
                             updateProgress()
-                            scrollNext()
+                            scrollNext(box)
                         }
                     })
                     box.append(i)
@@ -348,16 +293,9 @@
 
                 w.append(box)
             })
-
-            const finish = el('div', { class: 'field finishSlide' })
-            const btn = el('button', { id: 'submitBtn' }, 'Finish')
-            finish.append(btn)
-            w.append(finish)
-
-            btn.onclick = submitForm
         }
 
-        async function submitForm() {
+        qs('#submitBtn').onclick = async () => {
             const o = qs('#matrixOverlay')
             const t = qs('#matrixText')
             o.style.display = 'flex'
@@ -365,9 +303,12 @@
             let i = 0
             t.textContent = ''
             const typer = setInterval(() => { t.textContent += msg[i++] || ''; if (i > msg.length) clearInterval(typer) }, 40)
+
             await fetch(WEBAPP_URL, { method: 'POST', body: JSON.stringify({ sessionId, submitted: true, answers }) })
+
             qs('.app').style.display = 'none'
             o.style.display = 'none'
+
             let out = '<h3>Thank you guys!! See ya soon with Smoky Flavours 🎉❤️‍🔥</h3>'
             Object.keys(answers).forEach(k => out += `<div class="summary-row"><b>${k}</b><span>${answers[k]}</span></div>`)
             document.body.innerHTML = out
