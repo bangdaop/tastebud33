@@ -15,26 +15,23 @@
             margin: 0;
             font-family: system-ui;
             background: linear-gradient(180deg, #f3f6fb, #e9eef5);
+            overflow: hidden
         }
 
         .app {
-            max-width: 720px;
-            margin: auto;
-            padding: 12px
+            height: 100vh;
+            display: flex;
+            flex-direction: column
         }
 
         .header img {
             width: 100%;
-            border-radius: 14px;
-            display: block
+            border-radius: 14px
         }
 
         #surveyWrap {
-            position: sticky;
-            top: 0;
-            background: #f3f6fb;
-            padding: 8px 0;
-            z-index: 20
+            padding: 8px;
+            background: #f3f6fb
         }
 
         #surveyBar {
@@ -47,103 +44,84 @@
         #surveyBarInner {
             height: 100%;
             width: 0%;
-            background: linear-gradient(90deg, #0d3b66, #3fa9f5);
-            transition: .3s
+            background: linear-gradient(90deg, #0d3b66, #3fa9f5)
         }
 
-        #loadWrap {
-            text-align: center;
-            margin: 12px 0
+        #slides {
+            flex: 1;
+            display: flex;
+            overflow-x: auto;
+            scroll-snap-type: x mandatory;
+            scroll-behavior: smooth
         }
 
-        #loadTrack {
-            height: 6px;
-            background: #ddd;
-            border-radius: 6px;
-            overflow: hidden
-        }
-
-        #loadBar {
-            height: 100%;
-            width: 0%;
-            background: linear-gradient(90deg, #ff7a00, #ffb347)
-        }
-
-        #loadText {
-            font-size: 12px;
-            margin-top: 6px;
-            opacity: .7
+        .slide {
+            flex: 0 0 100%;
+            scroll-snap-align: center;
+            padding: 18px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center
         }
 
         .field {
             background: white;
             padding: 18px;
             border-radius: 14px;
-            margin-bottom: 16px;
-            box-shadow: 0 8px 18px rgba(0, 0, 0, .06)
+            box-shadow: 0 8px 18px rgba(0, 0, 0, .08)
         }
 
         label {
-            font-weight: 800;
-            font-size: 20px;
+            font-size: 22px;
+            font-weight: 700;
             margin-bottom: 12px;
             display: block
         }
 
-        .opt {
+        .option {
             padding: 14px;
+            border-radius: 10px;
+            background: #fafbfc;
             border: 1px solid #ddd;
-            border-radius: 12px;
             margin-bottom: 10px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: .2s
+            font-size: 16px
         }
 
-        .opt.selected {
-            background: #fff3e6;
+        .option.selected {
+            background: #fff3e0;
             border-color: #ff7a00
         }
 
         input {
             width: 100%;
             padding: 14px;
+            font-size: 16px;
             border-radius: 10px;
-            border: 1px solid #d7dce4;
-            font-size: 16px
+            border: 1px solid #ccc
         }
 
         .badge {
             margin-top: 10px;
-            font-size: 17px;
-            font-weight: 800;
+            font-weight: 700;
+            font-size: 16px;
             color: #0d3b66
         }
 
+        .cityList {
+            max-height: 260px;
+            overflow-y: auto
+        }
+
         #submitBtn {
-            width: 100%;
-            padding: 16px;
+            margin: 14px;
+            padding: 14px;
             border: none;
-            border-radius: 14px;
+            border-radius: 12px;
             background: #ff7a00;
             color: white;
-            font-size: 18px;
-            opacity: .4
+            font-size: 16px
         }
 
-        #submitBtn:not(:disabled) {
-            opacity: 1
-        }
-
-        .summary-row {
-            display: flex;
-            justify-content: space-between;
-            font-size: 13px;
-            padding: 6px 0;
-            border-bottom: 1px dashed #ddd
-        }
-
-        /* MATRIX */
         #matrixOverlay {
             position: fixed;
             inset: 0;
@@ -151,7 +129,7 @@
             display: none;
             align-items: center;
             justify-content: center;
-            z-index: 9999
+            z-index: 999
         }
 
         #matrixText {
@@ -171,22 +149,15 @@
                 src="https://raw.githubusercontent.com/bangdaop/33cimg/9c0a0d694849c5fcc4fde282076fc70f0c46492f/33%20combo.PNG">
         </div>
 
-        <div id="loadWrap">
-            <div id="loadTrack">
-                <div id="loadBar"></div>
-            </div>
-            <div id="loadText">Loading…</div>
-        </div>
-
-        <div id="surveyWrap" style="display:none">
+        <div id="surveyWrap">
             <div id="surveyBar">
                 <div id="surveyBarInner"></div>
             </div>
         </div>
 
-        <div id="formWrapper"></div>
+        <div id="slides"></div>
 
-        <button id="submitBtn" disabled>Finish</button>
+        <button id="submitBtn" style="display:none">Finish</button>
 
     </div>
 
@@ -197,124 +168,124 @@
     <script>
         const WEBAPP_URL = "https://script.google.com/macros/s/AKfycbzxp6xJwgKTXCO5jas3mg7fD3fBbH5-0MHPkYD3K55LNN2Z7Yli88cvWKv17OcxpvSU/exec"
 
-        let sessionId = localStorage.getItem("tb_session_id")
-        if (!sessionId) {
-            sessionId = 's_' + Math.random().toString(36).slice(2, 12)
-            localStorage.setItem("tb_session_id", sessionId)
-        }
+        let sessionId = localStorage.getItem("tb_session") || ("s_" + Math.random().toString(36).slice(2))
+        localStorage.setItem("tb_session", sessionId)
 
         const answers = {}
         let config = []
 
         const ageMap = {
-            "Below 18 👶": "Congrats! Snack Squad (Under 18)",
-            "18–23👩‍🎓": "Cheers! Campus Cravers",
-            "24–28🕺": "Helloww Hustle Bites",
-            "29–35🧑‍💻": "Cool Weekend Foodies",
-            "35–45🧑‍🍼": "Nice! Comfort Connoisseurs",
-            "46+🧛‍♂️": "Absolutely Forever Young 46+"
+            "Below 18 👶": "Congrats! Snack Squad",
+            "18–23👩‍🎓": "Campus Cravers",
+            "24–28🕺": "Hustle Bites",
+            "29–35🧑‍💻": "Weekend Foodies",
+            "35–45🧑‍🍼": "Comfort Connoisseurs",
+            "46+🧛‍♂️": "Forever Young"
         }
 
-        const cityMap = { Hyderabad: "Telangana", Mumbai: "Maharashtra", Delhi: "Delhi", Bengaluru: "Karnataka", Chennai: "Tamil Nadu" }
+        const cityMap = { Hyderabad: "Telangana", Mumbai: "Maharashtra", Delhi: "Delhi", Bengaluru: "Karnataka" }
 
-        const qs = s => document.querySelector(s)
-        const el = (t, a = {}, ...c) => { const n = document.createElement(t); for (const k in a) n.setAttribute(k, a[k]); c.forEach(x => n.append(x)); return n }
+        const qs = x => document.querySelector(x)
 
         function autosave(k, v) {
-            fetch(WEBAPP_URL, { method: 'POST', body: JSON.stringify({ sessionId, fieldName: k, fieldValue: v }) })
+            fetch(WEBAPP_URL, { method: "POST", body: JSON.stringify({ sessionId, fieldName: k, fieldValue: v }) })
         }
 
         function updateProgress() {
+            const req = config.filter(f => f.type !== "statement")
             let d = 0
-            config.forEach(f => answers[f.key] != null && answers[f.key] !== '' && d++)
-            qs('#surveyBarInner').style.width = Math.round(d / config.length * 100) + '%'
-            qs('#surveyWrap').style.display = 'block'
-            qs('#submitBtn').disabled = d !== config.length
+            req.forEach(f => answers[f.key] && d++)
+            qs("#surveyBarInner").style.width = Math.round(d / req.length * 100) + "%"
+            if (d === req.length) qs("#submitBtn").style.display = "block"
         }
 
-        function scrollNext(card) {
-            setTimeout(() => card.nextElementSibling?.scrollIntoView({ behavior: 'smooth', block: 'center' }), 250)
+        function next(i) {
+            document.querySelectorAll(".slide")[i + 1]?.scrollIntoView({ behavior: "smooth" })
         }
 
-        async function load() {
-            qs('#loadBar').style.width = '40%'
-            const r = await fetch(WEBAPP_URL)
-            const j = await r.json()
+        fetch(WEBAPP_URL).then(r => r.json()).then(j => {
             config = j.config.filter(x => x.key)
-            qs('#loadBar').style.width = '90%'
             build()
-            updateProgress()
-            setTimeout(() => qs('#loadWrap').style.display = 'none', 300)
-        }
+        })
 
         function build() {
-            const w = qs('#formWrapper')
-            w.innerHTML = ''
+            const wrap = qs("#slides")
 
-            config.forEach(f => {
-                const box = el('div', { class: 'field' })
-                box.append(el('label', {}, f.label))
+            config.forEach((f, idx) => {
+                const slide = document.createElement("div")
+                slide.className = "slide"
+                const box = document.createElement("div")
+                box.className = "field"
 
-                if (f.type === 'select') {
+                if (f.type === "statement") {
+                    box.innerHTML = "<label>" + f.label + "</label>"
+                    slide.append(box); wrap.append(slide); return
+                }
+
+                box.append(document.createElement("label")).innerText = f.label
+
+                if (f.type === "select") {
+                    const list = document.createElement("div")
+                    list.className = f.key.toLowerCase().includes("city") ? "cityList" : ""
+
                     f.options.split(/;|,/).forEach(o => {
-                        const v = o.trim()
-                        const b = el('div', { class: 'opt' }, v)
+                        const d = document.createElement("div")
+                        d.className = "option"
+                        d.innerText = o.trim()
+                        d.onclick = () => {
+                            list.querySelectorAll(".option").forEach(x => x.classList.remove("selected"))
+                            d.classList.add("selected")
+                            answers[f.key] = d.innerText
+                            autosave(f.key, d.innerText)
 
-                        b.onclick = () => {
-                            answers[f.key] = v
-                            autosave(f.key, v)
-                            box.querySelectorAll('.opt').forEach(x => x.classList.remove('selected'))
-                            b.classList.add('selected')
+                            box.querySelectorAll(".badge").forEach(b => b.remove())
 
-                            box.querySelectorAll('.badge').forEach(x => x.remove())
-                            if (f.key.toLowerCase().includes("city")) b.after(el("div", { class: "badge" }, "📍 " + (cityMap[v] || "")))
-                            if (f.key.toLowerCase().includes("age")) b.after(el("div", { class: "badge" }, ageMap[v] || ""))
+                            if (f.key.toLowerCase().includes("city"))
+                                box.append(Object.assign(document.createElement("div"), { className: "badge", innerText: "📍 " + (cityMap[d.innerText] || "") }))
+
+                            if (f.key.toLowerCase().includes("age"))
+                                box.append(Object.assign(document.createElement("div"), { className: "badge", innerText: ageMap[d.innerText] || "" }))
 
                             updateProgress()
-                            scrollNext(box)
+                            setTimeout(() => next(idx), 300)
                         }
-
-                        box.append(b)
+                        list.append(d)
                     })
+                    box.append(list)
                 }
 
                 else {
-                    const i = el('input', { type: f.type })
-                    i.addEventListener('keydown', e => {
+                    const i = document.createElement("input")
+                    i.type = f.type
+                    i.onkeydown = e => {
                         if (e.key === "Enter") {
                             answers[f.key] = i.value
                             autosave(f.key, i.value)
                             updateProgress()
-                            scrollNext(box)
+                            next(idx)
                         }
-                    })
+                    }
                     box.append(i)
                 }
 
-                w.append(box)
+                slide.append(box)
+                wrap.append(slide)
             })
+
         }
 
-        qs('#submitBtn').onclick = async () => {
-            const o = qs('#matrixOverlay')
-            const t = qs('#matrixText')
-            o.style.display = 'flex'
+        qs("#submitBtn").onclick = async () => {
+            const o = qs("#matrixOverlay")
+            const t = qs("#matrixText")
+            o.style.display = "flex"
             const msg = "Submitting your choices to Head Chef CEO Elong Mask . . ."
-            let i = 0
-            t.textContent = ''
-            const typer = setInterval(() => { t.textContent += msg[i++] || ''; if (i > msg.length) clearInterval(typer) }, 40)
+            let i = 0; t.textContent = ""
+            const typer = setInterval(() => { t.textContent += msg[i++] || ""; if (i > msg.length) clearInterval(typer) }, 40)
 
-            await fetch(WEBAPP_URL, { method: 'POST', body: JSON.stringify({ sessionId, submitted: true, answers }) })
+            await fetch(WEBAPP_URL, { method: "POST", body: JSON.stringify({ sessionId, submitted: true, answers }) })
 
-            qs('.app').style.display = 'none'
-            o.style.display = 'none'
-
-            let out = '<h3>Thank you guys!! See ya soon with Smoky Flavours 🎉❤️‍🔥</h3>'
-            Object.keys(answers).forEach(k => out += `<div class="summary-row"><b>${k}</b><span>${answers[k]}</span></div>`)
-            document.body.innerHTML = out
+            document.body.innerHTML = "<h2>Thank you guys!! See ya soon with Smoky Flavours 🎉❤️‍🔥</h2>"
         }
-
-        load()
     </script>
 </body>
 
