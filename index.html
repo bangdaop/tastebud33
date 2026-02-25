@@ -44,7 +44,8 @@
         #surveyBarInner {
             height: 100%;
             width: 0%;
-            background: linear-gradient(90deg, #0d3b66, #3fa9f5)
+            background: linear-gradient(90deg, #0d3b66, #3fa9f5);
+            transition: width 0.4s ease;
         }
 
         #slides {
@@ -137,6 +138,68 @@
             font-family: monospace;
             font-size: 20px
         }
+
+        /* Loading screen */
+        #loadingScreen {
+            position: fixed;
+            inset: 0;
+            background: linear-gradient(180deg, #f3f6fb, #e9eef5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+            z-index: 1000;
+            transition: opacity 0.6s ease;
+        }
+
+        #loadingScreen h2 {
+            color: #0d3b66;
+            margin: 0 0 24px 0;
+            font-size: 24px;
+            font-weight: 700;
+        }
+
+        #loadBar {
+            width: 280px;
+            height: 8px;
+            background: #d9dee6;
+            border-radius: 999px;
+            overflow: hidden;
+        }
+
+        #loadBarInner {
+            height: 100%;
+            width: 0%;
+            background: linear-gradient(90deg, #0d3b66, #3fa9f5);
+            transition: width 2s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        #loadingScreen p {
+            margin-top: 16px;
+            color: #666;
+            font-size: 14px;
+        }
+
+        /* Next button for statements */
+        .next-btn {
+            display: block;
+            margin: 28px auto 0;
+            padding: 14px 40px;
+            background: linear-gradient(90deg, #0d3b66, #3fa9f5);
+            color: white;
+            border: none;
+            border-radius: 999px;
+            font-size: 17px;
+            font-weight: 700;
+            cursor: pointer;
+            box-shadow: 0 6px 20px rgba(13, 59, 102, .25);
+            transition: all 0.2s ease;
+        }
+
+        .next-btn:active {
+            transform: translateY(2px);
+            box-shadow: 0 4px 12px rgba(13, 59, 102, .25);
+        }
     </style>
 </head>
 
@@ -159,6 +222,15 @@
 
         <button id="submitBtn" style="display:none">Finish</button>
 
+    </div>
+
+    <!-- Loading screen with animated bar -->
+    <div id="loadingScreen">
+        <h2>Preparing your Taste Buds survey...</h2>
+        <div id="loadBar">
+            <div id="loadBarInner"></div>
+        </div>
+        <p>Fetching questions from the kitchen...</p>
     </div>
 
     <div id="matrixOverlay">
@@ -203,13 +275,36 @@
             document.querySelectorAll(".slide")[i + 1]?.scrollIntoView({ behavior: "smooth" })
         }
 
+        // Fetch config + loading bar animation
         fetch(WEBAPP_URL).then(r => r.json()).then(j => {
-            config = j.config.filter(x => x.key)
+            config = j.config.filter(x => x.key || x.type === "statement")
+
+            // Fake loading progress (starts after data received, feels smooth)
+            let loadProgress = 0
+            const loadInterval = setInterval(() => {
+                loadProgress = Math.min(loadProgress + Math.floor(Math.random() * 18) + 7, 97)
+                qs("#loadBarInner").style.width = loadProgress + "%"
+            }, 110)
+
             build()
+
+            // Finish loading animation
+            setTimeout(() => {
+                clearInterval(loadInterval)
+                qs("#loadBarInner").style.width = "100%"
+                setTimeout(() => {
+                    qs("#loadingScreen").style.opacity = "0"
+                    setTimeout(() => {
+                        qs("#loadingScreen").style.display = "none"
+                        updateProgress()
+                    }, 600)
+                }, 450)
+            }, 950)
         })
 
         function build() {
             const wrap = qs("#slides")
+            wrap.innerHTML = "" // clear in case of rebuild
 
             config.forEach((f, idx) => {
                 const slide = document.createElement("div")
@@ -218,8 +313,17 @@
                 box.className = "field"
 
                 if (f.type === "statement") {
-                    box.innerHTML = "<label>" + f.label + "</label>"
-                    slide.append(box); wrap.append(slide); return
+                    box.innerHTML = `<label>${f.label}</label>`
+
+                    const nextBtn = document.createElement("button")
+                    nextBtn.className = "next-btn"
+                    nextBtn.innerText = "Continue →"
+                    nextBtn.onclick = () => next(idx)
+                    box.appendChild(nextBtn)
+
+                    slide.appendChild(box)
+                    wrap.appendChild(slide)
+                    return
                 }
 
                 box.append(document.createElement("label")).innerText = f.label
@@ -238,29 +342,36 @@
                             answers[f.key] = d.innerText
                             autosave(f.key, d.innerText)
 
+                            // Remove old badge
                             box.querySelectorAll(".badge").forEach(b => b.remove())
 
-                            if (f.key.toLowerCase().includes("city"))
-                                box.append(Object.assign(document.createElement("div"), { className: "badge", innerText: "📍 " + (cityMap[d.innerText] || "") }))
-
-                            if (f.key.toLowerCase().includes("age"))
-                                box.append(Object.assign(document.createElement("div"), { className: "badge", innerText: ageMap[d.innerText] || "" }))
+                            // Add new badge for city / age
+                            if (f.key.toLowerCase().includes("city")) {
+                                box.append(Object.assign(document.createElement("div"), {
+                                    className: "badge",
+                                    innerText: "📍 " + (cityMap[d.innerText] || "")
+                                }))
+                            }
+                            if (f.key.toLowerCase().includes("age")) {
+                                box.append(Object.assign(document.createElement("div"), {
+                                    className: "badge",
+                                    innerText: ageMap[d.innerText] || ""
+                                }))
+                            }
 
                             updateProgress()
-                            setTimeout(() => next(idx), 300)
+                            setTimeout(() => next(idx), 280)
                         }
                         list.append(d)
                     })
                     box.append(list)
-                }
-
-                else {
+                } else {
                     const i = document.createElement("input")
-                    i.type = f.type
+                    i.type = f.type || "text"
                     i.onkeydown = e => {
-                        if (e.key === "Enter") {
-                            answers[f.key] = i.value
-                            autosave(f.key, i.value)
+                        if (e.key === "Enter" && i.value.trim()) {
+                            answers[f.key] = i.value.trim()
+                            autosave(f.key, i.value.trim())
                             updateProgress()
                             next(idx)
                         }
@@ -271,7 +382,6 @@
                 slide.append(box)
                 wrap.append(slide)
             })
-
         }
 
         qs("#submitBtn").onclick = async () => {
@@ -280,11 +390,17 @@
             o.style.display = "flex"
             const msg = "Submitting your choices to Head Chef CEO Elong Mask . . ."
             let i = 0; t.textContent = ""
-            const typer = setInterval(() => { t.textContent += msg[i++] || ""; if (i > msg.length) clearInterval(typer) }, 40)
+            const typer = setInterval(() => {
+                t.textContent += msg[i++] || "";
+                if (i > msg.length) clearInterval(typer)
+            }, 40)
 
-            await fetch(WEBAPP_URL, { method: "POST", body: JSON.stringify({ sessionId, submitted: true, answers }) })
+            await fetch(WEBAPP_URL, {
+                method: "POST",
+                body: JSON.stringify({ sessionId, submitted: true, answers })
+            })
 
-            document.body.innerHTML = "<h2>Thank you guys!! See ya soon with Smoky Flavours 🎉❤️‍🔥</h2>"
+            document.body.innerHTML = "<h2 style='text-align:center;margin-top:40vh;color:#0d3b66;font-size:28px;'>Thank you guys!! See ya soon with Smoky Flavours 🎉❤️‍🔥</h2>"
         }
     </script>
 </body>
