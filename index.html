@@ -114,13 +114,15 @@
         }
 
         #submitBtn {
-            margin: 14px;
-            padding: 14px;
+            margin: 14px auto;
+            padding: 14px 40px;
             border: none;
             border-radius: 12px;
             background: #ff7a00;
             color: white;
-            font-size: 16px
+            font-size: 16px;
+            display: none;
+            cursor: pointer;
         }
 
         #matrixOverlay {
@@ -171,7 +173,7 @@
             height: 100%;
             width: 0%;
             background: linear-gradient(90deg, #0d3b66, #3fa9f5);
-            transition: width 2s cubic-bezier(0.4, 0, 0.2, 1);
+            transition: width 0.3s ease;
         }
 
         #loadingScreen p {
@@ -185,20 +187,20 @@
             display: block;
             margin: 28px auto 0;
             padding: 14px 40px;
-            background: linear-gradient(90deg, #0d3b66, #3fa9f5);
+            background: linear-gradient(90deg, #ff7a00, #ffa500);
             color: white;
             border: none;
             border-radius: 999px;
             font-size: 17px;
             font-weight: 700;
             cursor: pointer;
-            box-shadow: 0 6px 20px rgba(13, 59, 102, .25);
+            box-shadow: 0 6px 20px rgba(255, 122, 0, .25);
             transition: all 0.2s ease;
         }
 
         .next-btn:active {
             transform: translateY(2px);
-            box-shadow: 0 4px 12px rgba(13, 59, 102, .25);
+            box-shadow: 0 4px 12px rgba(255, 122, 0, .25);
         }
 
         /* Error message style */
@@ -230,8 +232,6 @@
 
         <div id="slides"></div>
 
-        <button id="submitBtn" style="display:none">Finish</button>
-
     </div>
 
     <!-- Loading screen with animated bar -->
@@ -246,6 +246,8 @@
     <div id="matrixOverlay">
         <div id="matrixText"></div>
     </div>
+
+    <button id="submitBtn" style="display:none">Finish</button>
 
     <script>
         const WEBAPP_URL = "https://script.google.com/macros/s/AKfycbzxp6xJwgKTXCO5jas3mg7fD3fBbH5-0MHPkYD3K55LNN2Z7Yli88cvWKv17OcxpvSU/exec"
@@ -278,14 +280,23 @@
             let d = 0
             req.forEach(f => answers[f.key] && d++)
             qs("#surveyBarInner").style.width = Math.round(d / req.length * 100) + "%"
-            if (d === req.length) qs("#submitBtn").style.display = "block"
+            if (d === req.length) {
+                qs("#submitBtn").style.display = "block"
+            }
         }
 
         function next(i) {
             document.querySelectorAll(".slide")[i + 1]?.scrollIntoView({ behavior: "smooth" })
         }
 
-        // Fetch config + loading bar animation
+        // Start loading animation immediately
+        let loadProgress = 0
+        const loadInterval = setInterval(() => {
+            loadProgress = Math.min(loadProgress + Math.floor(Math.random() * 10) + 5, 85) // Ramp up to 85% max while fetching
+            qs("#loadBarInner").style.width = loadProgress + "%"
+        }, 150)
+
+        // Fetch config
         fetch(WEBAPP_URL).then(r => {
             if (!r.ok) throw new Error('Network response was not ok: ' + r.statusText);
             return r.json();
@@ -295,29 +306,25 @@
             }
             config = j.config.filter(x => x.key?.trim() || x.type === "statement")
 
-            // Fake loading progress (starts after data received, feels smooth)
-            let loadProgress = 0
-            const loadInterval = setInterval(() => {
-                loadProgress = Math.min(loadProgress + Math.floor(Math.random() * 18) + 7, 97)
+            // Continue loading to 100%
+            clearInterval(loadInterval)
+            const finishLoad = setInterval(() => {
+                loadProgress = Math.min(loadProgress + 5, 100)
                 qs("#loadBarInner").style.width = loadProgress + "%"
-            }, 110)
+                if (loadProgress >= 100) clearInterval(finishLoad)
+            }, 50)
 
             build()
 
-            // Finish loading animation
             setTimeout(() => {
-                clearInterval(loadInterval)
-                qs("#loadBarInner").style.width = "100%"
+                qs("#loadingScreen").style.opacity = "0"
                 setTimeout(() => {
-                    qs("#loadingScreen").style.opacity = "0"
-                    setTimeout(() => {
-                        qs("#loadingScreen").style.display = "none"
-                        updateProgress()
-                    }, 600)
-                }, 450)
-            }, 950)
+                    qs("#loadingScreen").style.display = "none"
+                    updateProgress()
+                }, 600)
+            }, 800)
         }).catch(err => {
-            // Handle fetch errors gracefully
+            clearInterval(loadInterval)
             const loadingScreen = qs("#loadingScreen");
             loadingScreen.classList.add("error");
             loadingScreen.innerHTML = `
@@ -339,20 +346,21 @@
                 box.className = "field"
 
                 if (f.type === "statement") {
-                    box.innerHTML = `<label>${f.label || ""}</label>`
-                    
+                    const labelEl = document.createElement("label")
+                    labelEl.innerText = f.label || ""
+                    box.appendChild(labelEl)
+
                     const nextBtn = document.createElement("button")
                     nextBtn.className = "next-btn"
                     nextBtn.innerText = "Continue →"
                     nextBtn.onclick = () => next(idx)
                     box.appendChild(nextBtn)
-                    
+
                     slide.appendChild(box)
                     wrap.appendChild(slide)
                     return
                 }
 
-                // Create and append label separately to avoid chaining issues
                 const labelEl = document.createElement("label")
                 labelEl.innerText = f.label || ""
                 box.appendChild(labelEl)
@@ -372,10 +380,8 @@
                             answers[f.key] = d.innerText
                             autosave(f.key, d.innerText)
 
-                            // Remove old badge
                             box.querySelectorAll(".badge").forEach(b => b.remove())
 
-                            // Add new badge for city / age
                             if (f.key.toLowerCase().includes("city")) {
                                 const badgeEl = document.createElement("div")
                                 badgeEl.className = "badge"
@@ -412,6 +418,19 @@
                 slide.appendChild(box)
                 wrap.appendChild(slide)
             })
+
+            // Add final submit slide
+            const submitSlide = document.createElement("div")
+            submitSlide.className = "slide"
+            const submitBox = document.createElement("div")
+            submitBox.className = "field"
+            const submitLabel = document.createElement("label")
+            submitLabel.innerText = "Great! You've answered all the questions."
+            submitBox.appendChild(submitLabel)
+            const submitBtn = qs("#submitBtn")
+            submitBox.appendChild(submitBtn)
+            submitSlide.appendChild(submitBox)
+            wrap.appendChild(submitSlide)
         }
 
         qs("#submitBtn").onclick = async () => {
@@ -420,14 +439,14 @@
             o.style.display = "flex"
             const msg = "Submitting your choices to Head Chef CEO Elong Mask . . ."
             let i = 0; t.textContent = ""
-            const typer = setInterval(() => { 
-                t.textContent += msg[i++] || ""; 
-                if (i > msg.length) clearInterval(typer) 
+            const typer = setInterval(() => {
+                t.textContent += msg[i++] || "";
+                if (i > msg.length) clearInterval(typer)
             }, 40)
 
-            await fetch(WEBAPP_URL, { 
-                method: "POST", 
-                body: JSON.stringify({ sessionId, submitted: true, answers }) 
+            await fetch(WEBAPP_URL, {
+                method: "POST",
+                body: JSON.stringify({ sessionId, submitted: true, answers })
             })
 
             document.body.innerHTML = "<h2 style='text-align:center;margin-top:40vh;color:#0d3b66;font-size:28px;'>Thank you guys!! See ya soon with Smoky Flavours 🎉❤️‍🔥</h2>"
