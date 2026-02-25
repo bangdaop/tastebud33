@@ -290,7 +290,10 @@
             if (!r.ok) throw new Error('Network response was not ok: ' + r.statusText);
             return r.json();
         }).then(j => {
-            config = j.config.filter(x => x.key || x.type === "statement")
+            if (!j || !j.config || !Array.isArray(j.config)) {
+                throw new Error("Invalid config format from server");
+            }
+            config = j.config.filter(x => x.key?.trim() || x.type === "statement")
 
             // Fake loading progress (starts after data received, feels smooth)
             let loadProgress = 0
@@ -336,26 +339,30 @@
                 box.className = "field"
 
                 if (f.type === "statement") {
-                    box.innerHTML = `<label>${f.label}</label>`
-
+                    box.innerHTML = `<label>${f.label || ""}</label>`
+                    
                     const nextBtn = document.createElement("button")
                     nextBtn.className = "next-btn"
                     nextBtn.innerText = "Continue →"
                     nextBtn.onclick = () => next(idx)
                     box.appendChild(nextBtn)
-
+                    
                     slide.appendChild(box)
                     wrap.appendChild(slide)
                     return
                 }
 
-                box.append(document.createElement("label")).innerText = f.label
+                // Create and append label separately to avoid chaining issues
+                const labelEl = document.createElement("label")
+                labelEl.innerText = f.label || ""
+                box.appendChild(labelEl)
 
                 if (f.type === "select") {
                     const list = document.createElement("div")
                     list.className = f.key.toLowerCase().includes("city") ? "cityList" : ""
 
-                    f.options.split(/;|,/).forEach(o => {
+                    const optionsStr = typeof f.options === "string" ? f.options : ""
+                    optionsStr.split(/;|,/).forEach(o => {
                         const d = document.createElement("div")
                         d.className = "option"
                         d.innerText = o.trim()
@@ -370,24 +377,24 @@
 
                             // Add new badge for city / age
                             if (f.key.toLowerCase().includes("city")) {
-                                box.append(Object.assign(document.createElement("div"), {
-                                    className: "badge",
-                                    innerText: "📍 " + (cityMap[d.innerText] || "")
-                                }))
+                                const badgeEl = document.createElement("div")
+                                badgeEl.className = "badge"
+                                badgeEl.innerText = "📍 " + (cityMap[d.innerText] || "")
+                                box.appendChild(badgeEl)
                             }
                             if (f.key.toLowerCase().includes("age")) {
-                                box.append(Object.assign(document.createElement("div"), {
-                                    className: "badge",
-                                    innerText: ageMap[d.innerText] || ""
-                                }))
+                                const badgeEl = document.createElement("div")
+                                badgeEl.className = "badge"
+                                badgeEl.innerText = ageMap[d.innerText] || ""
+                                box.appendChild(badgeEl)
                             }
 
                             updateProgress()
                             setTimeout(() => next(idx), 280)
                         }
-                        list.append(d)
+                        list.appendChild(d)
                     })
-                    box.append(list)
+                    box.appendChild(list)
                 } else {
                     const i = document.createElement("input")
                     i.type = f.type || "text"
@@ -399,11 +406,11 @@
                             next(idx)
                         }
                     }
-                    box.append(i)
+                    box.appendChild(i)
                 }
 
-                slide.append(box)
-                wrap.append(slide)
+                slide.appendChild(box)
+                wrap.appendChild(slide)
             })
         }
 
@@ -413,14 +420,14 @@
             o.style.display = "flex"
             const msg = "Submitting your choices to Head Chef CEO Elong Mask . . ."
             let i = 0; t.textContent = ""
-            const typer = setInterval(() => {
-                t.textContent += msg[i++] || "";
-                if (i > msg.length) clearInterval(typer)
+            const typer = setInterval(() => { 
+                t.textContent += msg[i++] || ""; 
+                if (i > msg.length) clearInterval(typer) 
             }, 40)
 
-            await fetch(WEBAPP_URL, {
-                method: "POST",
-                body: JSON.stringify({ sessionId, submitted: true, answers })
+            await fetch(WEBAPP_URL, { 
+                method: "POST", 
+                body: JSON.stringify({ sessionId, submitted: true, answers }) 
             })
 
             document.body.innerHTML = "<h2 style='text-align:center;margin-top:40vh;color:#0d3b66;font-size:28px;'>Thank you guys!! See ya soon with Smoky Flavours 🎉❤️‍🔥</h2>"
