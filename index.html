@@ -442,12 +442,14 @@
 
                             if (f.key.toLowerCase().includes("city")) {
                                 const mapped = cityMap[d.innerText] || { state: "", region: "" };
-                                answers["state"] = mapped.state
-                                answers["region"] = mapped.region
                                 const badgeEl = document.createElement("div")
                                 badgeEl.className = "badge"
                                 badgeEl.innerText = "📍 " + mapped.state
                                 box.appendChild(badgeEl)
+
+                                // ← INSTANT AUTOSAVE for state & region (this is what your backend needs)
+                                autosave("state", mapped.state)
+                                autosave("region", mapped.region)
                             }
                             if (f.key.toLowerCase().includes("age")) {
                                 const badgeEl = document.createElement("div")
