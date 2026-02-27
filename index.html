@@ -54,8 +54,7 @@
             overflow-x: auto;
             scroll-snap-type: x mandatory;
             scroll-behavior: smooth;
-            -webkit-overflow-scrolling: touch;
-            /* Better touch handling on iOS */
+            -webkit-overflow-scrolling: touch
         }
 
         .slide {
@@ -204,16 +203,6 @@
             transform: translateY(2px);
             box-shadow: 0 4px 12px rgba(255, 122, 0, .25);
         }
-
-        /* Error message style */
-        #loadingScreen.error h2 {
-            color: #ff0000;
-        }
-
-        #loadingScreen.error p {
-            color: #ff0000;
-            font-weight: bold;
-        }
     </style>
 </head>
 
@@ -330,6 +319,16 @@
             fetch(WEBAPP_URL, { method: "POST", body: JSON.stringify({ sessionId, fieldName: k, fieldValue: v }) })
         }
 
+        // Debounce for text/number inputs (2 seconds delay)
+        let autosaveTimeouts = {}
+        function debouncedAutosave(k, v) {
+            if (autosaveTimeouts[k]) clearTimeout(autosaveTimeouts[k])
+            autosaveTimeouts[k] = setTimeout(() => {
+                if (answers[k] === v) autosave(k, v)
+                delete autosaveTimeouts[k]
+            }, 2000)
+        }
+
         function updateProgress() {
             const req = config.filter(f => f.type !== "statement" && f.key?.trim())
             let d = 0
@@ -351,7 +350,7 @@
         // Start loading animation immediately
         let loadProgress = 0
         const loadInterval = setInterval(() => {
-            loadProgress = Math.min(loadProgress + Math.floor(Math.random() * 10) + 5, 85) // Ramp up to 85% max while fetching
+            loadProgress = Math.min(loadProgress + Math.floor(Math.random() * 10) + 5, 85)
             qs("#loadBarInner").style.width = loadProgress + "%"
         }, 150)
 
@@ -365,7 +364,6 @@
             }
             config = j.config.filter(x => x.key?.trim() || x.type === "statement")
 
-            // Continue loading to 100%
             clearInterval(loadInterval)
             const finishLoad = setInterval(() => {
                 loadProgress = Math.min(loadProgress + 5, 100)
@@ -396,7 +394,7 @@
 
         function build() {
             const wrap = qs("#slides")
-            wrap.innerHTML = "" // clear in case of rebuild
+            wrap.innerHTML = ""
 
             config.forEach((f, idx) => {
                 const isLast = idx === config.length - 1
@@ -444,12 +442,12 @@
 
                             if (f.key.toLowerCase().includes("city")) {
                                 const mapped = cityMap[d.innerText] || { state: "", region: "" };
+                                answers["state"] = mapped.state
+                                answers["region"] = mapped.region
                                 const badgeEl = document.createElement("div")
                                 badgeEl.className = "badge"
                                 badgeEl.innerText = "📍 " + mapped.state
                                 box.appendChild(badgeEl)
-                                autosave("state", mapped.state)
-                                autosave("region", mapped.region)
                             }
                             if (f.key.toLowerCase().includes("age")) {
                                 const badgeEl = document.createElement("div")
@@ -465,27 +463,17 @@
                     })
                     box.appendChild(list)
                 } else {
+                    // TEXT / NUMBER INPUTS → autosave ONLY after 2 seconds of inactivity
                     const i = document.createElement("input")
                     i.type = f.type || "text"
                     i.oninput = () => {
-                        answers[f.key] = i.value.trim(); // Update answers and progress immediately
+                        answers[f.key] = i.value.trim()
                         updateProgress()
-                    }
-                    i.onkeydown = e => {
-                        if (e.key === "Enter" && i.value.trim()) {
-                            autosave(f.key, answers[f.key]) // Autosave on Enter
-                            next(idx)
-                        }
-                    }
-                    i.onblur = () => {
-                        if (answers[f.key]) {
-                            autosave(f.key, answers[f.key]) // Autosave on blur (e.g., manual swipe away)
-                        }
+                        debouncedAutosave(f.key, answers[f.key])
                     }
                     box.appendChild(i)
                 }
 
-                // Append submit button to the last question's box
                 if (isLast) {
                     const submitBtn = qs("#submitBtn")
                     box.appendChild(submitBtn)
