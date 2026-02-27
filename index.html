@@ -103,13 +103,6 @@
             border: 1px solid #ccc
         }
 
-        .error {
-            color: red;
-            font-size: 14px;
-            margin-top: 5px;
-            display: block;
-        }
-
         .badge {
             margin-top: 10px;
             font-weight: 700;
@@ -475,15 +468,18 @@
                     const i = document.createElement("input")
                     i.type = f.type || "text"
                     i.oninput = () => {
-                        if (i.value.trim()) {
-                            answers[f.key] = i.value.trim()
-                            autosave(f.key, answers[f.key])
-                            updateProgress()
-                        }
+                        answers[f.key] = i.value.trim(); // Update answers and progress immediately
+                        updateProgress()
                     }
                     i.onkeydown = e => {
                         if (e.key === "Enter" && i.value.trim()) {
+                            autosave(f.key, answers[f.key]) // Autosave on Enter
                             next(idx)
+                        }
+                    }
+                    i.onblur = () => {
+                        if (answers[f.key]) {
+                            autosave(f.key, answers[f.key]) // Autosave on blur (e.g., manual swipe away)
                         }
                     }
                     box.appendChild(i)
