@@ -209,11 +209,17 @@
                     const list = document.createElement("div");
                     list.className = f.key.toLowerCase().includes("city") ? "cityList" : "";
 
-                    const optionsStr = typeof f.options === "string" ? f.options : "";
-                    optionsStr.split(/;|,/).forEach(o => {
+                    let options = (typeof f.options === "string" ? f.options : "").split(/;|,/).map(o => o.trim()).filter(Boolean);
+
+                    // ←←← ONLY THIS PART CHANGED: Sort city list alphabetically
+                    if (f.key.toLowerCase().includes("city")) {
+                        options.sort((a, b) => a.localeCompare(b));
+                    }
+
+                    options.forEach(o => {
                         const d = document.createElement("div");
                         d.className = "option";
-                        d.innerText = o.trim();
+                        d.innerText = o;
                         d.onclick = () => {
                             list.querySelectorAll(".option").forEach(x => x.classList.remove("selected"));
                             d.classList.add("selected");
@@ -230,7 +236,6 @@
                                 badgeEl.innerText = "📍 " + mapped.state;
                                 d.appendChild(badgeEl);
 
-                                // ←←← ONLY THESE TWO LINES ADDED (this is what makes state/region appear in Responses sheet)
                                 answers.state = mapped.state;
                                 answers.region = mapped.region;
                             }
