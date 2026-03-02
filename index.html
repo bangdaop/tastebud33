@@ -55,7 +55,6 @@
     <script>
         const WEBAPP_URL = "https://script.google.com/macros/s/AKfycbzxp6xJwgKTXCO5jas3mg7fD3fBbH5-0MHPkYD3K55LNN2Z7Yli88cvWKv17OcxpvSU/exec"
 
-        // 10-minute session reset
         let sessionId = localStorage.getItem("tb_session");
         let sessionTime = localStorage.getItem("tb_session_time");
         const TEN_MINUTES = 10 * 60 * 1000;
@@ -160,7 +159,6 @@
             document.querySelectorAll(".slide")[i + 1]?.scrollIntoView({ behavior: "smooth" });
         }
 
-        // Loading
         let loadProgress = 0;
         const loadInterval = setInterval(() => {
             loadProgress = Math.min(loadProgress + Math.floor(Math.random()*10)+5, 85);
@@ -230,9 +228,9 @@
                                 const badgeEl = document.createElement("div");
                                 badgeEl.className = "badge";
                                 badgeEl.innerText = "📍 " + mapped.state;
-                                d.appendChild(badgeEl);   // ← State name right below city
+                                d.appendChild(badgeEl);
 
-                                // Store for final Responses sheet
+                                // ←←← ONLY THESE TWO LINES ADDED (this is what makes state/region appear in Responses sheet)
                                 answers.state = mapped.state;
                                 answers.region = mapped.region;
                             }
