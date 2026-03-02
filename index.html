@@ -55,7 +55,7 @@
     <script>
         const WEBAPP_URL = "https://script.google.com/macros/s/AKfycbzxp6xJwgKTXCO5jas3mg7fD3fBbH5-0MHPkYD3K55LNN2Z7Yli88cvWKv17OcxpvSU/exec"
 
-        // ==================== SESSION ID RESET AFTER 10 MINUTES ====================
+        // 10-minute session reset
         let sessionId = localStorage.getItem("tb_session");
         let sessionTime = localStorage.getItem("tb_session_time");
         const TEN_MINUTES = 10 * 60 * 1000;
@@ -66,8 +66,8 @@
             localStorage.setItem("tb_session_time", Date.now());
         }
 
-        const answers = {}
-        let config = []
+        const answers = {};
+        let config = [];
 
         const ageMap = {
             "Below 18 👶": "Congrats! Snack Squad",
@@ -76,7 +76,7 @@
             "29–35🧑‍💻": "Weekend Foodies",
             "35–45🧑‍🍼": "Comfort Connoisseurs",
             "46+🧛‍♂️": "Forever Young"
-        }
+        };
 
         const cityMap = {
             "Ahmedabad": {state: "Gujarat", region: "West"},
@@ -131,168 +131,163 @@
             "Panaji": {state: "Goa", region: "West"},
             "Thane": {state: "Maharashtra", region: "West"},
             "Kolhapur": {state: "Maharashtra", region: "West"}
-        }
+        };
 
-        const qs = x => document.querySelector(x)
+        const qs = x => document.querySelector(x);
 
         function autosave(k, v) {
-            fetch(WEBAPP_URL, { method: "POST", body: JSON.stringify({ sessionId, fieldName: k, fieldValue: v }) })
+            fetch(WEBAPP_URL, { method: "POST", body: JSON.stringify({ sessionId, fieldName: k, fieldValue: v }) });
         }
 
-        let autosaveTimeouts = {}
+        let autosaveTimeouts = {};
         function debouncedAutosave(k, v) {
-            if (autosaveTimeouts[k]) clearTimeout(autosaveTimeouts[k])
+            if (autosaveTimeouts[k]) clearTimeout(autosaveTimeouts[k]);
             autosaveTimeouts[k] = setTimeout(() => {
-                if (answers[k] === v) autosave(k, v)
-                delete autosaveTimeouts[k]
-            }, 2000)
+                if (answers[k] === v) autosave(k, v);
+                delete autosaveTimeouts[k];
+            }, 2000);
         }
 
         function updateProgress() {
-            const req = config.filter(f => f.type !== "statement" && f.key?.trim())
-            let d = 0
-            req.forEach(f => { if (answers[f.key] && answers[f.key].trim()) d++ })
-            qs("#surveyBarInner").style.width = Math.round(d / req.length * 100) + "%"
-            qs("#submitBtn").style.display = (d === req.length) ? "block" : "none"
+            const req = config.filter(f => f.type !== "statement" && f.key?.trim());
+            let d = 0;
+            req.forEach(f => { if (answers[f.key] && answers[f.key].trim()) d++; });
+            qs("#surveyBarInner").style.width = Math.round(d / req.length * 100) + "%";
+            qs("#submitBtn").style.display = (d === req.length) ? "block" : "none";
         }
 
         function next(i) {
-            document.querySelectorAll(".slide")[i + 1]?.scrollIntoView({ behavior: "smooth" })
+            document.querySelectorAll(".slide")[i + 1]?.scrollIntoView({ behavior: "smooth" });
         }
 
-        // Loading animation
-        let loadProgress = 0
+        // Loading
+        let loadProgress = 0;
         const loadInterval = setInterval(() => {
-            loadProgress = Math.min(loadProgress + Math.floor(Math.random()*10)+5, 85)
-            qs("#loadBarInner").style.width = loadProgress + "%"
-        }, 150)
+            loadProgress = Math.min(loadProgress + Math.floor(Math.random()*10)+5, 85);
+            qs("#loadBarInner").style.width = loadProgress + "%";
+        }, 150);
 
         fetch(WEBAPP_URL).then(r => r.ok ? r.json() : Promise.reject(r.statusText))
         .then(j => {
-            config = j.config.filter(x => x.key?.trim() || x.type === "statement")
-            clearInterval(loadInterval)
+            config = j.config.filter(x => x.key?.trim() || x.type === "statement");
+            clearInterval(loadInterval);
             const finish = setInterval(() => {
-                loadProgress = Math.min(loadProgress + 5, 100)
-                qs("#loadBarInner").style.width = loadProgress + "%"
-                if (loadProgress >= 100) clearInterval(finish)
-            }, 50)
-            build()
+                loadProgress = Math.min(loadProgress + 5, 100);
+                qs("#loadBarInner").style.width = loadProgress + "%";
+                if (loadProgress >= 100) clearInterval(finish);
+            }, 50);
+            build();
             setTimeout(() => {
-                qs("#loadingScreen").style.opacity = "0"
-                setTimeout(() => { qs("#loadingScreen").style.display = "none"; updateProgress() }, 600)
-            }, 800)
+                qs("#loadingScreen").style.opacity = "0";
+                setTimeout(() => { qs("#loadingScreen").style.display = "none"; updateProgress(); }, 600);
+            }, 800);
         }).catch(() => {
-            clearInterval(loadInterval)
-            qs("#loadingScreen").classList.add("error")
-            qs("#loadingScreen").innerHTML = `<h2>Error Loading Survey</h2><p>Please check your internet and refresh.</p><button onclick="location.reload()">Retry</button>`
-        })
+            clearInterval(loadInterval);
+            qs("#loadingScreen").classList.add("error");
+            qs("#loadingScreen").innerHTML = `<h2>Error Loading Survey</h2><p>Please check your internet and refresh.</p><button onclick="location.reload()">Retry</button>`;
+        });
 
         function build() {
-            const wrap = qs("#slides"); wrap.innerHTML = ""
+            const wrap = qs("#slides"); wrap.innerHTML = "";
             config.forEach((f, idx) => {
-                const isLast = idx === config.length - 1
-                const slide = document.createElement("div"); slide.className = "slide"
-                const box = document.createElement("div"); box.className = "field"
+                const isLast = idx === config.length - 1;
+                const slide = document.createElement("div"); slide.className = "slide";
+                const box = document.createElement("div"); box.className = "field";
 
-                const labelEl = document.createElement("label")
-                labelEl.innerText = f.label || ""
-                box.appendChild(labelEl)
+                const labelEl = document.createElement("label");
+                labelEl.innerText = f.label || "";
+                box.appendChild(labelEl);
 
                 if (f.type === "statement") {
-                    const nextBtn = document.createElement("button")
-                    nextBtn.className = "next-btn"; nextBtn.innerText = "Continue →"
-                    nextBtn.onclick = () => next(idx)
-                    box.appendChild(nextBtn)
-                    slide.appendChild(box); wrap.appendChild(slide)
-                    return
+                    const nextBtn = document.createElement("button");
+                    nextBtn.className = "next-btn"; nextBtn.innerText = "Continue →";
+                    nextBtn.onclick = () => next(idx);
+                    box.appendChild(nextBtn);
+                    slide.appendChild(box); wrap.appendChild(slide);
+                    return;
                 }
 
                 if (f.type === "select") {
-                    const list = document.createElement("div")
-                    list.className = f.key.toLowerCase().includes("city") ? "cityList" : ""
+                    const list = document.createElement("div");
+                    list.className = f.key.toLowerCase().includes("city") ? "cityList" : "";
 
-                    const optionsStr = typeof f.options === "string" ? f.options : ""
+                    const optionsStr = typeof f.options === "string" ? f.options : "";
                     optionsStr.split(/;|,/).forEach(o => {
-                        const d = document.createElement("div")
-                        d.className = "option"
-                        d.innerText = o.trim()
+                        const d = document.createElement("div");
+                        d.className = "option";
+                        d.innerText = o.trim();
                         d.onclick = () => {
-                            list.querySelectorAll(".option").forEach(x => x.classList.remove("selected"))
-                            d.classList.add("selected")
+                            list.querySelectorAll(".option").forEach(x => x.classList.remove("selected"));
+                            d.classList.add("selected");
 
-                            answers[f.key] = d.innerText.trim()
-                            autosave(f.key, answers[f.key])
+                            answers[f.key] = d.innerText.trim();
+                            autosave(f.key, answers[f.key]);
 
-                            // Remove any previous badges in the whole field
-                            box.querySelectorAll(".badge").forEach(b => b.remove())
+                            box.querySelectorAll(".badge").forEach(b => b.remove());
 
                             if (f.key.toLowerCase().includes("city")) {
-                                const mapped = cityMap[d.innerText] || {state: "", region: ""}
-                                const badgeEl = document.createElement("div")
-                                badgeEl.className = "badge"
-                                badgeEl.innerText = "📍 " + mapped.state
-                                d.appendChild(badgeEl)   // ← STATE NAME NOW RIGHT BELOW THE CITY NAME
+                                const mapped = cityMap[d.innerText] || {state: "", region: ""};
+                                const badgeEl = document.createElement("div");
+                                badgeEl.className = "badge";
+                                badgeEl.innerText = "📍 " + mapped.state;
+                                d.appendChild(badgeEl);   // ← State name right below city
+
+                                // Store for final Responses sheet
+                                answers.state = mapped.state;
+                                answers.region = mapped.region;
                             }
                             if (f.key.toLowerCase().includes("age")) {
-                                const badgeEl = document.createElement("div")
-                                badgeEl.className = "badge"
-                                badgeEl.innerText = ageMap[d.innerText] || ""
-                                d.appendChild(badgeEl)
+                                const badgeEl = document.createElement("div");
+                                badgeEl.className = "badge";
+                                badgeEl.innerText = ageMap[d.innerText] || "";
+                                d.appendChild(badgeEl);
                             }
 
-                            updateProgress()
-                            setTimeout(() => next(idx), 280)
-                        }
-                        list.appendChild(d)
-                    })
-                    box.appendChild(list)
+                            updateProgress();
+                            setTimeout(() => next(idx), 280);
+                        };
+                        list.appendChild(d);
+                    });
+                    box.appendChild(list);
                 } else {
-                    const i = document.createElement("input")
-                    i.type = f.type || "text"
+                    const i = document.createElement("input");
+                    i.type = f.type || "text";
                     i.oninput = () => {
-                        answers[f.key] = i.value.trim()
-                        updateProgress()
-                        debouncedAutosave(f.key, answers[f.key])
-                    }
+                        answers[f.key] = i.value.trim();
+                        updateProgress();
+                        debouncedAutosave(f.key, answers[f.key]);
+                    };
                     i.onkeydown = e => {
                         if (e.key === "Enter" && i.value.trim()) {
-                            if (autosaveTimeouts[f.key]) clearTimeout(autosaveTimeouts[f.key])
-                            autosave(f.key, answers[f.key])
-                            next(idx)
+                            if (autosaveTimeouts[f.key]) clearTimeout(autosaveTimeouts[f.key]);
+                            autosave(f.key, answers[f.key]);
+                            next(idx);
                         }
-                    }
-                    box.appendChild(i)
+                    };
+                    box.appendChild(i);
                 }
 
-                if (isLast) box.appendChild(qs("#submitBtn"))
-                slide.appendChild(box)
-                wrap.appendChild(slide)
-            })
+                if (isLast) box.appendChild(qs("#submitBtn"));
+                slide.appendChild(box);
+                wrap.appendChild(slide);
+            });
         }
 
-        // ==================== FINAL SUBMIT – STATE & REGION GUARANTEED ====================
         qs("#submitBtn").onclick = async () => {
-            // This block ensures state & region are ALWAYS in the final payload
-            if (answers.city) {
-                const mapped = cityMap[answers.city] || {state: "", region: ""}
-                answers.state = mapped.state
-                answers.region = mapped.region
-            }
-
-            const o = qs("#matrixOverlay")
-            const t = qs("#matrixText")
-            o.style.display = "flex"
-            const msg = "Submitting your choices to Head Chef . . ."
-            let i = 0; t.textContent = ""
-            const typer = setInterval(() => { t.textContent += msg[i++] || ""; if (i > msg.length) clearInterval(typer) }, 40)
+            const o = qs("#matrixOverlay");
+            const t = qs("#matrixText");
+            o.style.display = "flex";
+            const msg = "Submitting your choices to Head Chef . . .";
+            let i = 0; t.textContent = "";
+            const typer = setInterval(() => { t.textContent += msg[i++] || ""; if (i > msg.length) clearInterval(typer); }, 40);
 
             await fetch(WEBAPP_URL, { 
                 method: "POST", 
                 body: JSON.stringify({ sessionId, submitted: true, answers }) 
-            })
+            });
 
-            document.body.innerHTML = "<h2 style='text-align:center;margin-top:40vh;color:#0d3b66;font-size:28px;'>Thank you guys!! See ya soon with Smoky Flavours 🎉❤️‍🔥</h2>"
-        }
+            document.body.innerHTML = "<h2 style='text-align:center;margin-top:40vh;color:#0d3b66;font-size:28px;'>Thank you guys!! See ya soon with Smoky Flavours 🎉❤️‍🔥</h2>";
+        };
     </script>
 </body>
 </html>
