@@ -285,15 +285,64 @@
         const answers = {};
         let config = [];
 
-        const ageMap = { /* your age map */
+        const ageMap = {
             "Below 18 👶": "Congrats! Snack Squad", "18–23👩‍🎓": "Campus Cravers",
             "24–28🕺": "Hustle Bites", "29–35🧑‍💻": "Weekend Foodies",
             "35–45🧑‍🍼": "Comfort Connoisseurs", "46+🧛‍♂️": "Forever Young"
         };
 
-        const cityMap = { /* your full city map */
+        const cityMap = {
             "Ahmedabad": { state: "Gujarat", region: "West" },
-            /* ... all cities ... */
+            "Bengaluru": { state: "Karnataka", region: "South" },
+            "Chennai": { state: "Tamil Nadu", region: "South" },
+            "Coimbatore": { state: "Tamil Nadu", region: "South" },
+            "Delhi": { state: "Delhi", region: "North" },
+            "Guwahati": { state: "Assam", region: "Northeast" },
+            "Hyderabad": { state: "Telangana", region: "South" },
+            "Indore": { state: "Madhya Pradesh", region: "Central" },
+            "Jaipur": { state: "Rajasthan", region: "North" },
+            "Lucknow": { state: "Uttar Pradesh", region: "North" },
+            "Mangaluru": { state: "Karnataka", region: "South" },
+            "Mumbai": { state: "Maharashtra", region: "West" },
+            "Nagpur": { state: "Maharashtra", region: "Central" },
+            "Patna": { state: "Bihar", region: "East" },
+            "Pune": { state: "Maharashtra", region: "West" },
+            "Surat": { state: "Gujarat", region: "West" },
+            "Vadodara": { state: "Gujarat", region: "West" },
+            "Visakhapatnam": { state: "Andhra Pradesh", region: "East" },
+            "Vijayawada": { state: "Andhra Pradesh", region: "East" },
+            "Kolkata": { state: "West Bengal", region: "East" },
+            "Thiruvananthapuram": { state: "Kerala", region: "South" },
+            "Kochi": { state: "Kerala", region: "South" },
+            "Bhopal": { state: "Madhya Pradesh", region: "Central" },
+            "Ranchi": { state: "Jharkhand", region: "East" },
+            "Bhubaneswar": { state: "Odisha", region: "East" },
+            "Chandigarh": { state: "Chandigarh", region: "North" },
+            "Amritsar": { state: "Punjab", region: "North" },
+            "Jodhpur": { state: "Rajasthan", region: "North" },
+            "Agra": { state: "Uttar Pradesh", region: "North" },
+            "Varanasi": { state: "Uttar Pradesh", region: "North" },
+            "Meerut": { state: "Uttar Pradesh", region: "North" },
+            "Nashik": { state: "Maharashtra", region: "West" },
+            "Rajkot": { state: "Gujarat", region: "West" },
+            "Kozhikode": { state: "Kerala", region: "South" },
+            "Madurai": { state: "Tamil Nadu", region: "South" },
+            "Salem": { state: "Tamil Nadu", region: "South" },
+            "Jamshedpur": { state: "Jharkhand", region: "East" },
+            "Dehradun": { state: "Uttarakhand", region: "North" },
+            "Ludhiana": { state: "Punjab", region: "North" },
+            "Srinagar": { state: "Jammu and Kashmir", region: "North" },
+            "Shimla": { state: "Himachal Pradesh", region: "North" },
+            "Gangtok": { state: "Sikkim", region: "Northeast" },
+            "Imphal": { state: "Manipur", region: "Northeast" },
+            "Kohima": { state: "Nagaland", region: "Northeast" },
+            "Aizawl": { state: "Mizoram", region: "Northeast" },
+            "Itanagar": { state: "Arunachal Pradesh", region: "Northeast" },
+            "Port Blair": { state: "Andaman and Nicobar", region: "Other" },
+            "Daman": { state: "Daman and Diu", region: "West" },
+            "Diu": { state: "Daman and Diu", region: "West" },
+            "Panaji": { state: "Goa", region: "West" },
+            "Thane": { state: "Maharashtra", region: "West" },
             "Kolhapur": { state: "Maharashtra", region: "West" }
         };
 
@@ -324,7 +373,6 @@
             document.querySelectorAll(".slide")[i + 1]?.scrollIntoView({ behavior: "smooth" });
         }
 
-        // ==================== LOADING + BUILD (unchanged) ====================
         let loadProgress = 0;
         const loadInterval = setInterval(() => {
             loadProgress = Math.min(loadProgress + Math.floor(Math.random() * 10) + 5, 85);
@@ -444,8 +492,8 @@
             btn.disabled = true;
             btn.textContent = "Submitting...";
 
-            // Add device info (optional but useful)
-            answers.deviceInfo = JSON.stringify({
+            // Device info saved as answers_deviceInfo (as you requested)
+            answers_deviceInfo = JSON.stringify({
                 os: /android/i.test(navigator.userAgent) ? "Android" : /iPad|iPhone|iPod/.test(navigator.userAgent) ? "iOS" : "Other",
                 device: /Mobile|Android|iP(hone|od|ad)/.test(navigator.userAgent) ? "Mobile" : "Desktop"
             });
@@ -462,7 +510,6 @@
                 body: JSON.stringify({ sessionId, submitted: true, answers })
             });
 
-            // ==================== BEAUTIFUL THANK YOU + SHARE BUTTONS ====================
             const surveyLink = window.location.href;
 
             document.body.innerHTML = `
