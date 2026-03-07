@@ -208,7 +208,6 @@
             box-shadow: 0 6px 20px rgba(255, 122, 0, .25);
         }
 
-        /* Thank You Share Buttons */
         .thank-you {
             text-align: center;
             padding: 40px 20px;
@@ -286,9 +285,12 @@
         let config = [];
 
         const ageMap = {
-            "Below 18 👶": "Congrats! Snack Squad", "18–23👩‍🎓": "Campus Cravers",
-            "24–28🕺": "Hustle Bites", "29–35🧑‍💻": "Weekend Foodies",
-            "35–45🧑‍🍼": "Comfort Connoisseurs", "46+🧛‍♂️": "Forever Young"
+            "Below 18 👶": "Congrats! Snack Squad",
+            "18–23👩‍🎓": "Campus Cravers",
+            "24–28🕺": "Hustle Bites",
+            "29–35🧑‍💻": "Weekend Foodies",
+            "35–45🧑‍🍼": "Comfort Connoisseurs",
+            "46+🧛‍♂️": "Forever Young"
         };
 
         const cityMap = {
@@ -493,7 +495,7 @@
             btn.textContent = "Submitting...";
 
             // Device info saved as answers_deviceInfo (as you requested)
-            answers_deviceInfo = JSON.stringify({
+            answers.answers_deviceInfo = JSON.stringify({
                 os: /android/i.test(navigator.userAgent) ? "Android" : /iPad|iPhone|iPod/.test(navigator.userAgent) ? "iOS" : "Other",
                 device: /Mobile|Android|iP(hone|od|ad)/.test(navigator.userAgent) ? "Mobile" : "Desktop"
             });
